@@ -25,4 +25,4 @@ El repositorio está organizado de forma modular:
 ### Clonar el repositorio
 ```bash
 git clone https://github.com/franciscogabrielrodriguez7-tech/SGA.git
-cd sga-project
+cd sga

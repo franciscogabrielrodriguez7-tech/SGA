@@ -1,4 +1,4 @@
-# SGA - Sistema de Gestión de Alquileres (Fundiplacas Rodríguez)
+# SGA - Sistema de Gestión de Alquileres de andamios
 
 SGA es una plataforma integral diseñada para optimizar y controlar el inventario y alquiler de equipos de construcción y andamiaje (incluyendo el control específico por semanas de conjuntos de planchones, crucetas, etc.).
 

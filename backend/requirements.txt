@@ -1,0 +1,8 @@
+fastapi==0.115.0          # Framework principal para la API
+uvicorn==0.30.1           # Servidor ASGI para correr FastAPI
+sqlalchemy==2.0.30        # ORM para manejar la base de datos
+psycopg2-binary==2.9.9    # Driver para PostgreSQL
+passlib[bcrypt]==1.7.4    # Manejo de contraseñas con hashing seguro
+python-jose[cryptography]==3.3.0  # Generación y validación de JWT
+pydantic==2.7.4           # Validación de datos y schemas
+bcrypt==4.1.2             # Backend de hashing usado por passlib

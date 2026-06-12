@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingreso SGA</title>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body class="login-body">
+
+    <main class="login-card">
+        <img src="img/LOGO_SGA.jpg" alt="Logo SGA" class="logo-sga-img">
+        <h1>Sistema de Gestión de Alquileres</h1>
+        <p>Ingreso por rol de usuario</p>
+
+        <label for="usuario">nombre</label>
+        <input type="text" id="usuario" placeholder="Ingrese su nombre" autocomplete="username">
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="Ingrese su contraseña" autocomplete="current-password">
+ <select id="rol">
+            <option value="">Seleccione rol</option>
+            <option value="admin">Administrador</option>
+            <option value="facturacion">Encargado de Facturación</option>
+            <option value="logistico">Encargado Logístico</option>
+    </select>
+
+
+        <button onclick="ingresar()">Ingresar</button>
+
+        <section class="usuarios-prueba">
+            <h2>Usuarios de prueba</h2>
+            <p><b>Administrador:</b> francisco / 123456</p>
+            <p><b>Facturación:</b> jiselt / 123456</p>
+            <p><b>Logístico:</b> jacobo / 123456</p>
+           
+        </section>
+    </main>
+
+    <script src="js/login.js"></script>
+</body>
+</html>

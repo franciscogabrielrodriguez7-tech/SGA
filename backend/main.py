@@ -71,6 +71,10 @@ def get_current_logistica(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="No autorizado")
     return current_user
 
+@app.get("/")
+def read_root():
+    return {"mensaje": "Bienvenido al SGA - Sistema de Gestión de Alquiler de Andamios"}
+
 # --- Endpoints públicos ---
 @app.get("/productos")
 def listar_productos(db: Session = Depends(get_db)):
@@ -116,7 +120,7 @@ def registrar_usuario(datos: UsuarioCreate, db: Session = Depends(get_db)):
     return {"mensaje": "Usuario registrado exitosamente"}
 
 # --- Endpoint de login ---
-@app.post("/login")
+@app.get("/login")
 def login(datos: UsuarioLogin, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.email_usuario == datos.email_usuario).first()
     if not usuario or not pwd_context.verify(datos.contrasena_usuario, usuario.contrasena_usuario):

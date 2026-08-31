@@ -395,31 +395,6 @@ BEFORE DELETE ON detalle_alquiler
 FOR EACH ROW
 EXECUTE FUNCTION fn_prevenir_borrado_detalle();
 
-
-CREATE OR REPLACE FUNCTION fn_verificar_usuario_activo()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_estado_usuario VARCHAR;
-BEGIN
-    -- Consultar el estado del usuario que intenta registrar el alquiler
-    SELECT estado_usuario INTO v_estado_usuario 
-    FROM usuario 
-    WHERE id_usuario = NEW.id_usuario_creador;
-
-    -- Si el usuario no existe o no está activo, bloquear la operación
-    IF v_estado_usuario IS NULL OR v_estado_usuario != 'activo' THEN
-        RAISE EXCEPTION 'Operación denegada: El usuario creador no se encuentra activo en el sistema.';
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Asociar el trigger a la tabla alquiler
-CREATE TRIGGER trg_validar_creador_activo
-BEFORE INSERT ON alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_verificar_usuario_activo();
 -- =========================================================
 -- FIN DEL SCRIPT
 -- =========================================================

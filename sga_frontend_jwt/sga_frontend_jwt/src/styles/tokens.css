@@ -1,0 +1,111 @@
+/* ============================================================================
+   tokens.css — Sistema de diseño de SGA, en CSS puro
+   ----------------------------------------------------------------------------
+   REEMPLAZA a src/theme.ts (Chakra UI). Mismos valores exactos, solo que
+   ahora viven como variables CSS nativas en vez de tokens de Chakra, para
+   poder eliminar la dependencia de Chakra UI / Emotion por completo.
+
+   Paleta base (acento seleccionado: cian #2BE6E1), en gama análoga
+   verde → cian → azul, tal como en la guía de diseño / rueda de color
+   proporcionada.
+   ============================================================================ */
+
+:root {
+  /* --- Escala principal: "brand" (cian) --- */
+  --brand-50: #EAFDFC;
+  --brand-100: #D2F9F7;
+  --brand-200: #AEE6E4; /* tono claro de la paleta original */
+  --brand-300: #7FE0DC;
+  --brand-400: #4CE0DB;
+  --brand-500: #2BE6E1; /* acento principal (seleccionado en la rueda) */
+  --brand-600: #22B8B4;
+  --brand-700: #1B8F8C;
+  --brand-800: #146462;
+  --brand-900: #0C3E3D;
+  --brand-950: #063C3A;
+
+  /* --- Escalas secundarias, extraídas directamente de la paleta --- */
+  --mint-400: #2CE6A0;
+  --mint-500: #22B880;
+
+  --green-400: #2CE661;
+  --green-500: #22B84C;
+
+  --sky-400: #2CB1E6;
+  --sky-500: #228EB8;
+
+  --azure-400: #2C76E6;
+  --azure-500: #2260B8;
+
+  /* --- Neutros fríos, para acompañar el cian sin competir con él --- */
+  --ink-50: #F5F8F8;
+  --ink-100: #E9EDEF;
+  --ink-200: #D7DEE1;
+  --ink-300: #A9B4BE;
+  --ink-500: #6B7885;
+  --ink-700: #3D4A57;
+  --ink-900: #16202B;
+  --ink-950: #0B1220;
+
+  /* --- Tipografía --- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+
+  /* --- Radios --- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* --- Sombras (siempre difuminadas, nunca duras) --- */
+  --shadow-sm: 0 1px 2px rgba(11, 18, 32, 0.05);
+  --shadow-md: 0 8px 24px rgba(11, 18, 32, 0.08);
+  --shadow-lg: 0 16px 40px rgba(11, 18, 32, 0.12);
+
+  /* --- Espaciado (escala de 4px, suficiente para este proyecto) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ==========================================================
+     TOKENS SEMÁNTICOS — modo claro (por defecto)
+     ========================================================== */
+  --color-brand-solid: var(--brand-500);
+  --color-brand-contrast: var(--brand-950);
+  --color-brand-fg: var(--brand-700);
+  --color-brand-muted: var(--brand-100);
+  --color-brand-subtle: var(--brand-200);
+  --color-brand-emphasized: var(--brand-300);
+
+  --color-success: var(--green-500);
+  --color-info: var(--sky-500);
+  --color-danger: #E64C4C;
+  --color-warning: #E6A62C;
+
+  --color-bg-app: var(--ink-50);
+  --color-bg-surface: #FFFFFF;
+  --color-border: var(--ink-200);
+  --color-fg-default: var(--ink-900);
+  --color-fg-muted: var(--ink-500);
+}
+
+/* ==========================================================
+   TOKENS SEMÁNTICOS — modo oscuro
+   ========================================================== */
+[data-theme="dark"] {
+  --color-brand-solid: var(--brand-400);
+  --color-brand-contrast: var(--ink-950);
+  --color-brand-fg: var(--brand-300);
+  --color-brand-muted: var(--brand-900);
+  --color-brand-subtle: var(--brand-800);
+  --color-brand-emphasized: var(--brand-700);
+
+  --color-bg-app: var(--ink-950);
+  --color-bg-surface: var(--ink-900);
+  --color-border: var(--ink-700);
+  --color-fg-default: var(--ink-50);
+  --color-fg-muted: var(--ink-300);
+}

@@ -1,0 +1,84 @@
+.appshell {
+  display: flex;
+  min-height: 100svh;
+  background: var(--color-bg-app);
+}
+
+.appshell-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--color-bg-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appshell-logo {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--color-brand-fg);
+  margin-bottom: var(--space-4);
+}
+
+.appshell-navlink {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-fg-default);
+  text-decoration: none;
+  font-weight: 400;
+  transition: background-color 0.15s ease;
+}
+
+.appshell-navlink:hover {
+  background: var(--color-brand-muted);
+}
+
+.appshell-navlink-active {
+  background: var(--color-brand-muted);
+  color: var(--color-brand-fg);
+  font-weight: 600;
+}
+
+.appshell-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.appshell-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+}
+
+.appshell-content {
+  padding: var(--space-8);
+}
+
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--color-brand-solid);
+}
+
+@media (max-width: 767px) {
+  .appshell-sidebar {
+    display: none;
+  }
+}

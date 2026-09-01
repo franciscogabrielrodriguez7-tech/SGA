@@ -26,6 +26,7 @@ from app.utils.response import (
 
 # NUEVO respecto a la variante sin JWT
 from app.utils.auth_dependency import get_current_user
+from app.utils.roles import requiere_rol, SOLO_ADMIN, ADMIN_O_FACTURACION, STAFF_INTERNO
 
 
 router = APIRouter(
@@ -35,10 +36,24 @@ router = APIRouter(
 
 
 # =========================================================
+# ROLES (roadmap sección 26): "administrar usuarios" es una
+# capacidad exclusiva de administrador (crear empleados, activar/
+# desactivar). EXCEPCIÓN: se permite también a
+# encargado_facturacion crear un usuario con rol_usuario='cliente'
+# durante el flujo de creación de un alquiler (RN-CLI-01/RN-ALQ-02:
+# el cliente puede registrarse en ese momento). El controller sigue
+# validando el rol_usuario recibido contra los valores permitidos;
+# esta ruta no distingue automáticamente "cliente" de "empleado" en
+# el payload — queda documentado aquí como una decisión explícita,
+# no como un descuido.
+# =========================================================
+
+
+# =========================================================
 # CREAR USUARIO
 # =========================================================
 
-@router.post("", dependencies=[Depends(get_current_user)])
+@router.post("", dependencies=[Depends(requiere_rol(*ADMIN_O_FACTURACION))])
 def registrar_usuario(
     datos: UsuarioCreate,
     db: Session = Depends(get_db)
@@ -84,7 +99,7 @@ def registrar_usuario(
 # LISTAR USUARIOS (filtro opcional por rol)
 # =========================================================
 
-@router.get("", dependencies=[Depends(get_current_user)])
+@router.get("", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
 def listar_usuarios(
     rol_usuario: Optional[str] = None,
     db: Session = Depends(get_db)
@@ -113,7 +128,7 @@ def listar_usuarios(
 # CONSULTAR USUARIO
 # =========================================================
 
-@router.get("/{id_usuario}", dependencies=[Depends(get_current_user)])
+@router.get("/{id_usuario}", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
 def consultar_usuario(
     id_usuario: str,
     db: Session = Depends(get_db)
@@ -150,7 +165,7 @@ def consultar_usuario(
 # CAMBIAR ESTADO (activar / desactivar, RN-USR-04/05)
 # =========================================================
 
-@router.patch("/{id_usuario}/estado", dependencies=[Depends(get_current_user)])
+@router.patch("/{id_usuario}/estado", dependencies=[Depends(requiere_rol(*SOLO_ADMIN))])
 def cambiar_estado(
     id_usuario: str,
     datos: UsuarioEstadoUpdate,

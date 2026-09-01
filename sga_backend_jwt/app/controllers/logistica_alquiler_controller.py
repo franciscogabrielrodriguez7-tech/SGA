@@ -17,14 +17,16 @@ from app.utils.db_errors import extraer_mensaje_negocio
 
 def crear_gasto(
     db: Session,
-    datos
+    datos,
+    usuario_actual
 ):
 
     try:
 
         gasto = LogisticaAlquiler(
             id_alquiler=datos.id_alquiler,
-            id_usuario_logistico=datos.id_usuario_logistico,
+            # CORREGIDO: ya no viene del payload (roadmap sección 25)
+            id_usuario_logistico=usuario_actual.id_usuario,
             es_recogida=datos.es_recogida,
             valor_gasto_logistico=datos.valor_gasto_logistico,
             descripcion_gasto_logistico=datos.descripcion_gasto_logistico,

@@ -34,8 +34,12 @@ class DetalleAlquilerInline(BaseModel):
 
 
 class AlquilerCreate(BaseModel):
-
-    id_usuario_creador: str = Field(..., max_length=20)
+    """
+    CORREGIDO: ya no se recibe "id_usuario_creador" en el payload — se
+    toma del JWT (usuario_actual) en el controller, no de lo que el
+    cliente diga (roadmap sección 25: no depender de un id_usuario
+    enviado por el frontend).
+    """
 
     id_usuario_cliente: str = Field(..., max_length=20)
 
@@ -60,11 +64,18 @@ class AlquilerCreate(BaseModel):
 
 class AlquilerUpdate(BaseModel):
     """
-    Campos editables de un alquiler ya creado (RN-ALQ-06).
-    NO incluye id_usuario_creador/id_usuario_cliente (no se cambia el
-    cliente de un contrato ya creado), NI estado_alquiler (usar el
-    endpoint PATCH /estado), NI tiempo_alquiler (usar el endpoint de
-    renovaciones, que es el que RN-REN define para extender el plazo).
+    Campos editables de un alquiler, SEGÚN SU ESTADO ACTUAL (matriz de
+    edición del roadmap, sección 21). El controller valida qué campos
+    están permitidos en qué estado — este schema solo define la forma
+    del payload; la restricción por estado vive en
+    alquiler_controller.actualizar_alquiler().
+
+    CORREGIDO respecto a la versión anterior: ahora SÍ incluye
+    `fecha_inicio` (editable solo en 'pendiente', sección 20) y
+    `tiempo_alquiler` (editable en 'pendiente'/'activo'/'vencido' —
+    un aumento se trata como renovación, una reducción como corrección
+    administrativa con validación de que no produzca un vencimiento
+    en el pasado; sección 19).
     """
 
     barrio: Optional[str] = Field(default=None, max_length=100)
@@ -74,6 +85,10 @@ class AlquilerUpdate(BaseModel):
     precio_alquiler: Optional[Decimal] = Field(default=None, gt=0)
 
     direccion: Optional[str] = Field(default=None, max_length=255)
+
+    fecha_inicio: Optional[date] = None
+
+    tiempo_alquiler: Optional[int] = Field(default=None, gt=0)
 
     se_lleva: Optional[bool] = None
 
@@ -104,3 +119,24 @@ class RenovacionCreate(BaseModel):
     """
 
     semanas: int = Field(..., gt=0)
+
+
+class RecepcionDirectaCreate(BaseModel):
+    """
+    NUEVO (roadmap sección 6). Recepción directa: el alquiler pasa de
+    'activo' a 'terminado' sin pasar por 'recogido', porque no hubo
+    proceso de recogida mediante transporte (alquiler.se_recoge=False).
+    La valida el controller. No genera fila en logistica_alquiler
+    (no hay operación logística de transporte que registrar, y crear
+    una fila ahí con es_recogida=True representaría incorrectamente
+    esta operación como una recogida por transporte, que no lo es).
+
+    NOTA: no se acepta un campo "observaciones" aquí — la tabla
+    "alquiler" no tiene ninguna columna para guardarlo, y forzarlo
+    dentro de logistica_alquiler falsearía el tipo de operación. Si en
+    el futuro se necesita, requiere agregar una columna nueva (fuera
+    del alcance de este roadmap, que pide no alterar la lógica de BD
+    sin justificarlo explícitamente).
+    """
+
+    pass

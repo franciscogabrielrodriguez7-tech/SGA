@@ -23,7 +23,8 @@ from app.utils.response import (
 
 # NUEVO respecto a la variante sin JWT: TODAS las rutas de este router
 # requieren un token valido (Authorization: Bearer <token>).
-from app.utils.auth_dependency import get_current_user
+from app.utils.auth_dependency import get_current_user, UsuarioActual
+from app.utils.roles import requiere_rol, STAFF_INTERNO
 
 
 router = APIRouter(
@@ -40,7 +41,7 @@ router = APIRouter(
 # se mantiene el mismo criterio por consistencia).
 # =========================================================
 
-@router.get("/resumen-semanal")
+@router.get("/resumen-semanal", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
 def resumen_semanal(
     db: Session = Depends(get_db)
 ):
@@ -64,15 +65,16 @@ def resumen_semanal(
         )
 
 
-@router.post("")
+@router.post("", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
 def registrar_gasto(
     datos: GastoCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    usuario_actual: UsuarioActual = Depends(get_current_user)
 ):
 
     try:
 
-        gasto = crear_gasto(db, datos)
+        gasto = crear_gasto(db, datos, usuario_actual)
 
         return response_success(
             mensaje="Gasto logístico registrado correctamente",
@@ -104,7 +106,7 @@ def registrar_gasto(
         )
 
 
-@router.get("")
+@router.get("", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
 def listar_gastos(
     id_alquiler: Optional[int] = None,
     db: Session = Depends(get_db)

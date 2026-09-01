@@ -24,6 +24,7 @@ from app.utils.response import (
 # NUEVO respecto a la variante sin JWT: TODAS las rutas de este router
 # requieren un token válido (Authorization: Bearer <token>).
 from app.utils.auth_dependency import get_current_user
+from app.utils.roles import requiere_rol, SOLO_ADMIN, STAFF_INTERNO
 
 
 router = APIRouter(
@@ -33,7 +34,7 @@ router = APIRouter(
 )
 
 
-@router.post("")
+@router.post("", dependencies=[Depends(requiere_rol(*SOLO_ADMIN))])
 def registrar_producto(
     datos: ProductoCreate,
     db: Session = Depends(get_db)
@@ -64,7 +65,7 @@ def registrar_producto(
         )
 
 
-@router.get("")
+@router.get("", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
 def listar_productos(
     solo_activos: bool = True,
     db: Session = Depends(get_db)
@@ -89,7 +90,7 @@ def listar_productos(
         )
 
 
-@router.get("/{id_producto}")
+@router.get("/{id_producto}", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
 def consultar_producto(
     id_producto: int,
     db: Session = Depends(get_db)
@@ -122,7 +123,7 @@ def consultar_producto(
         )
 
 
-@router.patch("/{id_producto}")
+@router.patch("/{id_producto}", dependencies=[Depends(requiere_rol(*SOLO_ADMIN))])
 def modificar_producto(
     id_producto: int,
     datos: ProductoUpdate,

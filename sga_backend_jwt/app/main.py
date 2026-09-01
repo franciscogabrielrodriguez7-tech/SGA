@@ -48,6 +48,24 @@ app = FastAPI(
 
 
 # =========================================================
+# SCHEDULER (NUEVO) — actualiza activo -> vencido diariamente
+# a las 00:00 America/Bogota. Ver app/utils/scheduler.py.
+# =========================================================
+
+from app.utils.scheduler import iniciar_scheduler, detener_scheduler
+
+
+@app.on_event("startup")
+def _iniciar_scheduler_evento():
+    iniciar_scheduler()
+
+
+@app.on_event("shutdown")
+def _detener_scheduler_evento():
+    detener_scheduler()
+
+
+# =========================================================
 # CORS
 # =========================================================
 
@@ -79,9 +97,16 @@ app.add_middleware(
 @app.exception_handler(HTTPException)
 async def manejar_http_exception(request: Request, exc: HTTPException):
 
+    codigo_error = "HTTP_ERROR"
+
+    if exc.status_code == 401:
+        codigo_error = "AUTH_ERROR"
+    elif exc.status_code == 403:
+        codigo_error = "FORBIDDEN"
+
     return response_error(
         mensaje=str(exc.detail),
-        error="AUTH_ERROR" if exc.status_code == 401 else "HTTP_ERROR",
+        error=codigo_error,
         code=exc.status_code
     )
 

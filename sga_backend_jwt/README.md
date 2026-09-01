@@ -48,8 +48,8 @@ Con JWT, **todas las rutas de escritura y consulta quedan protegidas**, incluyen
 -- Genera el hash de la contraseña en Python primero:
 -- python -c "import bcrypt; print(bcrypt.hashpw(b'tu_clave', bcrypt.gensalt()).decode())"
 
-INSERT INTO usuario (id_usuario, rol_usuario, nombres_usuario, apellidos_usuario, telefono_usuario, contrasena_usuario, tipo_documento)
-VALUES ('1000000001', 'admin', 'Nombre', 'Apellido', '3000000000', '<hash_generado>', 'CC');
+INSERT INTO usuario (id_usuario, rol_usuario, nombres_usuario, apellidos_usuario, email_usuario, telefono_usuario, contrasena_usuario, tipo_documento)
+VALUES ('1000000001', 'admin', 'Nombre', 'Apellido', 'email_usuario', '3000000000', '<hash_generado>', 'CC');
 ```
 
 A partir de ahí, ese admin inicia sesión, obtiene su token, y con él puede crear el resto de usuarios (`encargado_facturacion`, `encargado_logistico`, `cliente`) a través de la API normalmente.

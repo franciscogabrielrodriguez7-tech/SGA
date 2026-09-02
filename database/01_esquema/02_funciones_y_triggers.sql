@@ -395,6 +395,26 @@ BEFORE DELETE ON detalle_alquiler
 FOR EACH ROW
 EXECUTE FUNCTION fn_prevenir_borrado_detalle();
 
+
+CREATE OR REPLACE FUNCTION fn_verificar_usuario_activo()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_estado_usuario BOOLEAN;
+BEGIN
+    SELECT estado_usuario
+    INTO v_estado_usuario
+    FROM usuario
+    WHERE id_usuario = NEW.id_usuario_creador;
+
+    IF v_estado_usuario IS NULL OR v_estado_usuario = FALSE THEN
+        RAISE EXCEPTION 'Operación denegada: El usuario creador no se encuentra activo en el sistema.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
 -- =========================================================
 -- FIN DEL SCRIPT
 -- =========================================================

@@ -838,7 +838,7 @@ def recepcion_directa(
             "(se_recoge=True). Usa el endpoint de recogida en su lugar."
         )
 
-    if alquiler.estado_alquiler != "activo":
+    if alquiler.estado_alquiler not in {"activo", "vencido"}:
         raise ValueError(
             "Solo se puede hacer una recepción directa desde el estado "
             f"'activo'. Estado actual: '{alquiler.estado_alquiler}'"

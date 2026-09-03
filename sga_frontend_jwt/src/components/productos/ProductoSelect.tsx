@@ -21,7 +21,6 @@ export function ProductoSelect({
       value={value ?? ""}
       onChange={(e) => onProductoChange(Number(e.target.value))}
     >
-      <option value="">Selecciona un producto</option>
 
       {productos.map((producto) => (
         <option key={producto.id_producto} value={producto.id_producto}>

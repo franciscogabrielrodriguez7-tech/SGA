@@ -17,6 +17,7 @@ import type { Cliente } from "../../interfaces/Cliente";
 import type { Producto } from "../../interfaces/Producto";
 
 import { validarAlquiler } from "../../utils/validacionesAlquiler";
+import { obtenerFechaActual } from "../../components/inputs/inputFecha";
 
 // NOTA IMPORTANTE respecto al esqueleto original:
 // - "clientes" ya NO se recibe como prop con datos mock: se busca en vivo
@@ -30,30 +31,34 @@ import { validarAlquiler } from "../../utils/validacionesAlquiler";
 export function CrearAlquiler() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
-  const obtenerFechaActual = (): string => {
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = String(hoy.getMonth() + 1).padStart(2, "0");
-    const dia = String(hoy.getDate()).padStart(2, "0");
-
-    return `${año}-${mes}-${dia}`;
-  };
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [productoSeleccionado, setProductoSeleccionado] = useState<number | null>(null);
   const [cargandoProductos, setCargandoProductos] = useState(true);
 
-  useEffect(() => {
-    productosApi
-      .listar()
-      .then(setProductos)
-      .catch((error) => {
-        const mensaje =
-          error instanceof ApiError
-            ? error.message
-            : "Error al cargar productos";
-        toaster.create({ title: "Error", description: mensaje, type: "error" });
-      })
-      .finally(() => setCargandoProductos(false));
-  }, []);
+useEffect(() => {
+  productosApi
+    .listar()
+    .then((productos) => {
+      setProductos(productos);
+
+      if (productos.length > 0) {
+        setProductoSeleccionado(productos[0].id_producto);
+      }
+    })
+    .catch((error) => {
+      const mensaje =
+        error instanceof ApiError
+          ? error.message
+          : "Error al cargar productos";
+
+      toaster.create({
+        title: "Error",
+        description: mensaje,
+        type: "error",
+      });
+    })
+    .finally(() => setCargandoProductos(false));
+}, []);
 
   const [detallesProducto, setDetallesProducto] = useState<DetalleProducto[]>([
     { productoId: null, cantidad: 1 },
@@ -414,6 +419,7 @@ export function CrearAlquiler() {
           <div>
             <label className="field-label">Teléfono</label>
             <input
+              maxLength={10}
               ref={telefonoRef}
               className="input"
               value={datosCliente.telefono_usuario}
@@ -571,14 +577,8 @@ export function CrearAlquiler() {
                   <label className="field-label">Producto</label>
                   <ProductoSelect
                     productos={productos}
-                    value={detalle.productoId}
-                    onProductoChange={(idProducto) => {
-                      setDetallesProducto((actuales) =>
-                        actuales.map((d, i) =>
-                          i === indice ? { ...d, productoId: idProducto } : d,
-                        ),
-                      );
-                    }}
+                    value={productoSeleccionado}
+                    onProductoChange={setProductoSeleccionado}
                   />
                 </div>
 

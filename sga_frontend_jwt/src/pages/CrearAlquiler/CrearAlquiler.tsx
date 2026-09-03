@@ -30,7 +30,14 @@ import { validarAlquiler } from "../../utils/validacionesAlquiler";
 export function CrearAlquiler() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const obtenerFechaActual = (): string => {
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoy.getDate()).padStart(2, "0");
 
+    return `${año}-${mes}-${dia}`;
+  };
   const [productos, setProductos] = useState<Producto[]>([]);
   const [cargandoProductos, setCargandoProductos] = useState(true);
 
@@ -40,7 +47,9 @@ export function CrearAlquiler() {
       .then(setProductos)
       .catch((error) => {
         const mensaje =
-          error instanceof ApiError ? error.message : "Error al cargar productos";
+          error instanceof ApiError
+            ? error.message
+            : "Error al cargar productos";
         toaster.create({ title: "Error", description: mensaje, type: "error" });
       })
       .finally(() => setCargandoProductos(false));
@@ -63,7 +72,7 @@ export function CrearAlquiler() {
   const [seRecoge, setSeRecoge] = useState<boolean>(false);
   const [direccion, setDireccion] = useState("");
   const [barrio, setBarrio] = useState("");
-  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaInicio, setFechaInicio] = useState<string>(obtenerFechaActual());
   const [tiempoAlquiler, setTiempoAlquiler] = useState<number>(1);
   const [deposito, setDeposito] = useState<number>(0);
   const [enviando, setEnviando] = useState(false);
@@ -109,7 +118,8 @@ export function CrearAlquiler() {
           telefono_usuario: "",
         }));
       } else {
-        const mensaje = error instanceof ApiError ? error.message : "Error al buscar cliente";
+        const mensaje =
+          error instanceof ApiError ? error.message : "Error al buscar cliente";
         toaster.create({ title: "Error", description: mensaje, type: "error" });
       }
     } finally {
@@ -121,7 +131,9 @@ export function CrearAlquiler() {
   const costoRecogida = seRecoge ? 15000 : 0;
 
   const totalProductos = detallesProducto.reduce((total, detalle) => {
-    const productoActual = productos.find((p) => p.id_producto === detalle.productoId);
+    const productoActual = productos.find(
+      (p) => p.id_producto === detalle.productoId,
+    );
     const precioConjunto = productoActual
       ? productoActual.precio_base_producto * detalle.cantidad
       : 0;
@@ -139,13 +151,17 @@ export function CrearAlquiler() {
     if (detallesProducto.length >= productos.length) {
       toaster.create({
         title: "No se pueden agregar más productos",
-        description: "Todos los productos disponibles ya han sido seleccionados.",
+        description:
+          "Todos los productos disponibles ya han sido seleccionados.",
         type: "warning",
       });
       return;
     }
 
-    setDetallesProducto((actuales) => [...actuales, { productoId: null, cantidad: 1 }]);
+    setDetallesProducto((actuales) => [
+      ...actuales,
+      { productoId: null, cantidad: 1 },
+    ]);
   };
 
   const eliminarProducto = (indiceAEliminar: number) => {
@@ -158,7 +174,9 @@ export function CrearAlquiler() {
       return;
     }
 
-    setDetallesProducto((actuales) => actuales.filter((_, i) => i !== indiceAEliminar));
+    setDetallesProducto((actuales) =>
+      actuales.filter((_, i) => i !== indiceAEliminar),
+    );
   };
 
   const manejarCrearAlquiler = async () => {
@@ -170,7 +188,11 @@ export function CrearAlquiler() {
     });
 
     if (error) {
-      toaster.create({ title: "Datos incompletos", description: error, type: "warning" });
+      toaster.create({
+        title: "Datos incompletos",
+        description: error,
+        type: "warning",
+      });
       return;
     }
 
@@ -218,7 +240,9 @@ export function CrearAlquiler() {
         se_lleva: seLleva,
         se_recoge: seRecoge,
         detalles: detallesProducto.map((d) => {
-          const productoActual = productos.find((p) => p.id_producto === d.productoId);
+          const productoActual = productos.find(
+            (p) => p.id_producto === d.productoId,
+          );
           const precioConjunto = productoActual
             ? productoActual.precio_base_producto * d.cantidad
             : 0;
@@ -245,9 +269,15 @@ export function CrearAlquiler() {
       // error de negocio (stock insuficiente, etc.) tal como lo devuelve
       // el backend.
       const mensaje =
-        error instanceof ApiError ? error.message : "No se pudo crear el alquiler";
+        error instanceof ApiError
+          ? error.message
+          : "No se pudo crear el alquiler";
 
-      toaster.create({ title: "Error al crear el alquiler", description: mensaje, type: "error" });
+      toaster.create({
+        title: "Error al crear el alquiler",
+        description: mensaje,
+        type: "error",
+      });
     } finally {
       setEnviando(false);
     }
@@ -271,11 +301,14 @@ export function CrearAlquiler() {
         <p className="text-bold">Datos del cliente</p>
 
         {estadoCliente === "encontrado" && (
-          <p className="text-sm text-success">✓ Cliente encontrado (ya registrado).</p>
+          <p className="text-sm text-success">
+            ✓ Cliente encontrado (ya registrado).
+          </p>
         )}
         {estadoCliente === "no-encontrado" && (
           <p className="text-sm text-warning">
-            Cliente no encontrado — se registrará como nuevo al crear el alquiler.
+            Cliente no encontrado — se registrará como nuevo al crear el
+            alquiler.
           </p>
         )}
 
@@ -328,7 +361,9 @@ export function CrearAlquiler() {
                   buscarClientePorDocumento(datosCliente.id_usuario);
                 }
               }}
-              placeholder={buscandoCliente ? "Buscando..." : "Número de documento"}
+              placeholder={
+                buscandoCliente ? "Buscando..." : "Número de documento"
+              }
             />
           </div>
 
@@ -340,7 +375,10 @@ export function CrearAlquiler() {
               value={datosCliente.nombres_usuario}
               placeholder="Nombres del cliente"
               onChange={(e) =>
-                setDatosCliente((actuales) => ({ ...actuales, nombres_usuario: e.target.value }))
+                setDatosCliente((actuales) => ({
+                  ...actuales,
+                  nombres_usuario: e.target.value,
+                }))
               }
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -359,7 +397,10 @@ export function CrearAlquiler() {
               value={datosCliente.apellidos_usuario}
               placeholder="Apellidos del cliente"
               onChange={(e) =>
-                setDatosCliente((actuales) => ({ ...actuales, apellidos_usuario: e.target.value }))
+                setDatosCliente((actuales) => ({
+                  ...actuales,
+                  apellidos_usuario: e.target.value,
+                }))
               }
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -378,7 +419,10 @@ export function CrearAlquiler() {
               value={datosCliente.telefono_usuario}
               placeholder="Teléfono del cliente"
               onChange={(e) =>
-                setDatosCliente((actuales) => ({ ...actuales, telefono_usuario: e.target.value }))
+                setDatosCliente((actuales) => ({
+                  ...actuales,
+                  telefono_usuario: e.target.value,
+                }))
               }
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -388,40 +432,45 @@ export function CrearAlquiler() {
               }}
             />
           </div>
+        </div>
+      </div>
+      {/* Alquiler */}
+      <h2 className="heading-lg" style={{ marginBottom: 16 }}>
+        Alquiler
+      </h2>
+      <div className="card stack gap-4" style={{ marginBottom: 32 }}>
+        <div>
+          <label className="field-label">Dirección</label>
+          <input
+            ref={direccionRef}
+            className="input"
+            placeholder="Dirección"
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                barrioRef.current?.focus();
+              }
+            }}
+          />
+        </div>
 
-          <div>
-            <label className="field-label">Dirección</label>
-            <input
-              ref={direccionRef}
-              className="input"
-              placeholder="Dirección"
-              value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  barrioRef.current?.focus();
-                }
-              }}
-            />
-          </div>
-
-          <div>
-            <label className="field-label">Barrio</label>
-            <input
-              ref={barrioRef}
-              className="input"
-              placeholder="Barrio"
-              value={barrio}
-              onChange={(e) => setBarrio(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  fechaInicioRef.current?.focus();
-                }
-              }}
-            />
-          </div>
+        <div>
+          <label className="field-label">Barrio</label>
+          <input
+            ref={barrioRef}
+            className="input"
+            placeholder="Barrio"
+            value={barrio}
+            onChange={(e) => setBarrio(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                fechaInicioRef.current?.focus();
+              }
+            }}
+          />
         </div>
 
         <div className="grid grid-cols-1 grid-cols-2-md">
@@ -443,7 +492,9 @@ export function CrearAlquiler() {
           </div>
 
           <div>
-            <label className="field-label">Tiempo de alquiler (en semanas)</label>
+            <label className="field-label">
+              Tiempo de alquiler (en semanas)
+            </label>
             <input
               ref={tiempoAlquilerRef}
               className="input"
@@ -463,7 +514,11 @@ export function CrearAlquiler() {
 
             <div style={{ marginTop: 16 }}>
               <label className="field-label">Depósito</label>
-              <InputMoneda ref={depositoRef} value={deposito} onChange={setDeposito} />
+              <InputMoneda
+                ref={depositoRef}
+                value={deposito}
+                onChange={setDeposito}
+              />
             </div>
           </div>
         </div>
@@ -502,7 +557,9 @@ export function CrearAlquiler() {
 
       <div className="stack gap-4" style={{ marginBottom: 32 }}>
         {detallesProducto.map((detalle, indice) => {
-          const productoActual = productos.find((p) => p.id_producto === detalle.productoId);
+          const productoActual = productos.find(
+            (p) => p.id_producto === detalle.productoId,
+          );
           const precioConjunto = productoActual
             ? productoActual.precio_base_producto * detalle.cantidad
             : 0;
@@ -517,7 +574,9 @@ export function CrearAlquiler() {
                     value={detalle.productoId}
                     onProductoChange={(idProducto) => {
                       setDetallesProducto((actuales) =>
-                        actuales.map((d, i) => (i === indice ? { ...d, productoId: idProducto } : d)),
+                        actuales.map((d, i) =>
+                          i === indice ? { ...d, productoId: idProducto } : d,
+                        ),
                       );
                     }}
                   />
@@ -533,7 +592,9 @@ export function CrearAlquiler() {
                     onChange={(e) => {
                       const cantidad = Number(e.target.value);
                       setDetallesProducto((actuales) =>
-                        actuales.map((d, i) => (i === indice ? { ...d, cantidad } : d)),
+                        actuales.map((d, i) =>
+                          i === indice ? { ...d, cantidad } : d,
+                        ),
                       );
                     }}
                   />
@@ -541,7 +602,11 @@ export function CrearAlquiler() {
 
                 <div>
                   <label className="field-label">Precio conjunto</label>
-                  <input className="input" value={`$${precioConjunto.toLocaleString("es-CO")}`} readOnly />
+                  <input
+                    className="input"
+                    value={`$${precioConjunto.toLocaleString("es-CO")}`}
+                    readOnly
+                  />
                 </div>
               </div>
 
@@ -605,11 +670,20 @@ export function CrearAlquiler() {
 
       {/* Acciones */}
       <div className="hstack justify-end gap-3">
-        <button type="button" className="btn btn-outline" onClick={() => navigate("/alquileres")}>
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={() => navigate("/alquileres")}
+        >
           Cancelar
         </button>
 
-        <button type="button" className="btn btn-primary" disabled={enviando} onClick={manejarCrearAlquiler}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={enviando}
+          onClick={manejarCrearAlquiler}
+        >
           {enviando ? "Creando..." : "Crear alquiler"}
         </button>
       </div>

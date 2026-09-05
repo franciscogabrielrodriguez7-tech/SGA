@@ -1,280 +1,93 @@
 -- =========================================================
 -- SGA - Sistema de Gestión de Alquileres de Andamios
 -- ARCHIVO: 02_funciones_y_triggers.sql
--- CONTENIDO: Funciones PL/pgSQL y triggers asociados.
--- ORIGEN: extraído sin modificaciones de CREAR_TABLAS.sql
---         (líneas 223-585 del archivo original), como parte
---         de la reorganización documental del proyecto.
--- ORDEN DE EJECUCIÓN: 2 de 2 (requiere que 01_tablas.sql ya
---         se haya ejecutado, pues los triggers se asocian a
---         tablas existentes).
---
--- FUNCIONES / TRIGGERS INCLUIDOS (en orden de aparición):
---   fn_actualizar_stock_alquiler_insert       -> trg_sincronizar_stock_insert (AFTER INSERT detalle_alquiler)
---   fn_actualizar_stock_alquiler_delete       -> (función definida; sin trigger asociado en el original)
---   fn_actualizar_stock_alquiler_update       -> trg_sincronizar_stock_update (AFTER UPDATE detalle_alquiler)
---   fn_cerrar_alquiler_devolver_stock         -> trg_finalizar_alquiler_stock (AFTER UPDATE alquiler)
---   fn_verificar_stock_disponible             -> trg_validar_stock_disponible (BEFORE INSERT detalle_alquiler)
---   fn_ajustar_stock_en_actualizacion         -> trg_ajustar_stock_actualizacion (BEFORE UPDATE detalle_alquiler)
---   fn_validar_estado_alquiler_activo         -> trg_validar_estado_alquiler_activo (BEFORE INSERT/UPDATE detalle_alquiler)
---   fn_prohibir_reabrir_alquiler              -> trg_prohibir_reabrir_alquiler (BEFORE UPDATE alquiler)
---   fn_actualizar_timestamp                   -> trg_timestamp_usuario / _producto / _alquiler / _detalle / _logistica
---   fn_validar_fechas_alquiler                -> trg_validar_fecha_inicio (BEFORE INSERT alquiler)
---   fn_validar_eliminacion_producto           -> trg_validar_eliminacion_producto (BEFORE DELETE producto)
---   fn_validar_modificacion_stock             -> trg_validar_modificacion_stock (BEFORE UPDATE stock_total/stock_alquilado producto)
---   fn_prevenir_borrado_detalle               -> trg_prevenir_borrado_detalle (BEFORE DELETE detalle_alquiler)
---
--- NOTA: la función fn_actualizar_stock_alquiler_delete está
--- definida en el script original pero, según lo revisado, no
--- tiene un CREATE TRIGGER asociado en el archivo fuente. Se
--- deja tal cual estaba (sin agregar el trigger, para no
--- inventar comportamiento no presente en el original).
---
--- NOTA: el contenido SQL de este archivo es idéntico al
--- original. Solo se agregó este encabezado informativo.
+-- CONTENIDO: Lógica de negocio, control de stock y auditoría.
+-- ORDEN DE EJECUCIÓN: 2 de 2 (ejecutar después de 01_tablas.sql)
+-- MOTOR: PostgreSQL
 -- =========================================================
 
 -- =========================================================
--- TRIGGERS
+-- 1. FUNCIÓN GENÉRICA DE AUDITORÍA CENTRALIZADA
+-- Registra cualquier cambio (INSERT, UPDATE, DELETE) en las tablas clave,
+-- guardando los datos antiguos y nuevos en formato JSONB.
 -- =========================================================
-
-CREATE OR REPLACE FUNCTION fn_actualizar_stock_alquiler_insert()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Actualizamos la tabla producto sumando la cantidad alquilada 
-    -- utilizando el ID del producto que viene en la nueva fila del detalle.
-    UPDATE producto
-    SET stock_alquilado = stock_alquilado + NEW.cantidad_productos,
-        fecha_actualizacion = CURRENT_TIMESTAMP
-    WHERE id_producto = NEW.id_producto;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Creamos el disparador que se activa después de insertar en detalle_alquiler
-CREATE TRIGGER trg_sincronizar_stock_insert
-AFTER INSERT ON detalle_alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_actualizar_stock_alquiler_insert();
-
-  CREATE OR REPLACE FUNCTION fn_actualizar_stock_alquiler_delete()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Restamos del stock alquilado la cantidad que tenía el registro que se va a eliminar
-    UPDATE producto
-    SET stock_alquilado = stock_alquilado - OLD.cantidad_productos,
-        fecha_actualizacion = CURRENT_TIMESTAMP
-    WHERE id_producto = OLD.id_producto;
-
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-
-
-CREATE OR REPLACE FUNCTION fn_actualizar_stock_alquiler_update()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- CASO 1: El registro del detalle pasa de ACTIVO (TRUE) a INACTIVO (FALSE - Eliminación lógica)
-    IF OLD.estado_registro = TRUE AND NEW.estado_registro = FALSE THEN
-        UPDATE producto
-        SET stock_alquilado = stock_alquilado - NEW.cantidad_productos,
-            fecha_actualizacion = CURRENT_TIMESTAMP
-        WHERE id_producto = NEW.id_producto;
-    END IF;
-
-    -- CASO 2 (Seguridad opcional): Si por error se reactiva el registro, vuelve a sumar al stock
-    IF OLD.estado_registro = FALSE AND NEW.estado_registro = TRUE THEN
-        UPDATE producto
-        SET stock_alquilado = stock_alquilado + NEW.cantidad_productos,
-            fecha_actualizacion = CURRENT_TIMESTAMP
-        WHERE id_producto = NEW.id_producto;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE TRIGGER trg_sincronizar_stock_update
-AFTER UPDATE ON detalle_alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_actualizar_stock_alquiler_update();
-
-CREATE OR REPLACE FUNCTION fn_cerrar_alquiler_devolver_stock()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Si el estado anterior NO era terminado/recogido, pero EL NUEVO SÍ lo es:
-    IF OLD.estado_alquiler NOT IN ('terminado', 'recogido') 
-       AND NEW.estado_alquiler IN ('terminado', 'recogido') THEN
-        
-        -- Marcamos lógicamente los detalles como inactivos. 
-        -- Al hacer esto, el trigger trg_sincronizar_stock_update se encargará 
-        -- automáticamente de devolver el stock de forma limpia y segura fila por fila.
-        UPDATE detalle_alquiler
-        SET estado_registro = FALSE,
-            fecha_actualizacion = CURRENT_TIMESTAMP
-        WHERE id_alquiler = NEW.id_alquiler 
-          AND estado_registro = TRUE;
-
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_finalizar_alquiler_stock
-AFTER UPDATE ON alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_cerrar_alquiler_devolver_stock();
-
-
-CREATE OR REPLACE FUNCTION fn_verificar_stock_disponible()
+CREATE OR REPLACE FUNCTION fn_auditar_cambios()
 RETURNS TRIGGER AS $$
 DECLARE
-    v_stock_total INTEGER;
-    v_stock_alquilado INTEGER;
-    v_stock_disponible INTEGER;
-    v_nombre_producto VARCHAR(100);
+    v_id_afectado VARCHAR(50);
+    v_datos_viejos JSONB := NULL;
+    v_datos_nuevos JSONB := NULL;
 BEGIN
-    -- 1. Consultamos el estado actual del producto en la tabla producto
-    SELECT stock_total, stock_alquilado, nombre_producto 
-    INTO v_stock_total, v_stock_alquilado, v_nombre_producto
-    FROM producto
-    WHERE id_producto = NEW.id_producto;
+    IF (TG_OP = 'DELETE') THEN
+        v_datos_viejos := to_jsonb(OLD);
+        CASE TG_TABLE_NAME
+            WHEN 'usuario' THEN v_id_afectado := OLD.id_usuario::TEXT;
+            WHEN 'producto' THEN v_id_afectado := OLD.id_producto::TEXT;
+            WHEN 'alquiler' THEN v_id_afectado := OLD.id_alquiler::TEXT;
+            WHEN 'detalle_alquiler' THEN v_id_afectado := OLD.id_detalle_alquiler::TEXT;
+            WHEN 'logistica_alquiler' THEN v_id_afectado := OLD.id_logistica_alquiler::TEXT;
+            ELSE v_id_afectado := 'DESCONOCIDO';
+        END CASE;
+    ELSE
+        v_datos_nuevos := to_jsonb(NEW);
+        CASE TG_TABLE_NAME
+            WHEN 'usuario' THEN v_id_afectado := NEW.id_usuario::TEXT;
+            WHEN 'producto' THEN v_id_afectado := NEW.id_producto::TEXT;
+            WHEN 'alquiler' THEN v_id_afectado := NEW.id_alquiler::TEXT;
+            WHEN 'detalle_alquiler' THEN v_id_afectado := NEW.id_detalle_alquiler::TEXT;
+            WHEN 'logistica_alquiler' THEN v_id_afectado := NEW.id_logistica_alquiler::TEXT;
+            ELSE v_id_afectado := 'DESCONOCIDO';
+        END CASE;
 
-    -- 2. Calculamos cuánto hay realmente libre en la bodega
-    v_stock_disponible := v_stock_total - v_stock_alquilado;
-
-    -- 3. Si lo que piden supera lo que hay disponible, abortamos la operación
-    IF NEW.cantidad_productos > v_stock_disponible THEN
-        RAISE EXCEPTION 'Stock insuficiente para el producto "%". Stock disponible: %, Solicitado: %', 
-            v_nombre_producto, v_stock_disponible, NEW.cantidad_productos;
+        IF (TG_OP = 'UPDATE') THEN
+            v_datos_viejos := to_jsonb(OLD);
+        END IF;
     END IF;
 
-    -- Si hay suficiente stock, permitimos que continúe la inserción normalmente
-    RETURN NEW;
+    INSERT INTO auditoria_sistema (
+        nombre_tabla,
+        tipo_operacion,
+        id_registro_afectado,
+        datos_anteriores,
+        datos_nuevos
+    ) VALUES (
+        TG_TABLE_NAME,
+        TG_OP,
+        v_id_afectado,
+        v_datos_viejos,
+        v_datos_nuevos
+    );
+
+    RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_validar_stock_disponible
-BEFORE INSERT ON detalle_alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_verificar_stock_disponible();
+CREATE TRIGGER trg_auditoria_usuario
+AFTER INSERT OR UPDATE OR DELETE ON usuario
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
+CREATE TRIGGER trg_auditoria_producto
+AFTER INSERT OR UPDATE OR DELETE ON producto
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
+CREATE TRIGGER trg_auditoria_alquiler
+AFTER INSERT OR UPDATE OR DELETE ON alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
+CREATE TRIGGER trg_auditoria_detalle
+AFTER INSERT OR UPDATE OR DELETE ON detalle_alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
+
+CREATE TRIGGER trg_auditoria_logistica
+AFTER INSERT OR UPDATE OR DELETE ON logistica_alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_auditar_cambios();
 
 
-CREATE OR REPLACE FUNCTION fn_ajustar_stock_en_actualizacion()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_stock_total INTEGER;
-    v_stock_alquilado INTEGER;
-    v_stock_disponible INTEGER;
-    v_diferencia_cantidad INTEGER;
-    v_nombre_producto VARCHAR(100);
-BEGIN
-    -- CASO A: Solo nos importa si el registro está activo y cambió la cantidad o el producto
-    IF NEW.estado_registro = TRUE AND OLD.estado_registro = TRUE THEN
-        
-        -- Si cambiaron de producto por completo en la misma línea
-        IF NEW.id_producto != OLD.id_producto THEN
-            RAISE EXCEPTION 'No se permite cambiar el producto de una línea ya creada. Debe eliminar la línea y crear una nueva.';
-        END IF;
-
-        -- Calculamos la diferencia de cantidad (ej: si pasó de 5 a 8, la diferencia es +3)
-        v_diferencia_cantidad := NEW.cantidad_productos - OLD.cantidad_productos;
-
-        -- Si la cantidad aumentó, debemos verificar si hay stock disponible para ese incremento
-        IF v_diferencia_cantidad > 0 THEN
-            SELECT stock_total, stock_alquilado, nombre_producto 
-            INTO v_stock_total, v_stock_alquilado, v_nombre_producto
-            FROM producto
-            WHERE id_producto = NEW.id_producto;
-
-            -- Stock disponible real (excluyendo lo que ya tenía esta misma línea)
-            v_stock_disponible := (v_stock_total - v_stock_alquilado);
-
-            IF v_diferencia_cantidad > v_stock_disponible THEN
-                RAISE EXCEPTION 'Stock insuficiente para aumentar el producto "%". Faltan unidades en bodega.', 
-                    v_nombre_producto;
-            END IF;
-        END IF;
-
-        -- Actualizamos el stock alquilado en la tabla producto aplicando la diferencia
-        IF v_diferencia_cantidad != 0 THEN
-            UPDATE producto
-            SET stock_alquilado = stock_alquilado + v_diferencia_cantidad,
-                fecha_actualizacion = CURRENT_TIMESTAMP
-            WHERE id_producto = NEW.id_producto;
-        END IF;
-
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_ajustar_stock_actualizacion
-BEFORE UPDATE ON detalle_alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_ajustar_stock_en_actualizacion();
-
-CREATE OR REPLACE FUNCTION fn_validar_estado_alquiler_activo()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_estado_alquiler VARCHAR(30);
-BEGIN
-    -- 1. Consultamos el estado actual del alquiler al que pertenece este detalle
-    SELECT estado_alquiler 
-    INTO v_estado_alquiler
-    FROM alquiler
-    WHERE id_alquiler = NEW.id_alquiler;
-
-    -- 2. Si el alquiler ya está cerrado/finalizado
-    IF v_estado_alquiler IN ('terminado', 'recogido', 'cancelado') THEN
-        
-        -- EXCEPCIÓN PERMITIDA: Si es la actualización automática del sistema para 
-        -- desactivar el registro (cerrar el detalle) sin alterar productos ni cantidades.
-        IF (TG_OP = 'UPDATE' AND OLD.estado_registro = TRUE AND NEW.estado_registro = FALSE 
-            AND OLD.id_producto = NEW.id_producto 
-            AND OLD.cantidad_productos = NEW.cantidad_productos) THEN
-            RETURN NEW; -- Permitimos el cierre automático
-        END IF;
-
-        -- De lo contrario, prohibimos cualquier cambio o adición manual
-        RAISE EXCEPTION 'Operación denegada. No se pueden agregar o modificar productos en un alquiler que ya se encuentra en estado "%".', 
-            v_estado_alquiler;
-    END IF;
-
-    -- Si el alquiler sigue activo o pendiente, permitimos la acción
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_validar_estado_alquiler_activo
-BEFORE INSERT OR UPDATE ON detalle_alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_validar_estado_alquiler_activo();
-
-CREATE OR REPLACE FUNCTION fn_prohibir_reabrir_alquiler()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Si el estado anterior era cerrado, prohibimos cambiarlo a un estado abierto
-    IF OLD.estado_alquiler IN ('terminado', 'recogido', 'cancelado') 
-       AND NEW.estado_alquiler NOT IN ('terminado', 'recogido', 'cancelado') THEN
-        RAISE EXCEPTION 'Operación denegada. Un alquiler en estado "%" no puede ser reabierto. Por seguridad de inventario, debe crear un nuevo contrato.', 
-            OLD.estado_alquiler;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_prohibir_reabrir_alquiler
-BEFORE UPDATE ON alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_prohibir_reabrir_alquiler();
-
+-- =========================================================
+-- 2. MANTENIMIENTO AUTOMÁTICO DE TIMESTAMPS
+-- Actualiza automáticamente el campo fecha_actualizacion
+-- cada vez que se modifica un registro.
+-- =========================================================
 CREATE OR REPLACE FUNCTION fn_actualizar_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -283,138 +96,336 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Para la tabla USUARIO
 CREATE TRIGGER trg_timestamp_usuario
 BEFORE UPDATE ON usuario
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_timestamp();
 
--- Para la tabla PRODUCTO
 CREATE TRIGGER trg_timestamp_producto
 BEFORE UPDATE ON producto
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_timestamp();
 
--- Para la tabla ALQUILER
 CREATE TRIGGER trg_timestamp_alquiler
 BEFORE UPDATE ON alquiler
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_timestamp();
 
--- Para la tabla DETALLE_ALQUILER
 CREATE TRIGGER trg_timestamp_detalle
 BEFORE UPDATE ON detalle_alquiler
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_timestamp();
 
--- Para la tabla LOGISTICA_ALQUILER
 CREATE TRIGGER trg_timestamp_logistica
 BEFORE UPDATE ON logistica_alquiler
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_timestamp();
 
+
+-- =========================================================
+-- 3. GESTIÓN Y REGLAS DE USUARIOS
+-- Previene que un admin se desactive a sí mismo y asegura
+-- que siempre exista al menos un admin activo en el sistema.
+-- =========================================================
+CREATE OR REPLACE FUNCTION fn_impedir_autodesactivacion_admin()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Se reemplaza 'OLD.rol' por 'OLD.rol_usuario'
+    IF OLD.rol_usuario = 'admin' AND NEW.estado_registro = FALSE THEN
+        -- Si manejas la validación de sesión actual para impedir que un admin se apague a sí mismo, 
+        -- asegúrate de que tus comparaciones usen rol_usuario.
+        RAISE EXCEPTION 'Operación denegada: Un administrador no puede desactivar su propia cuenta.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_impedir_autodesactivacion_admin
+BEFORE UPDATE OF estado_registro ON usuario
+FOR EACH ROW EXECUTE FUNCTION fn_impedir_autodesactivacion_admin();
+
+CREATE OR REPLACE FUNCTION fn_garantizar_minimo_un_admin()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_conteo_admins INT;
+BEGIN
+    -- Validar si el usuario que se va a desactivar o borrar es administrador
+    IF OLD.rol_usuario = 'admin' AND (TG_OP = 'DELETE' OR NEW.estado_registro = FALSE) THEN
+        
+        -- Contar cuántos administradores activos quedan en el sistema
+        SELECT COUNT(*) INTO v_conteo_admins
+        FROM usuario
+        WHERE rol_usuario = 'admin' AND estado_registro = TRUE AND id_usuario <> OLD.id_usuario;
+
+        IF v_conteo_admins < 1 THEN
+            RAISE EXCEPTION 'Operación denegada: El sistema no puede quedarse sin administradores activos.';
+        END IF;
+    END IF;
+
+    RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_garantizar_minimo_un_admin
+BEFORE UPDATE OF estado_registro ON usuario
+FOR EACH ROW EXECUTE FUNCTION fn_garantizar_minimo_un_admin();
+
+
+-- =========================================================
+-- 4. CONTROL Y VALIDACIÓN DE INVENTARIO (PRODUCTOS Y DETALLES)
+-- Sincroniza el stock alquilado y previene modificaciones 
+-- o bajas de productos que actualmente están en obra.
+-- =========================================================
+CREATE OR REPLACE FUNCTION fn_validar_modificacion_producto()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Bloqueo de eliminación física o borrado lógico
+    IF (TG_OP = 'DELETE') OR (TG_OP = 'UPDATE' AND NEW.estado_registro = FALSE AND OLD.estado_registro = TRUE) THEN
+        IF OLD.stock_alquilado > 0 THEN
+            RAISE EXCEPTION 'Operación cancelada: El producto "%" tiene % unidades en obra. No se puede dar de baja.', 
+                OLD.nombre_producto, OLD.stock_alquilado;
+        END IF;
+    END IF;
+
+    -- Garantizar que el stock_total jamás sea menor al stock_alquilado
+    IF (TG_OP = 'UPDATE') THEN
+        IF NEW.stock_total < NEW.stock_alquilado THEN
+            RAISE EXCEPTION 'Ajuste denegado para "%": El stock total (%) no puede ser menor al stock alquilado actualmente en obras (%).', 
+                NEW.nombre_producto, NEW.stock_total, NEW.stock_alquilado;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_modificacion_producto
+BEFORE UPDATE OR DELETE ON producto
+FOR EACH ROW EXECUTE FUNCTION fn_validar_modificacion_producto();
+
+CREATE OR REPLACE FUNCTION fn_validar_detalle_alquiler()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_estado_alquiler VARCHAR(30);
+    v_stock_total INTEGER;
+    v_stock_alquilado INTEGER;
+    v_stock_disponible INTEGER;
+    v_nombre_producto VARCHAR(100);
+    v_diferencia INTEGER := 0;
+BEGIN
+    SELECT estado_alquiler INTO v_estado_alquiler
+    FROM alquiler WHERE id_alquiler = NEW.id_alquiler;
+
+    IF v_estado_alquiler IN ('terminado', 'recogido', 'cancelado') THEN
+        RAISE EXCEPTION 'Operación denegada. No se pueden modificar ítems de un alquiler en estado "%".', v_estado_alquiler;
+    END IF;
+
+    SELECT stock_total, stock_alquilado, nombre_producto 
+    INTO v_stock_total, v_stock_alquilado, v_nombre_producto
+    FROM producto WHERE id_producto = NEW.id_producto;
+
+    IF (TG_OP = 'INSERT') THEN
+        v_diferencia := NEW.cantidad_productos;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        IF NEW.id_producto != OLD.id_producto THEN
+            RAISE EXCEPTION 'No se permite cambiar el producto de una línea activa. Debe eliminar la línea y agregar una nueva.';
+        END IF;
+        v_diferencia := NEW.cantidad_productos - OLD.cantidad_productos;
+    END IF;
+
+    v_stock_disponible := (v_stock_total - v_stock_alquilado);
+
+    IF v_diferencia > v_stock_disponible THEN
+        RAISE EXCEPTION 'Stock insuficiente para el producto "%". Disponible: %, Solicitado adicional: %', 
+            v_nombre_producto, v_stock_disponible, v_diferencia;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validar_detalle_alquiler
+BEFORE INSERT OR UPDATE ON detalle_alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_validar_detalle_alquiler();
+
+CREATE OR REPLACE FUNCTION fn_sincronizar_stock_producto()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        IF NEW.estado_registro = TRUE THEN
+            UPDATE producto 
+            SET stock_alquilado = stock_alquilado + NEW.cantidad_productos
+            WHERE id_producto = NEW.id_producto;
+        END IF;
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+        -- Borrado lógico
+        IF OLD.estado_registro = TRUE AND NEW.estado_registro = FALSE THEN
+            UPDATE producto 
+            SET stock_alquilado = stock_alquilado - OLD.cantidad_productos
+            WHERE id_producto = OLD.id_producto;
+        -- Reactivación
+        ELSIF OLD.estado_registro = FALSE AND NEW.estado_registro = TRUE THEN
+            UPDATE producto 
+            SET stock_alquilado = stock_alquilado + NEW.cantidad_productos
+            WHERE id_producto = NEW.id_producto;
+        -- Modificación de cantidad
+        ELSIF OLD.estado_registro = TRUE AND NEW.estado_registro = TRUE THEN
+            UPDATE producto 
+            SET stock_alquilado = stock_alquilado + (NEW.cantidad_productos - OLD.cantidad_productos)
+            WHERE id_producto = NEW.id_producto;
+        END IF;
+
+    ELSIF (TG_OP = 'DELETE') THEN
+        IF OLD.estado_registro = TRUE THEN
+            UPDATE producto 
+            SET stock_alquilado = stock_alquilado - OLD.cantidad_productos
+            WHERE id_producto = OLD.id_producto;
+        END IF;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sincronizar_stock_producto
+AFTER INSERT OR UPDATE OR DELETE ON detalle_alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_sincronizar_stock_producto();
+
+
+-- =========================================================
+-- 5. REGLAS Y ESTADOS DEL ALQUILER (CONTRATOS)
+-- Validaciones de creación, retorno de stock al cerrar 
+-- y manejo controlado (vía admin) para reaperturas.
+-- =========================================================
+CREATE OR REPLACE FUNCTION fn_verificar_usuario_activo()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_estado BOOLEAN;
+BEGIN
+    -- Se corrige para apuntar a id_usuario_creador que es el campo real en la tabla alquiler
+    SELECT estado_registro INTO v_estado
+    FROM usuario 
+    WHERE id_usuario = NEW.id_usuario_creador;
+
+    IF v_estado IS FALSE THEN
+        RAISE EXCEPTION 'Operación cancelada: El usuario creador con ID % se encuentra inactivo en el sistema y no puede generar alquileres.', 
+            NEW.id_usuario_creador;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_verificar_usuario_activo_alquiler
+BEFORE INSERT OR UPDATE ON alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_verificar_usuario_activo();
+
 CREATE OR REPLACE FUNCTION fn_validar_fechas_alquiler()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Validamos que al crear un alquiler, la fecha de inicio no sea del pasado
     IF NEW.fecha_inicio < CURRENT_DATE THEN
-        RAISE EXCEPTION 'La fecha de inicio del alquiler (%) no puede ser anterior al día de hoy (%).', 
+        RAISE EXCEPTION 'La fecha de inicio del alquiler (%) no puede ser anterior a hoy (%).', 
             NEW.fecha_inicio, CURRENT_DATE;
     END IF;
-
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_validar_fecha_inicio
 BEFORE INSERT ON alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_validar_fechas_alquiler();
+FOR EACH ROW EXECUTE FUNCTION fn_validar_fechas_alquiler();
 
-CREATE OR REPLACE FUNCTION fn_validar_eliminacion_producto()
+CREATE OR REPLACE FUNCTION fn_cerrar_alquiler_devolver_stock()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- REGLA: No se puede eliminar un producto si tiene stock alquilado activo
-    IF OLD.stock_alquilado > 0 THEN
-        RAISE EXCEPTION 'Acción denegada. No se puede eliminar el producto "%" porque actualmente tiene % unidades alquiladas en campo.', 
-            OLD.nombre_producto, OLD.stock_alquilado;
-    END IF;
-
-    -- Si el stock alquilado es 0, permitimos que el DELETE se ejecute con normalidad
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_validar_eliminacion_producto
-BEFORE DELETE ON producto
-FOR EACH ROW
-EXECUTE FUNCTION fn_validar_eliminacion_producto();
-
-CREATE OR REPLACE FUNCTION fn_validar_modificacion_stock()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- REGLA: El stock total nunca puede ser menor al stock que actualmente está alquilado
-    IF NEW.stock_total < NEW.stock_alquilado THEN
-        RAISE EXCEPTION 'Modificación denegada. No puedes reducir el stock total a %. Actualmente hay % unidades alquiladas en campo.', 
-            NEW.stock_total, NEW.stock_alquilado;
-    END IF;
-
-    -- Opcional: Validar que el stock alquilado no se intente modificar manualmente de forma ilógica
-    IF NEW.stock_alquilado < 0 THEN
-        RAISE EXCEPTION 'El stock alquilado no puede ser un número negativo.';
+    IF OLD.estado_alquiler NOT IN ('terminado', 'recogido', 'cancelado') 
+       AND NEW.estado_alquiler IN ('terminado', 'recogido', 'cancelado') THEN
+        
+        UPDATE producto p
+        SET stock_alquilado = p.stock_alquilado - d.cantidad_productos
+        FROM detalle_alquiler d
+        WHERE d.id_alquiler = NEW.id_alquiler
+          AND d.id_producto = p.id_producto
+          AND d.estado_registro = TRUE;
     END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_validar_modificacion_stock
-BEFORE UPDATE OF stock_total, stock_alquilado ON producto
-FOR EACH ROW
-EXECUTE FUNCTION fn_validar_modificacion_stock();
+CREATE TRIGGER trg_cerrar_alquiler_devolver_stock
+AFTER UPDATE ON alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_cerrar_alquiler_devolver_stock();
 
-
--- trigger para prevenir la eliminación de un detalle de alquiler si el alquiler sigue activo o si el detalle sigue activo (stock descontado)
-CREATE OR REPLACE FUNCTION fn_prevenir_borrado_detalle()
+CREATE OR REPLACE FUNCTION fn_prohibir_reabrir_alquiler()
 RETURNS TRIGGER AS $$
 DECLARE
-    v_estado_alquiler VARCHAR;
+    v_permitido VARCHAR;
 BEGIN
-    -- Consultamos el estado actual del alquiler asociado
-    SELECT estado_alquiler INTO v_estado_alquiler
-    FROM alquiler
-    WHERE id_alquiler = OLD.id_alquiler;
+    v_permitido := current_setting('app.permitir_reapertura', true);
 
-    -- Si el alquiler sigue activo/vencido o el detalle sigue marcado como activo (stock descontado)
-    IF v_estado_alquiler NOT IN ('terminado', 'recogido') OR OLD.estado_registro = TRUE THEN
-        RAISE EXCEPTION 'Acción denegada: No se puede eliminar el registro del detalle porque el alquiler sigue en curso o el stock no ha sido devuelto a bodega.';
-    END IF;
-
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
--- Asociamos el trigger a la tabla detalle_alquiler
-CREATE TRIGGER trg_prevenir_borrado_detalle
-BEFORE DELETE ON detalle_alquiler
-FOR EACH ROW
-EXECUTE FUNCTION fn_prevenir_borrado_detalle();
-
-
-CREATE OR REPLACE FUNCTION fn_verificar_usuario_activo()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_estado_usuario BOOLEAN;
-BEGIN
-    SELECT estado_usuario
-    INTO v_estado_usuario
-    FROM usuario
-    WHERE id_usuario = NEW.id_usuario_creador;
-
-    IF v_estado_usuario IS NULL OR v_estado_usuario = FALSE THEN
-        RAISE EXCEPTION 'Operación denegada: El usuario creador no se encuentra activo en el sistema.';
+    IF OLD.estado_alquiler IN ('terminado', 'recogido', 'cancelado') THEN
+        IF NEW.estado_alquiler NOT IN ('terminado', 'recogido', 'cancelado') THEN
+            IF v_permitido IS NULL OR v_permitido != 'true' THEN
+                RAISE EXCEPTION 'Operación denegada: Un alquiler en estado "%" está finalizado. Utilice el procedimiento administrativo para reabrirlo.', OLD.estado_alquiler;
+            END IF;
+        END IF;
     END IF;
 
     RETURN NEW;
 END;
-$$;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prohibir_reabrir_alquiler
+BEFORE UPDATE OF estado_alquiler ON alquiler
+FOR EACH ROW EXECUTE FUNCTION fn_prohibir_reabrir_alquiler();
+
 -- =========================================================
--- FIN DEL SCRIPT
+-- 6. PROCEDIMIENTO ADMINISTRATIVO
+-- Permite a un admin reabrir un alquiler cerrado siempre 
+-- y cuando haya stock suficiente en la bodega.
 -- =========================================================
+CREATE OR REPLACE FUNCTION fn_admin_reabrir_alquiler(
+    p_id_alquiler INTEGER
+)
+RETURNS VOID AS $$
+DECLARE
+    r RECORD;
+    v_stock_total INT;
+    v_stock_alquilado INT;
+    v_stock_disponible INT;
+BEGIN
+    -- A. Verificar disponibilidad real en bodega
+    FOR r IN (
+        SELECT id_producto, cantidad_productos 
+        FROM detalle_alquiler 
+        WHERE id_alquiler = p_id_alquiler AND estado_registro = TRUE
+    ) LOOP
+        SELECT stock_total, stock_alquilado INTO v_stock_total, v_stock_alquilado
+        FROM producto WHERE id_producto = r.id_producto;
+
+        v_stock_disponible := v_stock_total - v_stock_alquilado;
+
+        IF v_stock_disponible < r.cantidad_productos THEN
+            RAISE EXCEPTION 'Reapertura denegada: El producto ID % no tiene suficiente stock libre en bodega (% disponibles, % requeridos).', 
+                r.id_producto, v_stock_disponible, r.cantidad_productos;
+        END IF;
+    END LOOP;
+
+    -- B. Habilitar sesión para saltar restricción
+    PERFORM set_config('app.permitir_reapertura', 'true', true);
+
+    -- C. Revertir estado a 'activo'
+    UPDATE alquiler 
+    SET estado_alquiler = 'activo' 
+    WHERE id_alquiler = p_id_alquiler;
+
+    -- D. Re-descontar el stock
+    UPDATE producto p
+    SET stock_alquilado = p.stock_alquilado + d.cantidad_productos
+    FROM detalle_alquiler d
+    WHERE d.id_alquiler = p_id_alquiler 
+      AND d.id_producto = p.id_producto 
+      AND d.estado_registro = TRUE;
+
+    -- E. Limpiar sesión
+    PERFORM set_config('app.permitir_reapertura', 'false', true);
+END;
+$$ LANGUAGE plpgsql;

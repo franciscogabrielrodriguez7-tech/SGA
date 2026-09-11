@@ -63,10 +63,12 @@ INSERT INTO usuario (
 -- Planchones: van en el conjunto base (0), pero si el cliente pide más planchones = $8.000 c/u.
 -- Secciones de andamio: $15.000 por sección, sin importar si es extra o no.
 
-INSERT INTO producto (nombre_producto, descripcion_producto, precio_base_producto, precio_base_extra, stock_total, stock_alquilado, estado_registro) VALUES
-('Sección de andamio ancha',   'Estructura tubular estándar de 1.50m x 1.50m. Ideal para fachadas.',                           15000.00, 15000.00, 150, 0, TRUE),
-('Sección de andamio angosta', 'Estructura de 1.50m x 0.80m. Diseñada para pasillos y espacios reducidos.',                   15000.00, 15000.00,  80, 0, TRUE),
-('Planchón mediano',            'Plataforma metálica antideslizante de 2.00m de longitud con ganchos de seguridad.',              0.00,      8000.00, 200, 0, TRUE),
-('Cruceta corta',               'Tijera/cruceta metálica de estabilización para andamios angostos.',                                 0.00,        0.00, 160, 0, TRUE),
-('Cruceta mediana',             'Tijera/cruceta metálica de estabilización para andamios de ancho estándar.',                    0.00,        0.00, 300, 0, TRUE);
+INSERT INTO producto (nombre_producto, descripcion_producto, precio_base_producto, precio_base_extra, unidad_minima_alquiler, stock_total, stock_alquilado, estado_registro) VALUES
+('Sección de andamio ancha',   'Estructura tubular estándar de 1.50m x 1.50m. Ideal para fachadas.',                           15000.00, 15000.00, 'SEMANA', 150, 0, TRUE),
+('Sección de andamio angosta', 'Estructura de 1.50m x 0.80m. Diseñada para pasillos y espacios reducidos.',                   15000.00, 15000.00, 'SEMANA',  80, 0, TRUE),
+('Planchón mediano',            'Plataforma metálica antideslizante de 2.00m de longitud con ganchos de seguridad.',              0.00,      8000.00, 'SEMANA', 200, 0, TRUE),
+('Cruceta corta',               'Tijera/cruceta metálica de estabilización para andamios angostos.',                                 0.00,        0.00, 'SEMANA', 160, 0, TRUE),
+('Cruceta mediana',             'Tijera/cruceta metálica de estabilización para andamios de ancho estándar.',                    0.00,        0.00, 'SEMANA', 300, 0, TRUE),
+('Rana compactadora',           'Equipo de compactación de suelos y asfalto.',                                                 100000.00, 100000.00, 'DIA',      5, 0, TRUE),
+('Escalera de extensión',       'Escalera de aluminio expandible multipropósito.',                                              10000.00,  10000.00, 'DIA',     10, 0, TRUE);
 

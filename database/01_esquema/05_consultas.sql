@@ -24,6 +24,7 @@ SELECT
     (stock_total - stock_alquilado) AS stock_disponible_bodega,
     precio_base_producto,
     precio_base_extra,
+    unidad_minima_alquiler,
     estado_registro
 FROM producto
 WHERE estado_registro = TRUE
@@ -41,6 +42,7 @@ SELECT
     descripcion_producto,
     precio_base_producto,
     precio_base_extra,
+    unidad_minima_alquiler,
     stock_total,
     estado_registro
 FROM producto

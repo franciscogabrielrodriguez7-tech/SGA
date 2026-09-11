@@ -14,6 +14,9 @@ class ProductoCreate(BaseModel):
 
     precio_base_producto: Decimal = Field(..., ge=0)
 
+    # Si no se indica, el controller lo iguala a precio_base_producto.
+    precio_base_extra: Optional[Decimal] = Field(default=None, ge=0)
+
     stock_total: int = Field(..., ge=0)
 
     # precio_base_producto se interpreta "por" esta unidad (ej. SEMANA
@@ -28,6 +31,8 @@ class ProductoUpdate(BaseModel):
     descripcion_producto: Optional[str] = Field(default=None, max_length=300)
 
     precio_base_producto: Optional[Decimal] = Field(default=None, ge=0)
+
+    precio_base_extra: Optional[Decimal] = Field(default=None, ge=0)
 
     # stock_alquilado NO es editable manualmente (lo sincronizan los
     # triggers). stock_total sí, y la BD rechaza si queda por debajo

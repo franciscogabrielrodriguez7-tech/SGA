@@ -15,6 +15,11 @@ class Producto(Base):
 
     precio_base_producto = Column(Numeric(10, 2), nullable=False)
 
+    # Precio cuando se añade como extra a un alquiler. Si no se
+    # especifica al crear el producto, el backend lo iguala al
+    # precio_base_producto (ver producto_controller.py).
+    precio_base_extra = Column(Numeric(10, 2), nullable=False, server_default="0.00")
+
     stock_total = Column(Integer, nullable=False)
 
     # stock_alquilado NUNCA se modifica manualmente desde el backend:
@@ -46,6 +51,10 @@ class Producto(Base):
         CheckConstraint(
             "unidad_minima_alquiler IN ('DIA', 'SEMANA', 'MES')",
             name="chk_producto_unidad_minima_alquiler",
+        ),
+        CheckConstraint(
+            "precio_base_extra >= 0",
+            name="chk_producto_precio_extra",
         ),
     )
 

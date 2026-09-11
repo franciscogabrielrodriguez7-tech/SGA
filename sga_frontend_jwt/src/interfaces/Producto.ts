@@ -13,6 +13,7 @@ export interface Producto {
   nombre_producto: string;
   descripcion_producto: string;
   precio_base_producto: number;
+  precio_base_extra: number;
   unidad_minima_alquiler: UnidadMinimaAlquiler;
   stock_total: number;
   stock_alquilado: number;
@@ -24,6 +25,7 @@ export interface ProductoCreatePayload {
   nombre_producto: string;
   descripcion_producto: string;
   precio_base_producto: number;
+  precio_base_extra?: number;
   stock_total: number;
   unidad_minima_alquiler: UnidadMinimaAlquiler;
 }

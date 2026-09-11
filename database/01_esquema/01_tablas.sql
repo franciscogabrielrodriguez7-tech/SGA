@@ -67,6 +67,10 @@ CREATE TABLE producto (
     nombre_producto VARCHAR(100) NOT NULL,
     descripcion_producto VARCHAR(300), -- Opcional para facilitar registros rápidos de piezas
     precio_base_producto NUMERIC(10, 2) NOT NULL,
+    -- Precio cuando el producto se añade como EXTRA a otro alquiler.
+    -- Por defecto igual al precio base; puede ser menor para incentivar
+    -- la adición de accesorios (ej. tablón extra a precio reducido).
+    precio_base_extra NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     stock_total INTEGER NOT NULL,
     stock_alquilado INTEGER NOT NULL DEFAULT 0,
 
@@ -86,6 +90,8 @@ CREATE TABLE producto (
     -- Restricciones de inventario físico
     CONSTRAINT chk_producto_precio
         CHECK (precio_base_producto >= 0),
+    CONSTRAINT chk_producto_precio_extra
+        CHECK (precio_base_extra >= 0),
     CONSTRAINT chk_producto_stock_total
         CHECK (stock_total >= 0),
     CONSTRAINT chk_producto_stock_alquilado

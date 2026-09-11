@@ -12,6 +12,7 @@ SELECT_PRODUCTO_CAMPOS = """
     nombre_producto,
     descripcion_producto,
     precio_base_producto,
+    precio_base_extra,
     unidad_minima_alquiler,
     stock_total,
     stock_alquilado,
@@ -27,10 +28,15 @@ def crear_producto(db: Session, datos, usuario_actual):
     try:
         set_audit_context(db, usuario_actual.id_usuario)
 
+        # Si no se especifica precio_base_extra, se iguala al precio
+        # base para que el comportamiento por defecto sea coherente.
+        precio_extra = datos.precio_base_extra if datos.precio_base_extra is not None else datos.precio_base_producto
+
         producto = Producto(
             nombre_producto=datos.nombre_producto,
             descripcion_producto=datos.descripcion_producto,
             precio_base_producto=datos.precio_base_producto,
+            precio_base_extra=precio_extra,
             stock_total=datos.stock_total,
             unidad_minima_alquiler=datos.unidad_minima_alquiler
         )

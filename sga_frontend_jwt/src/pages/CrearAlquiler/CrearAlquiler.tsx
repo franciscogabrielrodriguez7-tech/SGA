@@ -194,21 +194,20 @@ export function CrearAlquiler() {
   const costoEntrega = seLleva ? TARIFA_ENTREGA_RECOGIDA : 0;
   const costoRecogida = seRecoge ? TARIFA_ENTREGA_RECOGIDA : 0;
 
-  // RN de precio: producto.precio_base_producto se interpreta "por" su
-  // propia unidad_minima_alquiler (ej. precio semanal si es 'SEMANA').
-  // Por eso NUNCA se divide entre 7 para prorratear a un valor diario:
-  // se multiplica por el número ENTERO de esas unidades que caben en
-  // la duración total (calcularPrecioConjunto, compartido con la
-  // renovación en AlquilerDetalle.tsx). La restricción de UI de arriba
-  // garantiza que tiempoAlquilerDias siempre sea múltiplo del tamaño
-  // de esa unidad, así que esta división nunca deja fracción.
+  // RN de precio: precio_base_producto se interpreta "por" la
+  // unidad_minima_alquiler. Los productos marcados como EXTRA usan
+  // precio_base_extra en su lugar (puede ser diferente, ej. precio
+  // reducido para accesorios opcionales).
   const totalProductos = detallesProducto.reduce((total, detalle) => {
     const productoActual = productos.find((p) => p.id_producto === detalle.productoId);
     if (!productoActual) return total;
+    const precioUsar = detalle.esExtra
+      ? productoActual.precio_base_extra
+      : productoActual.precio_base_producto;
     return (
       total +
       calcularPrecioConjunto(
-        productoActual.precio_base_producto,
+        precioUsar,
         productoActual.unidad_minima_alquiler,
         detalle.cantidad,
         tiempoAlquilerDias,
@@ -788,7 +787,7 @@ export function CrearAlquiler() {
       </h2>
 
       <div className="card stack gap-3" style={{ marginBottom: 32 }}>
-        <div className="hstack justify-between text-bold">
+        <div className="hstack justify-between">
           <span>Productos</span>
           <span>${totalProductos.toLocaleString("es-CO")}</span>
         </div>
@@ -798,8 +797,12 @@ export function CrearAlquiler() {
             const productoActual = productos.find((p) => p.id_producto === detalle.productoId);
             if (!productoActual) return null;
 
+            const precioUsar = detalle.esExtra
+              ? productoActual.precio_base_extra
+              : productoActual.precio_base_producto;
+
             const precioConjunto = calcularPrecioConjunto(
-              productoActual.precio_base_producto,
+              precioUsar,
               productoActual.unidad_minima_alquiler,
               detalle.cantidad,
               tiempoAlquilerDias,
@@ -818,22 +821,29 @@ export function CrearAlquiler() {
         </ul>
 
         <div className="hstack justify-between">
+          <span>Entrega</span>
+          <span>${costoEntrega.toLocaleString("es-CO")}</span>
+        </div>
+        <div className="hstack justify-between">
+          <span>Recogida</span>
+          <span>${costoRecogida.toLocaleString("es-CO")}</span>
+        </div>
+        <div className="hstack justify-between">
           <span>Depósito</span>
           <span>${deposito.toLocaleString("es-CO")}</span>
         </div>
-
-        <div className="hstack justify-between text-bold" style={{ borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-          <span>Precio total del alquiler</span>
-          <span>${totalProductos.toLocaleString("es-CO")}</span>
+        <div className="hstack justify-between text-bold">
+          <span>Precio calculado</span>
+          <span>${precioSugerido.toLocaleString("es-CO")}</span>
         </div>
 
-        {(seLleva || seRecoge) && (
-          <p className="text-sm text-muted">
-            La entrega y/o recogida se registran como gastos logísticos aparte,
-            al momento de realizarlas (módulo Gastos) — no forman parte del
-            precio del alquiler.
-          </p>
-        )}
+        <div style={{ paddingTop: 12 }}>
+          <label className="field-label">Precio final del alquiler</label>
+          <InputMoneda
+            value={precioAlquilerFinal}
+            onChange={(nuevoPrecio) => setPrecioAlquiler(nuevoPrecio)}
+          />
+        </div>
       </div>
 
       {/* Acciones */}

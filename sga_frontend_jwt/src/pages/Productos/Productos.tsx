@@ -20,6 +20,7 @@ export function Productos() {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precioBase, setPrecioBase] = useState(0);
+  const [precioExtra, setPrecioExtra] = useState<number | null>(null);
   const [stockTotal, setStockTotal] = useState(1);
   const [unidadMinima, setUnidadMinima] = useState<UnidadMinimaAlquiler>("DIA");
   const [creando, setCreando] = useState(false);
@@ -55,6 +56,8 @@ export function Productos() {
         nombre_producto: nombre,
         descripcion_producto: descripcion,
         precio_base_producto: precioBase,
+        // null → el backend usa precio_base_producto como fallback
+        precio_base_extra: precioExtra ?? undefined,
         stock_total: stockTotal,
         unidad_minima_alquiler: unidadMinima,
       });
@@ -64,6 +67,7 @@ export function Productos() {
       setNombre("");
       setDescripcion("");
       setPrecioBase(0);
+      setPrecioExtra(null);
       setStockTotal(1);
       setUnidadMinima("DIA");
 
@@ -100,6 +104,17 @@ export function Productos() {
             <div>
               <label className="field-label">Precio base</label>
               <InputMoneda value={precioBase} onChange={setPrecioBase} />
+            </div>
+
+            <div>
+              <label className="field-label">Precio extra</label>
+              <InputMoneda
+                value={precioExtra ?? precioBase}
+                onChange={setPrecioExtra}
+              />
+              <p className="text-sm text-muted" style={{ marginTop: 4 }}>
+                Precio cuando se añade como accesorio extra. Si no se cambia, usa el precio base.
+              </p>
             </div>
 
             <div>
@@ -144,6 +159,7 @@ export function Productos() {
               <th>ID</th>
               <th>Nombre</th>
               <th>Precio base</th>
+              <th>Precio extra</th>
               <th>Unidad</th>
               <th>Stock total</th>
               <th>Alquilado</th>
@@ -157,6 +173,7 @@ export function Productos() {
                 <td>{p.id_producto}</td>
                 <td>{p.nombre_producto}</td>
                 <td>${p.precio_base_producto.toLocaleString("es-CO")}</td>
+                <td>${p.precio_base_extra.toLocaleString("es-CO")}</td>
                 <td><span className="badge">{{ DIA: "Día", SEMANA: "Semana", MES: "Mes" }[p.unidad_minima_alquiler]}</span></td>
                 <td>{p.stock_total}</td>
                 <td>{p.stock_alquilado}</td>

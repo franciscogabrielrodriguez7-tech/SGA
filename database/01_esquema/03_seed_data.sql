@@ -58,10 +58,15 @@ INSERT INTO usuario (
 -- El stock_alquilado inicia en 0. Los precios son por día (estimados).
 -- =========================================================
 
-INSERT INTO producto (nombre_producto, descripcion_producto, precio_base_producto, stock_total, stock_alquilado, estado_registro) VALUES
-('Sección de andamio ancha', 'Estructura tubular estándar de 1.50m x 1.50m. Ideal para fachadas.', 2500.00, 150, 0, TRUE),
-('Sección de andamio angosta', 'Estructura de 1.50m x 0.80m. Diseñada para pasillos y espacios reducidos.', 2800.00, 80, 0, TRUE),
-('Planchón mediano', 'Plataforma metálica antideslizante de 2.00m de longitud con ganchos de seguridad.', 1500.00, 200, 0, TRUE),
-('Cruceta corta', 'Tijera/cruceta metálica de estabilización para andamios angostos.', 800.00, 160, 0, TRUE),
-('Cruceta mediana', 'Tijera/cruceta metálica de estabilización para andamios de ancho estándar.', 1000.00, 300, 0, TRUE);
+-- precio_base_extra: precio cuando el ítem se agrega como accesorio extra (es_producto_extra=TRUE).
+-- Crucetas: siempre incluidas sin costo adicional (0 en ambos casos).
+-- Planchones: van en el conjunto base (0), pero si el cliente pide más planchones = $8.000 c/u.
+-- Secciones de andamio: $15.000 por sección, sin importar si es extra o no.
+
+INSERT INTO producto (nombre_producto, descripcion_producto, precio_base_producto, precio_base_extra, stock_total, stock_alquilado, estado_registro) VALUES
+('Sección de andamio ancha',   'Estructura tubular estándar de 1.50m x 1.50m. Ideal para fachadas.',                           15000.00, 15000.00, 150, 0, TRUE),
+('Sección de andamio angosta', 'Estructura de 1.50m x 0.80m. Diseñada para pasillos y espacios reducidos.',                   15000.00, 15000.00,  80, 0, TRUE),
+('Planchón mediano',            'Plataforma metálica antideslizante de 2.00m de longitud con ganchos de seguridad.',              0.00,      8000.00, 200, 0, TRUE),
+('Cruceta corta',               'Tijera/cruceta metálica de estabilización para andamios angostos.',                                 0.00,        0.00, 160, 0, TRUE),
+('Cruceta mediana',             'Tijera/cruceta metálica de estabilización para andamios de ancho estándar.',                    0.00,        0.00, 300, 0, TRUE);
 

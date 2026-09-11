@@ -23,6 +23,7 @@ SELECT
     stock_alquilado,
     (stock_total - stock_alquilado) AS stock_disponible_bodega,
     precio_base_producto,
+    precio_base_extra,
     estado_registro
 FROM producto
 WHERE estado_registro = TRUE
@@ -39,6 +40,7 @@ SELECT
     nombre_producto,
     descripcion_producto,
     precio_base_producto,
+    precio_base_extra,
     stock_total,
     estado_registro
 FROM producto
@@ -94,19 +96,17 @@ ORDER BY a.id_alquiler DESC;
 
 SELECT 
     l.id_logistica_alquiler,
-    l.id_alquiler,
+    la.id_alquiler,
     l.id_usuario_logistico AS documento_logistico,
     CONCAT(u.nombres_usuario, ' ', u.apellidos_usuario) AS nombre_empleado,
+    l.tipo_movimiento,
     l.descripcion_gasto_logistico,
     l.valor_gasto_logistico,
-    CASE 
-        WHEN l.es_recogida = FALSE THEN 'Despacho Inicial'
-        ELSE 'Recogida en Obra'
-    END AS tipo_operacion_logistica,
     l.observaciones_logistica_alquiler,
     l.fecha_creacion AS fecha_movimiento
 FROM logistica_alquiler l
 JOIN usuario u ON l.id_usuario_logistico = u.id_usuario
+LEFT JOIN logistica_alquiler_alquiler la ON l.id_logistica_alquiler = la.id_logistica_alquiler
 WHERE l.estado_registro = TRUE
 ORDER BY l.fecha_creacion DESC;
 

@@ -1,0 +1,142 @@
+.appshell {
+  display: flex;
+  min-height: 100svh;
+  background: var(--color-bg-app);
+}
+
+.appshell-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--color-bg-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appshell-logo {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--color-brand-fg);
+  margin-bottom: var(--space-4);
+}
+
+.appshell-navlink {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-fg-default);
+  text-decoration: none;
+  font-weight: 400;
+  transition: background-color 0.15s ease;
+}
+
+.appshell-navlink:hover {
+  background: var(--color-brand-muted);
+}
+
+.appshell-navlink-active {
+  background: var(--color-brand-muted);
+  color: var(--color-brand-fg);
+  font-weight: 600;
+}
+
+.appshell-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.appshell-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+}
+
+.appshell-content {
+  padding: var(--space-8);
+}
+
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--color-brand-solid);
+}
+
+.theme-toggle-btn:focus-visible,
+.appshell-menu-btn:focus-visible,
+.appshell-navlink:focus-visible {
+  outline: none;
+  border-color: var(--color-brand-solid);
+  box-shadow: 0 0 0 3px var(--color-brand-muted);
+}
+
+.appshell-menu-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-fg-default);
+  cursor: pointer;
+  font-size: 18px;
+  margin-right: var(--space-3);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.appshell-menu-btn:hover {
+  border-color: var(--color-brand-solid);
+  background: var(--color-brand-muted);
+}
+
+.appshell-overlay {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .appshell-menu-btn {
+    display: inline-flex;
+  }
+
+  .appshell-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(280px, 75%);
+    z-index: 30;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
+  }
+
+  .appshell-sidebar-open {
+    transform: translateX(0);
+  }
+
+  .appshell-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: var(--color-overlay);
+    z-index: 20;
+  }
+}

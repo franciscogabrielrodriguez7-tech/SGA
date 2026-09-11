@@ -1,0 +1,12 @@
+/* ============================================================================
+   index.css
+   ----------------------------------------------------------------------------
+   Punto de entrada de estilos. Ya no depende de Chakra UI / Emotion: todo
+   el sistema de diseño vive en src/styles/ (tokens, reset, layout,
+   componentes), en CSS puro.
+   ============================================================================ */
+
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/layout.css";
+@import "./styles/components.css";

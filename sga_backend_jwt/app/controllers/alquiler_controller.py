@@ -1,11 +1,11 @@
-from fastapi import HTTPException
 from sqlalchemy import text, or_, func
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, contains_eager
 from sqlalchemy.exc import DBAPIError
 
 from app.models.alquiler import Alquiler
 from app.models.usuario import Usuario
 from app.models.detalle_alquiler import DetalleAlquiler
+from app.models.producto import Producto
 from app.models.logistica_alquiler import LogisticaAlquiler
 from app.models.logistica_alquiler_alquiler import LogisticaAlquilerAlquiler
 from app.utils.audit_context import set_audit_context
@@ -17,7 +17,6 @@ from app.utils.tiempo import (
     enriquecer_temporal,
 )
 from app.utils.unidades import validar_tiempo_alquiler_para_productos
-from app.controllers.detalle_alquiler_controller import _recalcular_precio_alquiler
 
 
 # =========================================================
@@ -63,25 +62,26 @@ def _formatear_alquiler(alquiler: Alquiler) -> dict:
 
 
 def _obtener_detalles(db: Session, id_alquiler: int):
-
-    sql = text("""
-        SELECT
-            d.id_detalle_alquiler,
-            d.id_producto,
-            p.nombre_producto,
-            d.cantidad_productos,
-            d.precio_conjunto,
-            d.es_producto_extra,
-            d.estado_registro
-        FROM detalle_alquiler d
-        INNER JOIN producto p ON d.id_producto = p.id_producto
-        WHERE d.id_alquiler = :id_alquiler
-        ORDER BY d.id_detalle_alquiler
-    """)
-
-    resultado = db.execute(sql, {"id_alquiler": id_alquiler})
-
-    return [dict(row._mapping) for row in resultado]
+    """Devuelve las líneas de producto del alquiler con nombre de producto incluido."""
+    filas = (
+        db.query(DetalleAlquiler, Producto.nombre_producto)
+        .join(Producto, DetalleAlquiler.id_producto == Producto.id_producto)
+        .filter(DetalleAlquiler.id_alquiler == id_alquiler)
+        .order_by(DetalleAlquiler.id_detalle_alquiler)
+        .all()
+    )
+    return [
+        {
+            "id_detalle_alquiler": d.id_detalle_alquiler,
+            "id_producto": d.id_producto,
+            "nombre_producto": nombre,
+            "cantidad_productos": d.cantidad_productos,
+            "precio_conjunto": d.precio_conjunto,
+            "es_producto_extra": d.es_producto_extra,
+            "estado_registro": d.estado_registro,
+        }
+        for d, nombre in filas
+    ]
 
 
 # =========================================================
@@ -123,18 +123,13 @@ def crear_alquiler(db: Session, datos, usuario_actual):
     ids_producto = [linea.id_producto for linea in datos.detalles]
 
     if ids_producto:
-        filas = db.execute(
-            text(
-                "SELECT unidad_minima_alquiler FROM producto "
-                "WHERE id_producto = ANY(:ids)"
-            ),
-            {"ids": ids_producto},
-        ).fetchall()
-
-        unidades_minimas = [fila[0] for fila in filas]
-
+        unidades_minimas = (
+            db.query(Producto.unidad_minima_alquiler)
+            .filter(Producto.id_producto.in_(ids_producto))
+            .all()
+        )
         validar_tiempo_alquiler_para_productos(
-            datos.tiempo_alquiler_dias, unidades_minimas
+            datos.tiempo_alquiler_dias, [fila[0] for fila in unidades_minimas]
         )
 
     try:
@@ -358,11 +353,15 @@ def cancelar_alquiler(db: Session, id_alquiler: int, usuario_actual):
 # =========================================================
 
 def buscar_alquileres(db: Session, cliente: str = None, barrio: str = None, numero: int = None):
-    # Removido verificar_y_actualizar_vencidos(db) por eficiencia
-    query = db.query(Alquiler).options(
-        joinedload(Alquiler.cliente),
-        joinedload(Alquiler.creador)
-    ).join(Alquiler.cliente)
+    # Removido verificar_y_actualizar_vencidos(db) por eficiencia.
+    # Se hace join explícito con Usuario (alias cliente_alias) para poder
+    # filtrar por nombre. Se usa contains_eager en lugar de joinedload para
+    # evitar el JOIN duplicado que causaba resultados incorrectos.
+    cliente_alias = db.query(Alquiler).join(
+        Alquiler.cliente
+    ).options(contains_eager(Alquiler.cliente), joinedload(Alquiler.creador))
+
+    query = cliente_alias
 
     if cliente:
         patron = f"%{cliente}%"
@@ -370,7 +369,7 @@ def buscar_alquileres(db: Session, cliente: str = None, barrio: str = None, nume
             or_(
                 Usuario.nombres_usuario.ilike(patron),
                 Usuario.apellidos_usuario.ilike(patron),
-                Usuario.id_usuario.ilike(patron)
+                Usuario.id_usuario.ilike(patron),
             )
         )
 
@@ -472,17 +471,16 @@ def renovar_alquiler(db: Session, id_alquiler: int, dias: int, usuario_actual, p
 
     # Misma regla de unidad_minima_alquiler que en la creación: los
     # días de renovación deben ser compatibles con la unidad más
-    # restrictiva de los productos YA incluidos en este alquiler (ver
-    # app/utils/unidades.py). No basta con que la UI ya lo restrinja.
-    unidades_minimas = db.execute(
-        text("""
-            SELECT p.unidad_minima_alquiler
-            FROM detalle_alquiler d
-            INNER JOIN producto p ON d.id_producto = p.id_producto
-            WHERE d.id_alquiler = :id_alquiler AND d.estado_registro = TRUE
-        """),
-        {"id_alquiler": id_alquiler},
-    ).fetchall()
+    # restrictiva de los productos YA incluidos en este alquiler.
+    unidades_minimas = (
+        db.query(Producto.unidad_minima_alquiler)
+        .join(DetalleAlquiler, DetalleAlquiler.id_producto == Producto.id_producto)
+        .filter(
+            DetalleAlquiler.id_alquiler == id_alquiler,
+            DetalleAlquiler.estado_registro == True,
+        )
+        .all()
+    )
 
     validar_tiempo_alquiler_para_productos(dias, [fila[0] for fila in unidades_minimas])
 
@@ -628,19 +626,20 @@ def registrar_recogida(db: Session, id_alquiler: int, datos, usuario_actual):
         return None
 
     # RN-LOG-04: no se puede recoger sin haber entregado antes.
-    entrega_previa = db.execute(
-        text("""
-            SELECT 1
-            FROM logistica_alquiler l
-            INNER JOIN logistica_alquiler_alquiler laa
-                ON l.id_logistica_alquiler = laa.id_logistica_alquiler
-            WHERE laa.id_alquiler = :id_alquiler
-              AND l.tipo_movimiento = 'ENTREGA'
-              AND l.estado_registro = TRUE
-            LIMIT 1
-        """),
-        {"id_alquiler": id_alquiler},
-    ).first()
+    # Se verifica vía ORM a través de la tabla puente.
+    entrega_previa = (
+        db.query(LogisticaAlquiler)
+        .join(
+            LogisticaAlquilerAlquiler,
+            LogisticaAlquilerAlquiler.id_logistica_alquiler == LogisticaAlquiler.id_logistica_alquiler,
+        )
+        .filter(
+            LogisticaAlquilerAlquiler.id_alquiler == id_alquiler,
+            LogisticaAlquiler.tipo_movimiento == "ENTREGA",
+            LogisticaAlquiler.estado_registro == True,
+        )
+        .first()
+    )
 
     if not entrega_previa:
         raise ValueError(

@@ -6,6 +6,7 @@ import type { RolUsuario, TipoDocumento, Usuario } from "../../interfaces/Usuari
 import { toaster } from "../../components/ui/toaster";
 import { useAuth } from "../../context/AuthContext";
 import { SOLO_ADMIN, tienePermiso } from "../../utils/permisos";
+import { phoneValidation } from "../../utils/validations";
 
 // Solo los 3 roles internos son actores reales de esta pantalla de
 // administración: 'cliente' se gestiona desde /clientes (ver
@@ -50,6 +51,16 @@ export function Usuarios() {
       toaster.create({
         title: "Datos incompletos",
         description: "Documento, nombres, apellidos y teléfono son obligatorios.",
+        type: "warning",
+      });
+      return;
+    }
+
+    const valRes = phoneValidation.safeParse(telefono);
+    if (!valRes.success) {
+      toaster.create({
+        title: "Teléfono inválido",
+        description: valRes.error.errors[0].message,
         type: "warning",
       });
       return;

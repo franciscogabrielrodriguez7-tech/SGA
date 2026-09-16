@@ -28,18 +28,21 @@ function TarjetaAlquiler({ alquiler }: { alquiler: Alquiler }) {
 export function Dashboard() {
   const [proximosAVencer, setProximosAVencer] = useState<Alquiler[]>([]);
   const [pendientesEntrega, setPendientesEntrega] = useState<Alquiler[]>([]);
+  const [vencidos, setVencidos] = useState<Alquiler[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     async function cargar() {
       try {
-        const [vencer, entrega] = await Promise.all([
+        const [vencer, entrega, vencidosList] = await Promise.all([
           alquileresApi.proximosAVencer(2),
           alquileresApi.pendientesEntrega(),
+          alquileresApi.listar({ estado_alquiler: "vencido" }),
         ]);
 
         setProximosAVencer(vencer);
         setPendientesEntrega(entrega);
+        setVencidos(vencidosList);
       } catch (error) {
         const mensaje =
           error instanceof ApiError ? error.message : "Error al cargar el panel";
@@ -60,9 +63,27 @@ export function Dashboard() {
         <p className="text-muted">Resumen operativo de alquileres.</p>
       </div>
 
+      {/* Vencidos */}
+      <div>
+        <h2 className="heading-md" style={{ marginBottom: 12, color: "var(--color-danger)" }}>
+          Vencidos sin recogida
+        </h2>
+
+        {!cargando && vencidos.length === 0 && (
+          <p className="text-muted">No hay alquileres vencidos pendientes.</p>
+        )}
+
+        <div className="grid grid-cols-1 grid-cols-2-md grid-cols-3-lg">
+          {vencidos.map((a) => (
+            <TarjetaAlquiler key={a.id_alquiler} alquiler={a} />
+          ))}
+        </div>
+      </div>
+
+      {/* Próximos a vencer */}
       <div>
         <h2 className="heading-md" style={{ marginBottom: 12 }}>
-          Próximos a vencer (2 días) — RN-VEN-01
+          Próximos a vencer (2 días)
         </h2>
 
         {!cargando && proximosAVencer.length === 0 && (
@@ -76,6 +97,7 @@ export function Dashboard() {
         </div>
       </div>
 
+      {/* Pendientes de entrega */}
       <div>
         <h2 className="heading-md" style={{ marginBottom: 12 }}>
           Pendientes por entregar

@@ -9,6 +9,7 @@ from sqlalchemy import (
     ForeignKey,
     text
 )
+from sqlalchemy.orm import relationship
 
 from app.config.database import Base
 
@@ -28,6 +29,9 @@ class Alquiler(Base):
     id_usuario_cliente = Column(
         String(20), ForeignKey("usuario.id_usuario"), nullable=False
     )
+
+    creador = relationship("Usuario", foreign_keys=[id_usuario_creador])
+    cliente = relationship("Usuario", foreign_keys=[id_usuario_cliente])
 
     estado_alquiler = Column(String(30), nullable=False, server_default="pendiente")
 

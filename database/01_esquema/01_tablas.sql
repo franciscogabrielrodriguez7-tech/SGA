@@ -347,6 +347,11 @@ WHERE estado_registro IS TRUE;
 CREATE INDEX idx_alquiler_fecha_inicio 
 ON alquiler (fecha_inicio);
 
+-- Optimiza drásticamente la detección de vencimientos calculados al vuelo
+CREATE INDEX idx_alquiler_fecha_vencimiento 
+ON alquiler ((fecha_inicio + tiempo_alquiler_dias - 1));
+
+
 
 -- ---------------------------------------------------------
 -- TABLA: usuario

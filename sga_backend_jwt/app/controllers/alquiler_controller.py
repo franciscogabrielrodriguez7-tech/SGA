@@ -1,9 +1,10 @@
 from fastapi import HTTPException
-from sqlalchemy import text
-from sqlalchemy.orm import Session
+from sqlalchemy import text, or_, func
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import DBAPIError
 
 from app.models.alquiler import Alquiler
+from app.models.usuario import Usuario
 from app.models.detalle_alquiler import DetalleAlquiler
 from app.models.logistica_alquiler import LogisticaAlquiler
 from app.models.logistica_alquiler_alquiler import LogisticaAlquilerAlquiler
@@ -35,32 +36,30 @@ TRANSICIONES_VALIDAS = {
 ESTADOS_FINALES = {"terminado", "cancelado"}
 
 
-SELECT_ALQUILER_HEADER = f"""
-    SELECT
-        a.id_alquiler,
-        a.estado_alquiler,
-        a.barrio,
-        a.direccion,
-        a.deposito,
-        a.precio_alquiler,
-        a.fecha_inicio,
-        a.tiempo_alquiler_dias,
-        {FECHA_VENCIMIENTO_SQL} AS fecha_vencimiento,
-        a.se_lleva,
-        a.se_recoge,
-        a.estado_registro,
-        a.fecha_creacion,
-        a.fecha_actualizacion,
-        a.id_usuario_creador,
-        creador.nombres_usuario AS nombres_creador,
-        creador.apellidos_usuario AS apellidos_creador,
-        a.id_usuario_cliente,
-        cliente.nombres_usuario AS nombres_cliente,
-        cliente.apellidos_usuario AS apellidos_cliente
-    FROM alquiler a
-    INNER JOIN usuario creador ON a.id_usuario_creador = creador.id_usuario
-    INNER JOIN usuario cliente ON a.id_usuario_cliente = cliente.id_usuario
-"""
+def _formatear_alquiler(alquiler: Alquiler) -> dict:
+    d = {
+        "id_alquiler": alquiler.id_alquiler,
+        "estado_alquiler": alquiler.estado_alquiler,
+        "barrio": alquiler.barrio,
+        "direccion": alquiler.direccion,
+        "deposito": alquiler.deposito,
+        "precio_alquiler": alquiler.precio_alquiler,
+        "fecha_inicio": alquiler.fecha_inicio,
+        "tiempo_alquiler_dias": alquiler.tiempo_alquiler_dias,
+        "fecha_vencimiento": calcular_fecha_vencimiento(alquiler.fecha_inicio, alquiler.tiempo_alquiler_dias),
+        "se_lleva": alquiler.se_lleva,
+        "se_recoge": alquiler.se_recoge,
+        "estado_registro": alquiler.estado_registro,
+        "fecha_creacion": alquiler.fecha_creacion,
+        "fecha_actualizacion": alquiler.fecha_actualizacion,
+        "id_usuario_creador": alquiler.id_usuario_creador,
+        "nombres_creador": alquiler.creador.nombres_usuario if alquiler.creador else None,
+        "apellidos_creador": alquiler.creador.apellidos_usuario if alquiler.creador else None,
+        "id_usuario_cliente": alquiler.id_usuario_cliente,
+        "nombres_cliente": alquiler.cliente.nombres_usuario if alquiler.cliente else None,
+        "apellidos_cliente": alquiler.cliente.apellidos_usuario if alquiler.cliente else None,
+    }
+    return enriquecer_temporal(d)
 
 
 def _obtener_detalles(db: Session, id_alquiler: int):
@@ -195,20 +194,19 @@ def crear_alquiler(db: Session, datos, usuario_actual):
 # =========================================================
 
 def obtener_alquiler(db: Session, id_alquiler: int):
+    # Removido verificar_y_actualizar_vencidos(db) por eficiencia
+    alquiler = db.query(Alquiler).options(
+        joinedload(Alquiler.cliente),
+        joinedload(Alquiler.creador)
+    ).filter(Alquiler.id_alquiler == id_alquiler).first()
 
-    verificar_y_actualizar_vencidos(db)
-
-    sql = text(SELECT_ALQUILER_HEADER + " WHERE a.id_alquiler = :id_alquiler")
-
-    resultado = db.execute(sql, {"id_alquiler": id_alquiler}).first()
-
-    if not resultado:
+    if not alquiler:
         return None
 
-    alquiler = enriquecer_temporal(dict(resultado._mapping))
-    alquiler["detalles"] = _obtener_detalles(db, id_alquiler)
+    dic_alquiler = _formatear_alquiler(alquiler)
+    dic_alquiler["detalles"] = _obtener_detalles(db, id_alquiler)
 
-    return alquiler
+    return dic_alquiler
 
 
 # =========================================================
@@ -216,26 +214,21 @@ def obtener_alquiler(db: Session, id_alquiler: int):
 # =========================================================
 
 def obtener_alquileres(db: Session, estado_alquiler: str = None, id_usuario_cliente: str = None):
-
-    verificar_y_actualizar_vencidos(db)
-
-    sql = SELECT_ALQUILER_HEADER + " WHERE 1=1"
-
-    parametros = {}
+    # Removido verificar_y_actualizar_vencidos(db) por eficiencia
+    query = db.query(Alquiler).options(
+        joinedload(Alquiler.cliente),
+        joinedload(Alquiler.creador)
+    )
 
     if estado_alquiler:
-        sql += " AND a.estado_alquiler = :estado_alquiler"
-        parametros["estado_alquiler"] = estado_alquiler
+        query = query.filter(Alquiler.estado_alquiler == estado_alquiler)
 
     if id_usuario_cliente:
-        sql += " AND a.id_usuario_cliente = :id_usuario_cliente"
-        parametros["id_usuario_cliente"] = id_usuario_cliente
+        query = query.filter(Alquiler.id_usuario_cliente == id_usuario_cliente)
 
-    sql += " ORDER BY a.fecha_creacion DESC"
+    alquileres = query.order_by(Alquiler.fecha_creacion.desc()).all()
 
-    resultado = db.execute(text(sql), parametros)
-
-    return [enriquecer_temporal(dict(row._mapping)) for row in resultado]
+    return [_formatear_alquiler(a) for a in alquileres]
 
 
 # =========================================================
@@ -365,36 +358,31 @@ def cancelar_alquiler(db: Session, id_alquiler: int, usuario_actual):
 # =========================================================
 
 def buscar_alquileres(db: Session, cliente: str = None, barrio: str = None, numero: int = None):
-
-    verificar_y_actualizar_vencidos(db)
-
-    sql = SELECT_ALQUILER_HEADER + " WHERE 1=1"
-
-    parametros = {}
+    # Removido verificar_y_actualizar_vencidos(db) por eficiencia
+    query = db.query(Alquiler).options(
+        joinedload(Alquiler.cliente),
+        joinedload(Alquiler.creador)
+    ).join(Alquiler.cliente)
 
     if cliente:
-        sql += """
-            AND (
-                cliente.nombres_usuario ILIKE :cliente
-                OR cliente.apellidos_usuario ILIKE :cliente
-                OR cliente.id_usuario ILIKE :cliente
+        patron = f"%{cliente}%"
+        query = query.filter(
+            or_(
+                Usuario.nombres_usuario.ilike(patron),
+                Usuario.apellidos_usuario.ilike(patron),
+                Usuario.id_usuario.ilike(patron)
             )
-        """
-        parametros["cliente"] = f"%{cliente}%"
+        )
 
     if barrio:
-        sql += " AND a.barrio ILIKE :barrio"
-        parametros["barrio"] = f"%{barrio}%"
+        query = query.filter(Alquiler.barrio.ilike(f"%{barrio}%"))
 
     if numero:
-        sql += " AND a.id_alquiler = :numero"
-        parametros["numero"] = numero
+        query = query.filter(Alquiler.id_alquiler == numero)
 
-    sql += " ORDER BY a.fecha_creacion DESC"
+    alquileres = query.order_by(Alquiler.fecha_creacion.desc()).all()
 
-    resultado = db.execute(text(sql), parametros)
-
-    return [enriquecer_temporal(dict(row._mapping)) for row in resultado]
+    return [_formatear_alquiler(a) for a in alquileres]
 
 
 # =========================================================
@@ -402,22 +390,23 @@ def buscar_alquileres(db: Session, cliente: str = None, barrio: str = None, nume
 # =========================================================
 
 def alquileres_proximos_a_vencer(db: Session, dias: int = 2):
-
-    verificar_y_actualizar_vencidos(db)
-
-    sql = text(
-        SELECT_ALQUILER_HEADER
-        + f"""
-            WHERE a.estado_alquiler = 'activo'
-              AND {FECHA_VENCIMIENTO_SQL}
-                  BETWEEN CURRENT_DATE AND (CURRENT_DATE + (:dias || ' days')::interval)
-            ORDER BY fecha_vencimiento ASC
-        """
+    # Removido verificar_y_actualizar_vencidos(db) por eficiencia
+    fecha_vencimiento_expr = func.date(Alquiler.fecha_inicio + Alquiler.tiempo_alquiler_dias - 1)
+    
+    query = db.query(Alquiler).options(
+        joinedload(Alquiler.cliente),
+        joinedload(Alquiler.creador)
+    ).filter(
+        Alquiler.estado_alquiler == 'activo',
+        fecha_vencimiento_expr.between(
+            func.current_date(), 
+            func.current_date() + text(f"INTERVAL '{dias} days'")
+        )
     )
 
-    resultado = db.execute(sql, {"dias": dias})
+    alquileres = query.order_by(fecha_vencimiento_expr.asc()).all()
 
-    return [enriquecer_temporal(dict(row._mapping)) for row in resultado]
+    return [_formatear_alquiler(a) for a in alquileres]
 
 
 # =========================================================
@@ -425,18 +414,21 @@ def alquileres_proximos_a_vencer(db: Session, dias: int = 2):
 # =========================================================
 
 def alquileres_pendientes_entrega(db: Session, solo_transporte: bool = False):
-
-    verificar_y_actualizar_vencidos(db)
-
+    # Removido verificar_y_actualizar_vencidos(db) por eficiencia
     if not solo_transporte:
         return obtener_alquileres(db, estado_alquiler="pendiente")
 
-    sql = SELECT_ALQUILER_HEADER + " WHERE a.estado_alquiler = 'pendiente' AND a.se_lleva = TRUE"
-    sql += " ORDER BY a.fecha_creacion DESC"
+    query = db.query(Alquiler).options(
+        joinedload(Alquiler.cliente),
+        joinedload(Alquiler.creador)
+    ).filter(
+        Alquiler.estado_alquiler == 'pendiente',
+        Alquiler.se_lleva == True
+    ).order_by(Alquiler.fecha_creacion.desc())
 
-    resultado = db.execute(text(sql))
+    alquileres = query.all()
 
-    return [enriquecer_temporal(dict(row._mapping)) for row in resultado]
+    return [_formatear_alquiler(a) for a in alquileres]
 
 
 # =========================================================

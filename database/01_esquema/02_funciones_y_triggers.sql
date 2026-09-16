@@ -405,8 +405,15 @@ DECLARE
     v_stock_total INT;
     v_stock_alquilado INT;
     v_stock_disponible INT;
+    v_estado_actual VARCHAR(30);
 BEGIN
-    -- A. Verificar disponibilidad real en bodega
+    -- A. Verificar que el estado no sea 'cancelado'
+    SELECT estado_alquiler INTO v_estado_actual FROM alquiler WHERE id_alquiler = p_id_alquiler;
+    IF v_estado_actual = 'cancelado' THEN
+        RAISE EXCEPTION 'Operación denegada: No se puede reabrir un alquiler que fue cancelado (anulado). Solo se pueden reabrir contratos terminados o recogidos.';
+    END IF;
+
+    -- B. Verificar disponibilidad real en bodega
     FOR r IN (
         SELECT id_producto, cantidad_productos 
         FROM detalle_alquiler 

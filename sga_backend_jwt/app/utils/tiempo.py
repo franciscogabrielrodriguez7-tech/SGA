@@ -38,8 +38,7 @@ ZONA_BOGOTA = ZoneInfo("America/Bogota")
 
 def _plantilla_fecha_vencimiento(prefijo: str = "") -> str:
     return (
-        f"({prefijo}fecha_inicio + ({prefijo}tiempo_alquiler_dias - 1) "
-        "* INTERVAL '1 day')::date"
+        f"({prefijo}fecha_inicio + {prefijo}tiempo_alquiler_dias - 1)"
     )
 
 

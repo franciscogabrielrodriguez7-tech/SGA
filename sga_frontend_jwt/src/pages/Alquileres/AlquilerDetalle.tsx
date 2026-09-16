@@ -66,7 +66,7 @@ export function AlquilerDetalle() {
       (total, d) =>
         total +
         calcularPrecioConjunto(
-          d.precio_base_producto,
+          d.es_producto_extra ? d.precio_base_extra : d.precio_base_producto,
           d.unidad_minima_alquiler,
           d.cantidad_productos,
           diasRenovacion,
@@ -320,7 +320,7 @@ export function AlquilerDetalle() {
           Cambiar estado
         </h2>
 
-        <div className="hstack gap-3">
+        <div className="hstack gap-3 flex-wrap">
           <select
             className="input"
             style={{ width: "auto" }}

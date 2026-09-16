@@ -1,182 +1,153 @@
-# SGA Backend JWT — v2 (esquema con auditoría centralizada)
+# SGA — Backend (FastAPI + SQLAlchemy + JWT)
 
-Backend FastAPI + SQLAlchemy + Pydantic para el Sistema de Gestión de
-Alquileres de Andamios (SGA), construido desde cero contra el nuevo
-esquema PostgreSQL con auditoría centralizada, validado con una base
-de datos PostgreSQL real (no simulada).
+API REST del Sistema de Gestión de Alquileres de Andamios. Construida con Python, FastAPI y PostgreSQL.
 
-## 1. Puesta en marcha
+---
+
+## Requisitos
+
+- Python 3.11 o superior
+- PostgreSQL 14 o superior (con la base de datos `sga_db` ya creada y los scripts SQL ejecutados — ver `README.md` raíz)
+- `pip` (viene incluido con Python)
+
+---
+
+## Instalación paso a paso
+
+### 1. Ir a la carpeta del backend
 
 ```bash
+cd sga_backend_jwt
+```
+
+### 2. Crear el entorno virtual de Python
+
+Un entorno virtual aísla las dependencias del proyecto para que no choquen con otras instalaciones de Python en tu máquina.
+
+```bash
+# En Windows
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# En macOS / Linux
+python3 -m venv venv
+```
+
+### 3. Activar el entorno virtual
+
+Debes activarlo **cada vez** que abras una nueva terminal para trabajar con el proyecto.
+
+```bash
+# En Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# En Windows (CMD)
+.\venv\Scripts\activate.bat
+
+# En macOS / Linux
+source venv/bin/activate
+```
+
+Sabrás que está activo porque el prompt de la terminal mostrará `(venv)` al inicio.
+
+### 4. Instalar las dependencias
+
+```bash
 pip install -r requirements.txt
+```
 
+### 5. Configurar las variables de entorno
+
+Copia el archivo de ejemplo y edítalo con tus datos reales:
+
+```bash
+# En Windows
+copy .env.example .env
+
+# En macOS / Linux
 cp .env.example .env
-# edita .env: DATABASE_URL, JWT_SECRET_KEY
+```
 
-# Cargar el esquema (orden obligatorio):
-psql -d TU_BASE_DE_DATOS -f database/01_tablas.sql
-psql -d TU_BASE_DE_DATOS -f database/02_funciones_y_triggers.sql
-psql -d TU_BASE_DE_DATOS -f database/03_seed_data.sql   # opcional, datos de prueba
+Luego abre `.env` con cualquier editor de texto y ajusta los valores:
 
+```env
+# Cadena de conexión a PostgreSQL
+# Formato: postgresql+psycopg2://USUARIO:CONTRASEÑA@HOST:PUERTO/NOMBRE_BD
+DATABASE_URL=postgresql+psycopg2://postgres:TU_CONTRASEÑA@localhost:5432/sga_db
+
+# Clave secreta para firmar los tokens JWT
+# Genera una clave segura ejecutando en la terminal:
+#   python -c "import secrets; print(secrets.token_hex(32))"
+JWT_SECRET_KEY=cambia-esto-por-una-clave-secreta-larga-y-aleatoria
+
+# Algoritmo de firma JWT (no cambiar salvo que sepas lo que haces)
+JWT_ALGORITHM=HS256
+
+# Tiempo de expiración del token en minutos (480 = 8 horas)
+JWT_EXPIRE_MINUTES=480
+```
+
+> ⚠️ Nunca subas el archivo `.env` real a GitHub. El `.gitignore` ya lo excluye.
+
+### 6. Sincronizar Alembic (control de migraciones)
+
+Como ya ejecutaste los scripts SQL directamente en el Paso 2 del README principal, la base de datos ya está en su estado más reciente. Solo debes decirle a Alembic que lo reconozca como punto de partida:
+
+```bash
+alembic stamp head
+```
+
+### 7. Iniciar el servidor
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-Swagger: `http://localhost:8000/docs` — usa el botón **Authorize** con
-el `access_token` que devuelve `POST /api/sga/auth/login`.
+El servidor quedará disponible en `http://localhost:8000`.
 
-**Usuarios de prueba (seed)** — contraseña para todos: `Sga2026*`
-(ver nota en `database/03_seed_data.sql`):
-- admin: teléfono `3000000000`
-- encargado_facturacion: teléfono `3101234567`
-- encargado_logistico: teléfono `3151234567`
+La documentación interactiva de la API (Swagger UI) estará en: `http://localhost:8000/docs`
 
-## 2. Decisiones de diseño flagged explícitamente
+---
 
-Estas son correcciones o decisiones que tomé sobre el esquema
-entregado y que quiero que revises antes de dar esto por definitivo:
-
-### 2.1 Bug bloqueante corregido en `01_tablas.sql`
-`CREATE INDEX idx_usuario_rol ... WHERE estado_usuario IS TRUE` hacía
-fallar la carga completa del esquema porque `usuario` no tiene columna
-`estado_usuario` (la auditoría centralizada la reemplazó por
-`estado_registro`, igual que en las demás tablas). **Corregido** a
-`estado_registro`. Verificado con `psql` contra una instancia
-PostgreSQL real: el esquema corregido carga sin errores.
-
-### 2.2 `auditoria_sistema.id_usuario_accion` nunca se poblaba
-El trigger `fn_auditar_cambios()` insertaba en `auditoria_sistema`
-pero nunca incluía `id_usuario_accion` en el `INSERT` — quedaba
-siempre `NULL`. Esto contradice la regla de negocio de "auditoría
-inyectada desde el JWT, nunca confiada al payload". Un trigger de
-PostgreSQL no puede leer un JWT directamente, así que agregué el
-mecanismo mínimo necesario:
-
-- El trigger ahora lee `current_setting('app.usuario_actual', true)`.
-- El backend ejecuta `SET LOCAL app.usuario_actual = '<id_usuario>'`
-  al inicio de cada transacción de escritura, ANTES del primer
-  `INSERT`/`UPDATE`/`DELETE` (ver `app/utils/audit_context.py`,
-  `set_audit_context()`, llamado desde cada función de controller que
-  escribe en una tabla auditada).
-- `SET LOCAL` (no `SET`): el valor solo vive dentro de la transacción
-  actual y se descarta automáticamente al hacer COMMIT/ROLLBACK, así
-  que nunca puede filtrarse hacia otra request que reutilice la misma
-  conexión del pool.
-
-Verificado con `psql`: `BEGIN; SET LOCAL app.usuario_actual='...';
-UPDATE ...; COMMIT;` deja el `id_usuario_accion` correcto en
-`auditoria_sistema`.
-
-### 2.3 Fórmula de fecha de vencimiento
-`fecha_vencimiento = fecha_inicio + (tiempo_alquiler_dias - 1) días`.
-El esquema unificó el tiempo de alquiler a días para ganar
-flexibilidad. Se mantiene el mismo principio ya usado antes para la
-fórmula semanal: el día de inicio cuenta como el primer día del
-alquiler, así que un alquiler de 15 días que empieza el 01/09 vence el
-15/09 (no el 16/09). Centralizada en `app/utils/tiempo.py` para que
-SQL y Python nunca puedan desincronizarse.
-
-### 2.4 Historial y renovaciones ahora son reales
-Con la auditoría centralizada, `GET /alquileres/{id}/historial` y
-`GET /renovaciones/{id}` consultan `auditoria_sistema` de verdad
-(antes, sin esta tabla, solo se podía devolver el estado actual). No
-existe una tabla `renovacion` independiente: una renovación es un
-evento `UPDATE` sobre `alquiler` que aumenta `tiempo_alquiler_dias`;
-`POST /alquileres/{id}/renovaciones` devuelve el alquiler actualizado
-más el campo `id_auditoria_renovacion`, que es justamente el `id` que
-espera `GET /renovaciones/{id}`.
-
-### 2.5 Módulo `/clientes` separado de `/usuarios`
-Ambos operan sobre la misma tabla `usuario` (`rol_usuario='cliente'`
-vs. roles de personal). `/clientes` nunca acepta `rol_usuario` en el
-payload — el controller lo fuerza siempre a `'cliente'`. Un cliente
-registrado en punto de venta no recibe contraseña (queda `NULL`, tal
-como lo permite el esquema).
-
-### 2.6 `GET /usuarios` con jerarquía de roles
-Un `admin` puede listar todo el personal sin filtro. Un
-`encargado_facturacion` o `encargado_logistico` **solo** puede
-consultar `GET /usuarios?rol_usuario=encargado_logistico` (para, por
-ejemplo, asignar una entrega). Cualquier otro uso del endpoint por
-esos roles devuelve 403.
-
-### 2.7 Reconciliación del vencimiento — verificada en dos capas independientes
-Se comprobó explícitamente, contra PostgreSQL real, que un alquiler
-`activo` pasa a `vencido` automáticamente por **dos vías
-independientes** (ninguna depende de la otra):
-
-1. **Por acción**: `verificar_y_actualizar_vencidos()` corre al
-   inicio de las 11 funciones de `alquiler_controller.py` que leen o
-   modifican alquileres (crear, consultar, listar, actualizar, cambiar
-   estado, buscar, próximos a vencer, pendientes de entrega, renovar,
-   registrar entrega, registrar recogida). Prueba real: se forzó
-   `fecha_inicio` de un alquiler `activo` 20 días atrás directamente
-   en la BD (sin pasar por el backend) y una simple llamada a
-   `GET /alquileres/{id}` lo dejó en `vencido`, persistido en la BD.
-2. **Por scheduler diario**: `app/utils/scheduler.py`, job en
-   `CronTrigger(hour=0, minute=5, timezone="America/Bogota")`. Se
-   probó ejecutando el job manualmente (sin ningún endpoint HTTP de
-   por medio) sobre otro alquiler vencido y también lo transicionó
-   correctamente.
-
-**Bug encontrado y corregido durante esta verificación**: `CronTrigger`
-NO hereda automáticamente la timezone del `BackgroundScheduler` que lo
-contiene — por defecto usa UTC salvo que se le pase `timezone=`
-explícitamente al propio trigger. La versión original
-(`CronTrigger(hour=0, minute=5)`, sin `timezone`) habría ejecutado el
-job a las 00:05 **UTC** (7:05 p.m. hora Bogotá del día anterior), no a
-medianoche Bogotá como estaba documentado. Corregido pasando
-`timezone="America/Bogota"` también al `CronTrigger`. Verificado:
-`next_run_time` ahora muestra offset `-05:00` en el horario esperado.
-
-### 2.8 Sin columnas `actualizado_por` / `eliminado_por` / `fecha_eliminacion`
-El esquema anterior las tenía; el nuevo las centralizó en
-`auditoria_sistema`, así que se eliminaron de todos los modelos
-SQLAlchemy. "Quién hizo qué" se consulta en `auditoria_sistema`
-(`id_usuario_accion`), no en la tabla de negocio.
-
-## 3. Estructura del proyecto
+## Estructura del Proyecto
 
 ```
-app/
-├── main.py                 # FastAPI, CORS, manejador de excepciones, routers
-├── config/                 # settings.py (env), database.py (SQLAlchemy)
-├── models/                 # 1 modelo SQLAlchemy por tabla del esquema
-├── schemas/                # Pydantic: *Create, *Update, *EstadoUpdate
-├── controllers/            # Lógica de negocio (transaccional, sin mocks)
-├── routes/                 # FastAPI routers, RBAC vía Depends(requiere_rol(...))
-└── utils/
-    ├── jwt_utils.py         # emitir/validar JWT
-    ├── security.py          # bcrypt
-    ├── roles.py              # RBAC + jerarquía de grupos de roles
-    ├── auth_dependency.py    # HTTPBearer -> UsuarioActual
-    ├── audit_context.py      # SET LOCAL app.usuario_actual (ver 2.2)
-    ├── tiempo.py              # fórmula de vencimiento, única fuente de verdad
-    ├── db_errors.py           # traduce RAISE EXCEPTION de triggers a 400 legible
-    ├── response.py            # sobre {status, mensaje, data, error, code}
-    └── scheduler.py           # job diario activo -> vencido
-database/
-├── 01_tablas.sql            # esquema (con el fix de 2.1)
-├── 02_funciones_y_triggers.sql  # triggers (con el fix de 2.2)
-└── 03_seed_data.sql         # datos de prueba (passwords bcrypt reales)
+sga_backend_jwt/
+├── alembic/                # Configuración y migraciones de Alembic
+├── app/
+│   ├── config/             # Configuración de base de datos (SQLAlchemy engine, Session)
+│   ├── controllers/        # Lógica de negocio (alquiler, usuario, producto, etc.)
+│   ├── models/             # Modelos SQLAlchemy (mapeo de tablas)
+│   ├── routes/             # Endpoints FastAPI (routers)
+│   ├── schemas/            # Esquemas Pydantic (validación de request/response)
+│   └── utils/              # Utilidades (JWT, auditoría, tiempo, scheduler, etc.)
+├── .env                    # Variables de entorno locales (NO subir a Git)
+├── .env.example            # Plantilla de variables de entorno
+├── alembic.ini             # Configuración de Alembic
+└── requirements.txt        # Dependencias Python
 ```
 
-## 4. Jerarquía de roles (RBAC)
+---
 
+## Comandos útiles
+
+```bash
+# Correr el servidor en modo desarrollo (con recarga automática)
+uvicorn app.main:app --reload
+
+# Generar una nueva migración de base de datos tras cambiar modelos
+alembic revision --autogenerate -m "descripcion_del_cambio"
+
+# Aplicar migraciones pendientes
+alembic upgrade head
+
+# Ver el historial de migraciones
+alembic history
 ```
-admin  >  encargado_facturacion  >  encargado_logistico  >  cliente (sin acceso)
-```
 
-`encargado_facturacion` puede hacer todo lo que hace
-`encargado_logistico` (grupo `STAFF_INTERNO` los incluye siempre
-juntos), pero no al revés. `cliente` nunca aparece en ningún grupo de
-roles — no tiene acceso al sistema.
+---
 
-## 5. Regla crítica de auditoría
+## Notas importantes
 
-`id_usuario_creador`, `id_usuario_logistico` e `id_usuario_accion`
-JAMÁS se reciben del payload. Siempre se extraen de
-`usuario_actual.id_usuario` (inyectado por `get_current_user` desde el
-JWT decodificado) dentro del controller. Ningún schema Pydantic de
-creación/actualización expone esos campos.
+- **Vencimientos automáticos:** El sistema usa `APScheduler` para transicionar automáticamente los alquileres de `activo` a `vencido` todos los días a las 00:05. No es necesario configurar nada extra; el job se registra al arrancar la aplicación.
+- **Zona horaria:** Toda la lógica de fechas usa la zona horaria `America/Bogota`. Ver `app/utils/tiempo.py`.
+- **Auditoría:** Cada INSERT/UPDATE/DELETE en las tablas principales queda registrado automáticamente en la tabla `auditoria_sistema` gracias a triggers de PostgreSQL.

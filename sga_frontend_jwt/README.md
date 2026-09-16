@@ -1,80 +1,121 @@
-# Frontend SGA (Sistema de Gestión de Alquileres de Andamios)
+# SGA — Frontend (React + TypeScript + Vite)
 
-**Variante: CON JWT** — requiere el backend `sga_backend_jwt` (no el original sin JWT). Ver `RECOMENDACION_JWT.md` en el paquete comparativo para la explicación completa.
+Interfaz web del Sistema de Gestión de Alquileres de Andamios. Construida con React 19, TypeScript y Vite.
 
-Stack: React 19 + TypeScript + Vite + **CSS puro** (sin librerías de UI) + React Router.
+---
 
-## 1. Requisitos previos
+## Requisitos
 
-- Node.js 18+
-- El backend **`sga_backend_jwt`** corriendo (no el backend sin JWT — los payloads de login son distintos). Ver el README de ese backend para cómo crear el primer usuario admin.
+- [Node.js 20+](https://nodejs.org/) (incluye `npm`)
+- El backend de SGA corriendo en `http://localhost:8000` (ver `sga_backend_jwt/README.md`)
 
-## 2. Instalación
+Para verificar tu versión de Node:
+```bash
+node --version
+npm --version
+```
+
+---
+
+## Instalación paso a paso
+
+### 1. Ir a la carpeta del frontend
+
+```bash
+cd sga_frontend_jwt
+```
+
+### 2. Instalar las dependencias
 
 ```bash
 npm install
 ```
 
-## 3. Variables de entorno
+Esto descargará todos los paquetes definidos en `package.json` (React, React Router, Zod, etc.) dentro de la carpeta `node_modules/`.
+
+### 3. Configurar la URL del backend
+
+Copia el archivo de ejemplo de variables de entorno:
 
 ```bash
+# En Windows
+copy .env.example .env
+
+# En macOS / Linux
 cp .env.example .env
 ```
 
-```
+El archivo `.env` resultante contiene:
+
+```env
+# URL base de la API del backend
+# Si tu backend corre en otro puerto o host, cámbiala aquí
 VITE_API_URL=http://localhost:8000/api/sga
 ```
 
-## 4. Ejecutar en desarrollo
+> En la mayoría de casos no necesitas cambiar nada si seguiste la guía del backend.
+
+### 4. Iniciar el servidor de desarrollo
 
 ```bash
 npm run dev
 ```
 
-## 5. Compilar para producción
+La aplicación quedará disponible en `http://localhost:5173`.
+
+El servidor tiene **recarga en caliente (HMR)**: cualquier cambio que guardes en el código se reflejará automáticamente en el navegador sin necesidad de recargar.
+
+---
+
+## Estructura del Proyecto
+
+```
+sga_frontend_jwt/
+├── public/              # Archivos estáticos públicos (favicon, etc.)
+├── src/
+│   ├── api/             # Funciones de llamada a la API REST del backend
+│   ├── components/      # Componentes reutilizables (AppShell, Toaster, etc.)
+│   ├── context/         # Contextos de React (AuthContext para sesión JWT)
+│   ├── interfaces/      # Tipos TypeScript (Alquiler, Usuario, Producto, etc.)
+│   ├── pages/           # Páginas de la aplicación por ruta
+│   │   ├── Dashboard/   # Panel de control (alquileres pendientes, por vencer, vencidos)
+│   │   ├── Alquileres/  # Lista y detalle de alquileres
+│   │   ├── CrearAlquiler/
+│   │   ├── Usuarios/
+│   │   ├── Productos/
+│   │   ├── Gastos/
+│   │   └── Login/
+│   ├── styles/          # Hojas de estilo CSS (tokens, layout, componentes)
+│   └── utils/           # Utilidades (permisos de rol, validaciones Zod, etc.)
+├── .env                 # Variables de entorno locales (NO subir a Git)
+├── .env.example         # Plantilla de variables de entorno
+├── package.json         # Dependencias y scripts npm
+└── vite.config.ts       # Configuración de Vite
+```
+
+---
+
+## Comandos disponibles
 
 ```bash
+# Iniciar servidor de desarrollo con HMR
+npm run dev
+
+# Verificar el código con el linter (oxlint)
+npm run lint
+
+# Compilar para producción (genera la carpeta dist/)
 npm run build
+
+# Vista previa del build de producción localmente
 npm run preview
 ```
 
-## Sin Chakra UI — sistema de diseño en CSS puro
+---
 
-Este proyecto **no usa ninguna librería de componentes UI** (se eliminaron `@chakra-ui/react`, `@emotion/react` y `next-themes`). Todo el sistema de diseño vive en `src/styles/`:
+## Notas importantes
 
-- `tokens.css` — variables CSS con la paleta cian/verde/azul que definiste (incluye modo claro y oscuro vía `[data-theme="dark"]`).
-- `base.css` — reset mínimo y tipografía base.
-- `layout.css` — utilidades de layout (`.stack`, `.hstack`, `.grid`, etc.).
-- `components.css` — componentes reutilizables: `.btn`, `.input`, `.card`, `.badge`, `.table`, `.toast`.
-
-El toggle de tema y el sistema de alertas (`toaster.create(...)`) se reimplementaron sin dependencias externas. El bundle de producción bajó de 598 KB a ~276 KB al eliminar Chakra/Emotion.
-
-## Cómo funciona la sesión (IMPORTANTE — distinto a la variante sin JWT)
-
-`POST /usuarios/login` del backend `sga_backend_jwt` devuelve un `access_token` además de los datos del usuario. Esta variante:
-
-- Guarda el usuario **y el token** en `localStorage` (`src/context/AuthContext.tsx`).
-- `src/api/client.ts` adjunta automáticamente `Authorization: Bearer <token>` en **cada** petición.
-- Si el backend responde `401` (token vencido o inválido) en cualquier petición que no sea el propio login, el cliente dispara un evento global `sesionExpirada`; `AuthContext` lo escucha, cierra la sesión y `ProtectedRoute` redirige a `/login` automáticamente, con un toast avisando al usuario.
-- El token vence según `JWT_EXPIRE_MINUTES` configurado en el backend (8 horas por defecto).
-
-## Trigger agregado en el backend: usuario creador debe estar activo
-
-El backend ahora rechaza la creación de un alquiler si `id_usuario_creador` no existe o está desactivado (`estado_usuario = FALSE`), vía `trg_validar_creador_activo`. Si ves el error "Operación denegada: El usuario creador no se encuentra activo en el sistema." al crear un alquiler, el usuario con el que iniciaste sesión fue desactivado.
-
-## Diferencias de código respecto a la variante sin JWT
-
-Solo 3 archivos cambian (todo lo demás — páginas, componentes, CSS — es idéntico):
-
-| Archivo | Cambio |
-|---|---|
-| `src/interfaces/Usuario.ts` | `LoginResponse` incluye ahora `access_token` y `token_type` |
-| `src/context/AuthContext.tsx` | Guarda el token, expone `token`, escucha el evento `sesionExpirada` para cerrar sesión automáticamente |
-| `src/api/client.ts` | Adjunta `Authorization: Bearer <token>` en cada petición; dispara `sesionExpirada` en un 401 |
-
-## Validado
-
-- `npx tsc -b` sin errores.
-- `npm run build` sin errores (48 módulos, ~276 KB).
-- **Prueba end-to-end real**: `uvicorn` (backend real) + `vite dev` (frontend real) corriendo simultáneamente, verificado por HTTP con `curl`, y confirmado que el CSS compilado contiene la paleta de colores exacta (`#2be6e1`, `#2ce6a0`, `#2c76e6`, etc.) y el bundle JS no contiene ninguna referencia a Chakra.
-- Backend JWT probado: login emite token, rutas protegidas rechazan peticiones sin token (401) y las aceptan con token válido, trigger de usuario activo probado (usuario activo permite crear alquiler, inactivo lo bloquea con mensaje claro).
+- **Autenticación:** La aplicación usa JWT. El token se almacena en `localStorage` y se envía automáticamente en el header `Authorization: Bearer <token>` en cada llamada a la API. Al cerrar sesión o si el token expira, se redirige al login.
+- **Roles de usuario:** La interfaz adapta los controles visibles según el rol del usuario autenticado (`admin`, `encargado_facturacion`, `encargado_logistico`). Los roles se validan además en el backend.
+- **Validaciones:** Los formularios usan [Zod](https://zod.dev/) para validación de esquemas en el cliente antes de enviar datos al servidor.
+- **CORS:** Si ves errores de CORS en la consola del navegador, verifica que el backend tenga configurado el origen `http://localhost:5173` en su lista de `allow_origins` (ver `app/main.py`).

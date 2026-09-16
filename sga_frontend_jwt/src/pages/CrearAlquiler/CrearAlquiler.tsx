@@ -682,7 +682,7 @@ export function CrearAlquiler() {
           );
           const precioConjunto = productoActual
             ? calcularPrecioConjunto(
-                productoActual.precio_base_producto,
+                detalle.esExtra ? productoActual.precio_base_extra : productoActual.precio_base_producto,
                 productoActual.unidad_minima_alquiler,
                 detalle.cantidad,
                 tiempoAlquilerDias,
@@ -787,6 +787,10 @@ export function CrearAlquiler() {
       </h2>
 
       <div className="card stack gap-3" style={{ marginBottom: 32 }}>
+        <div className="hstack justify-between">
+          <span>Tiempo de alquiler</span>
+          <span>{cantidadTiempo} {OPCIONES_UNIDAD_TIEMPO.find(op => op.valor === unidadTiempo)?.etiqueta.toLowerCase()}</span>
+        </div>
         <div className="hstack justify-between">
           <span>Productos</span>
           <span>${totalProductos.toLocaleString("es-CO")}</span>

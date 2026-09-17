@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ☰
           </button>
 
-          <span className="heading-md">SGA</span>
+          <span className="heading-md hide-on-mobile">SGA</span>
 
           <div className="hstack gap-4" style={{ marginLeft: "auto" }}>
             {usuario && (

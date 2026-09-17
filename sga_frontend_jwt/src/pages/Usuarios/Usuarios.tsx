@@ -216,7 +216,7 @@ export function Usuarios() {
               </select>
             </div>
             
-            <div style={{ gridColumn: "span 2" }}>
+            <div className="col-span-2-md">
               <label className="field-label">Documento</label>
               <input className="input" value={idUsuario} onChange={(e) => setIdUsuario(e.target.value)} />
             </div>

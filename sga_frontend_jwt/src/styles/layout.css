@@ -44,6 +44,7 @@
 @media (min-width: 768px) {
   .grid-cols-2-md { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-3-md { grid-template-columns: repeat(3, 1fr); }
+  .col-span-2-md { grid-column: span 2 / span 2; }
 }
 
 @media (min-width: 1024px) {

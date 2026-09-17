@@ -14,6 +14,7 @@ export function Productos() {
   const puedeGestionar = tienePermiso(usuario?.rol_usuario, SOLO_ADMIN);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [mostrarInactivos, setMostrarInactivos] = useState(false);
 
   // Form states (Crear)
   const [nombre, setNombre] = useState("");
@@ -37,11 +38,8 @@ export function Productos() {
 
   const cargar = () => {
     setCargando(true);
-    // Para el admin cargamos también los inactivos, si se quisiera, 
-    // pero por ahora mantenemos el comportamiento por defecto de listar() si no le pasamos arg
-    // o pasamos false para traer todos y que el admin pueda reactivar.
     productosApi
-      .listar(false) // Traemos todos para poder ver los desactivados
+      .listar(!mostrarInactivos)
       .then(setProductos)
       .catch((error) => {
         const mensaje = error instanceof ApiError ? error.message : "Error al cargar productos";
@@ -50,7 +48,7 @@ export function Productos() {
       .finally(() => setCargando(false));
   };
 
-  useEffect(cargar, []);
+  useEffect(cargar, [mostrarInactivos]);
 
   const manejarCrear = async () => {
     if (!nombre || !descripcion || stockTotal < 1) {
@@ -224,6 +222,17 @@ export function Productos() {
             {creando ? "Creando..." : "Crear producto"}
           </button>
         </div>
+      )}
+
+      {puedeGestionar && (
+        <label className="checkbox-row" style={{ alignSelf: "flex-end" }}>
+          <input 
+            type="checkbox" 
+            checked={mostrarInactivos} 
+            onChange={(e) => setMostrarInactivos(e.target.checked)} 
+          />
+          <span className="text-sm">Mostrar productos inactivos</span>
+        </label>
       )}
 
       <div className="table-wrap hide-on-mobile">

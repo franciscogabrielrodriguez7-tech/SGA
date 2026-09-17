@@ -31,12 +31,12 @@ export const usuariosApi = {  crear(payload: UsuarioCreatePayload) {
     });
   },
 
-  cambiarEstado(idUsuario: string, estadoUsuario: boolean) {
-    return apiRequest<{ id_usuario: string; estado_usuario: boolean }>(
+  cambiarEstado(idUsuario: string, estadoRegistro: boolean) {
+    return apiRequest<{ id_usuario: string; estado_registro: boolean }>(
       `/usuarios/${idUsuario}/estado`,
       {
         method: "PATCH",
-        body: { estado_usuario: estadoUsuario },
+        body: { estado_registro: estadoRegistro },
       },
     );
   },

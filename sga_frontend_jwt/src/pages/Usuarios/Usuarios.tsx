@@ -52,7 +52,7 @@ export function Usuarios() {
       .listar(filtroRol || undefined)
       .then((data) => {
         if (!mostrarInactivos) {
-          setUsuarios(data.filter(u => u.estado_usuario));
+          setUsuarios(data.filter(u => u.estado_registro));
         } else {
           setUsuarios(data);
         }
@@ -177,7 +177,7 @@ export function Usuarios() {
   const manejarCambiarEstado = async () => {
     if (!usuarioEditando) return;
     
-    const nuevoEstado = !usuarioEditando.estado_usuario;
+    const nuevoEstado = !usuarioEditando.estado_registro;
     const accion = nuevoEstado ? "Activar" : "Desactivar";
 
     if (!window.confirm(`¿Estás seguro de ${accion.toLowerCase()} a este usuario?`)) return;
@@ -298,7 +298,7 @@ export function Usuarios() {
           </thead>
           <tbody>
             {usuarios.map((u) => {
-              const opaco = !u.estado_usuario;
+              const opaco = !u.estado_registro;
               return (
                 <tr 
                   key={u.id_usuario}
@@ -316,8 +316,8 @@ export function Usuarios() {
                   <td><span className="badge">{u.rol_usuario}</span></td>
                   <td>{u.telefono_usuario}</td>
                   <td>
-                    <span className={`badge ${u.estado_usuario ? "" : "badge-gray"}`}>
-                      {u.estado_usuario ? "Activo" : "Inactivo"}
+                    <span className={`badge ${u.estado_registro ? "" : "badge-gray"}`}>
+                      {u.estado_registro ? "Activo" : "Inactivo"}
                     </span>
                   </td>
                 </tr>
@@ -332,7 +332,7 @@ export function Usuarios() {
 
       <div className="show-mobile-cards">
         {usuarios.map((u) => {
-          const opaco = !u.estado_usuario;
+          const opaco = !u.estado_registro;
           return (
             <div
               key={u.id_usuario}
@@ -345,8 +345,8 @@ export function Usuarios() {
             >
               <div className="list-card-header">
                 <span className="list-card-title">{u.nombres_usuario} {u.apellidos_usuario}</span>
-                <span className={`badge ${u.estado_usuario ? "" : "badge-gray"}`}>
-                  {u.estado_usuario ? "Activo" : "Inactivo"}
+                <span className={`badge ${u.estado_registro ? "" : "badge-gray"}`}>
+                  {u.estado_registro ? "Activo" : "Inactivo"}
                 </span>
               </div>
               <div className="stack gap-1">
@@ -419,9 +419,9 @@ export function Usuarios() {
                 className="btn btn-outline" 
                 onClick={manejarCambiarEstado}
                 disabled={cambiandoEstado || guardandoEdicion}
-                style={{ color: usuarioEditando.estado_usuario ? "var(--color-danger)" : "var(--color-primary)", borderColor: "currentColor" }}
+                style={{ color: usuarioEditando.estado_registro ? "var(--color-danger)" : "var(--color-primary)", borderColor: "currentColor" }}
               >
-                {cambiandoEstado ? "Procesando..." : (usuarioEditando.estado_usuario ? "Desactivar Usuario" : "Activar Usuario")}
+                {cambiandoEstado ? "Procesando..." : (usuarioEditando.estado_registro ? "Desactivar Usuario" : "Activar Usuario")}
               </button>
               
               <div style={{ display: 'flex', gap: 12 }}>

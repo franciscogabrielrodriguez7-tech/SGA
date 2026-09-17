@@ -19,7 +19,7 @@ export interface Usuario {
   tipo_documento: TipoDocumento;
   fecha_creacion: string;
   fecha_actualizacion?: string;
-  estado_usuario: boolean;
+  estado_registro: boolean;
 }
 
 export interface UsuarioCreatePayload {

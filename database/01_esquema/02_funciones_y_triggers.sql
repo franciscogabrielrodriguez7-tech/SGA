@@ -138,11 +138,14 @@ FOR EACH ROW EXECUTE FUNCTION fn_actualizar_timestamp();
 -- =========================================================
 CREATE OR REPLACE FUNCTION fn_impedir_autodesactivacion_admin()
 RETURNS TRIGGER AS $$
+DECLARE
+    v_usuario_actual VARCHAR;
 BEGIN
-    -- Se reemplaza 'OLD.rol' por 'OLD.rol_usuario'
-    IF OLD.rol_usuario = 'admin' AND NEW.estado_registro = FALSE THEN
-        -- Si manejas la validación de sesión actual para impedir que un admin se apague a sí mismo, 
-        -- asegúrate de que tus comparaciones usen rol_usuario.
+    -- Obtener el ID del usuario que está ejecutando la acción desde el contexto de la BD
+    v_usuario_actual := current_setting('app.current_user_id', true);
+
+    -- Bloquear solo si un administrador intenta desactivar su PROPIA cuenta
+    IF OLD.rol_usuario = 'admin' AND NEW.estado_registro = FALSE AND OLD.id_usuario = v_usuario_actual THEN
         RAISE EXCEPTION 'Operación denegada: Un administrador no puede desactivar su propia cuenta.';
     END IF;
 

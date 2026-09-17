@@ -33,6 +33,14 @@ export interface UsuarioCreatePayload {
   tipo_documento: TipoDocumento;
 }
 
+export interface UsuarioUpdatePayload {
+  rol_usuario?: RolUsuario;
+  nombres_usuario?: string;
+  apellidos_usuario?: string;
+  email_usuario?: string | null;
+  telefono_usuario?: string;
+}
+
 export interface LoginPayload {
   telefono_usuario?: string;
   email_usuario?: string;

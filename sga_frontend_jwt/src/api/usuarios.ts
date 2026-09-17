@@ -24,6 +24,13 @@ export const usuariosApi = {  crear(payload: UsuarioCreatePayload) {
     return apiRequest<Usuario>(`/usuarios/${idUsuario}`);
   },
 
+  actualizar(idUsuario: string, payload: import("../interfaces/Usuario").UsuarioUpdatePayload) {
+    return apiRequest<Usuario>(`/usuarios/${idUsuario}`, {
+      method: "PATCH",
+      body: payload,
+    });
+  },
+
   cambiarEstado(idUsuario: string, estadoUsuario: boolean) {
     return apiRequest<{ id_usuario: string; estado_usuario: boolean }>(
       `/usuarios/${idUsuario}/estado`,

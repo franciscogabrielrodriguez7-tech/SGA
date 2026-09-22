@@ -76,10 +76,11 @@ export function Usuarios() {
       return;
     }
 
-    if (!phoneValidation.isValid(telefono)) {
+    const resultadoTelefono = phoneValidation.safeParse(telefono);
+    if (!resultadoTelefono.success) {
       toaster.create({
         title: "Teléfono inválido",
-        description: phoneValidation.message,
+        description: resultadoTelefono.error.issues[0]?.message ?? "Teléfono inválido.",
         type: "error",
       });
       return;
@@ -145,10 +146,11 @@ export function Usuarios() {
       return;
     }
 
-    if (!phoneValidation.isValid(editTelefono)) {
+    const resultadoTelefono = phoneValidation.safeParse(editTelefono);
+    if (!resultadoTelefono.success) {
       toaster.create({
         title: "Teléfono inválido",
-        description: phoneValidation.message,
+        description: resultadoTelefono.error.issues[0]?.message ?? "Teléfono inválido.",
         type: "error",
       });
       return;

@@ -4,9 +4,13 @@ import { productosApi } from "../../api/productos";
 import { ApiError } from "../../api/client";
 import type { Producto, UnidadMinimaAlquiler } from "../../interfaces/Producto";
 import { toaster } from "../../components/ui/toaster";
-import { InputMoneda } from "../../components/inputs/InputMoneda";
 import { useAuth } from "../../context/AuthContext";
 import { SOLO_ADMIN, tienePermiso } from "../../utils/permisos";
+
+import { CrearProductoSection } from "../../components/productosComponents/CrearProductoSection";
+import { ListaProductosDesktop } from "../../components/productosComponents/ListaProductosDesktop";
+import { ListaProductosMobile } from "../../components/productosComponents/ListaProductosMobile";
+import { ModalEditarProducto } from "../../components/productosComponents/ModalEditarProducto";
 
 export function Productos() {
   const { usuario } = useAuth();
@@ -161,67 +165,15 @@ export function Productos() {
       <h1 className="heading-xl">Productos</h1>
 
       {puedeGestionar && (
-        <div className="card">
-          <h2 className="heading-md" style={{ marginBottom: 16 }}>
-            Nuevo producto
-          </h2>
-
-          <div className="grid grid-cols-1 grid-cols-2-md" style={{ marginBottom: 16 }}>
-            <div>
-              <label className="field-label">Nombre</label>
-              <input className="input" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Descripción</label>
-              <input className="input" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Precio base</label>
-              <InputMoneda value={precioBase} onChange={setPrecioBase} />
-            </div>
-
-            <div>
-              <label className="field-label">Precio extra</label>
-              <InputMoneda
-                value={precioExtra ?? precioBase}
-                onChange={setPrecioExtra}
-              />
-              <p className="text-sm text-muted" style={{ marginTop: 4 }}>
-                Precio al añadir como extra.
-              </p>
-            </div>
-
-            <div>
-              <label className="field-label">Unidad mínima de alquiler</label>
-              <select
-                className="input"
-                value={unidadMinima}
-                onChange={(e) => setUnidadMinima(e.target.value as UnidadMinimaAlquiler)}
-              >
-                <option value="DIA">Día (precio base es por día)</option>
-                <option value="SEMANA">Semana (precio base es por semana)</option>
-                <option value="MES">Mes (precio base es por mes)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="field-label">Stock total</label>
-              <input
-                className="input"
-                type="number"
-                min={1}
-                value={stockTotal}
-                onChange={(e) => setStockTotal(Number(e.target.value))}
-              />
-            </div>
-          </div>
-
-          <button type="button" className="btn btn-primary" disabled={creando} onClick={manejarCrear}>
-            {creando ? "Creando..." : "Crear producto"}
-          </button>
-        </div>
+        <CrearProductoSection
+          nombre={nombre} setNombre={setNombre}
+          descripcion={descripcion} setDescripcion={setDescripcion}
+          precioBase={precioBase} setPrecioBase={setPrecioBase}
+          precioExtra={precioExtra} setPrecioExtra={setPrecioExtra}
+          unidadMinima={unidadMinima} setUnidadMinima={setUnidadMinima}
+          stockTotal={stockTotal} setStockTotal={setStockTotal}
+          creando={creando} manejarCrear={manejarCrear}
+        />
       )}
 
       {puedeGestionar && (
@@ -235,192 +187,32 @@ export function Productos() {
         </label>
       )}
 
-      <div className="table-wrap hide-on-mobile">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Precio base</th>
-              <th>Precio extra</th>
-              <th>Unidad</th>
-              <th>Alquilado / Total</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((p) => {
-              // Si el producto está inactivo o sin stock, visualmente apagado
-              const opaco = !p.estado_registro;
-              const sinStock = p.stock_disponible === 0;
+      <ListaProductosDesktop
+        productos={productos}
+        cargando={cargando}
+        puedeGestionar={puedeGestionar}
+        abrirModalEdicion={abrirModalEdicion}
+      />
 
-              return (
-                <tr 
-                  key={p.id_producto} 
-                  onClick={() => abrirModalEdicion(p)}
-                  style={{ 
-                    cursor: puedeGestionar ? "pointer" : "default",
-                    opacity: opaco ? 0.5 : 1,
-                    transition: "opacity 0.2s"
-                  }}
-                  title={puedeGestionar ? "Haz clic para editar" : ""}
-                  className={puedeGestionar ? "row-hover" : ""}
-                >
-                  <td>{p.id_producto}</td>
-                  <td className="text-bold">{p.nombre_producto}</td>
-                  <td>${p.precio_base_producto.toLocaleString("es-CO")}</td>
-                  <td>${p.precio_base_extra.toLocaleString("es-CO")}</td>
-                  <td><span className="badge">{{ DIA: "Día", SEMANA: "Semana", MES: "Mes" }[p.unidad_minima_alquiler]}</span></td>
-                  <td>
-                    <span style={{ color: sinStock ? "var(--color-danger)" : "inherit", fontWeight: sinStock ? "bold" : "normal" }}>
-                      {p.stock_disponible}
-                    </span>
-                    <span className="text-muted"> / {p.stock_total} disp.</span>
-                  </td>
-                  <td>
-                    <span className={`badge ${p.estado_registro ? "" : "badge-gray"}`}>
-                      {p.estado_registro ? "Activo" : "Inactivo"}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <ListaProductosMobile
+        productos={productos}
+        cargando={cargando}
+        puedeGestionar={puedeGestionar}
+        abrirModalEdicion={abrirModalEdicion}
+      />
 
-        {!cargando && productos.length === 0 && (
-          <p className="table-empty">No hay productos registrados.</p>
-        )}
-      </div>
-
-      <div className="show-mobile-cards">
-        {productos.map((p) => {
-          const opaco = !p.estado_registro;
-          const sinStock = p.stock_disponible === 0;
-
-          return (
-            <div
-              key={p.id_producto}
-              onClick={() => abrirModalEdicion(p)}
-              className="list-card"
-              style={{
-                cursor: puedeGestionar ? "pointer" : "default",
-                opacity: opaco ? 0.6 : 1,
-              }}
-            >
-              <div className="list-card-header">
-                <span className="list-card-title">{p.nombre_producto}</span>
-                <span className={`badge ${p.estado_registro ? "" : "badge-gray"}`}>
-                  {p.estado_registro ? "Activo" : "Inactivo"}
-                </span>
-              </div>
-              <div className="stack gap-1">
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span className="text-sm text-muted">Base: ${p.precio_base_producto.toLocaleString("es-CO")}</span>
-                  <span className="text-sm text-muted">Extra: ${p.precio_base_extra.toLocaleString("es-CO")}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span className="text-sm text-muted">Und: {{ DIA: "Día", SEMANA: "Semana", MES: "Mes" }[p.unidad_minima_alquiler]}</span>
-                  <span className="text-sm">
-                    Stock: <strong style={{ color: sinStock ? "var(--color-danger)" : "inherit" }}>{p.stock_disponible}</strong> / {p.stock_total}
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        {!cargando && productos.length === 0 && (
-          <p className="text-muted">No hay productos registrados.</p>
-        )}
-      </div>
-
-      {/* MODAL DE EDICIÓN */}
-      {productoEditando && (
-        <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 className="heading-lg">Editar: {productoEditando.nombre_producto}</h2>
-              <button className="btn" onClick={cerrarModal} style={{ padding: '4px 8px' }}>✕</button>
-            </div>
-
-            <div className="stack gap-4" style={{ marginBottom: 24 }}>
-              
-              <div className="grid grid-cols-1 grid-cols-2-md">
-                <div>
-                  <label className="field-label">Nombre</label>
-                  <input className="input" value={editNombre} onChange={(e) => setEditNombre(e.target.value)} />
-                </div>
-                <div>
-                  <label className="field-label">Descripción</label>
-                  <input className="input" value={editDescripcion} onChange={(e) => setEditDescripcion(e.target.value)} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 grid-cols-2-md">
-                <div>
-                  <label className="field-label">Precio base</label>
-                  <InputMoneda value={editPrecioBase} onChange={setPrecioBase} />
-                </div>
-                <div>
-                  <label className="field-label">Precio extra</label>
-                  <InputMoneda value={editPrecioExtra} onChange={setEditPrecioExtra} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 grid-cols-2-md">
-                <div>
-                  <label className="field-label">Unidad mínima de alquiler</label>
-                  <select
-                    className="input"
-                    value={editUnidadMinima}
-                    onChange={(e) => setEditUnidadMinima(e.target.value as UnidadMinimaAlquiler)}
-                  >
-                    <option value="DIA">Día</option>
-                    <option value="SEMANA">Semana</option>
-                    <option value="MES">Mes</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="field-label">Stock total</label>
-                  <input
-                    className="input"
-                    type="number"
-                    min={1}
-                    value={editStockTotal}
-                    onChange={(e) => setEditStockTotal(Number(e.target.value))}
-                  />
-                  <p className="text-sm text-muted" style={{ marginTop: 4 }}>
-                    Actualmente en alquiler: {productoEditando.stock_alquilado}
-                  </p>
-                </div>
-              </div>
-
-            </div>
-
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
-              <button 
-                type="button" 
-                className="btn btn-outline" 
-                onClick={manejarCambiarEstado}
-                disabled={cambiandoEstado || guardandoEdicion}
-                style={{ color: productoEditando.estado_registro ? "var(--color-danger)" : "var(--color-primary)", borderColor: "currentColor" }}
-              >
-                {cambiandoEstado ? "Procesando..." : (productoEditando.estado_registro ? "Desactivar Producto" : "Activar Producto")}
-              </button>
-              
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button type="button" className="btn btn-outline" onClick={cerrarModal}>
-                  Cancelar
-                </button>
-                <button type="button" className="btn btn-primary" onClick={manejarGuardarEdicion} disabled={guardandoEdicion || cambiandoEstado}>
-                  {guardandoEdicion ? "Guardando..." : "Guardar Cambios"}
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
+      <ModalEditarProducto
+        productoEditando={productoEditando}
+        editNombre={editNombre} setEditNombre={setEditNombre}
+        editDescripcion={editDescripcion} setEditDescripcion={setEditDescripcion}
+        editPrecioBase={editPrecioBase} setEditPrecioBase={setEditPrecioBase}
+        editPrecioExtra={editPrecioExtra} setEditPrecioExtra={setEditPrecioExtra}
+        editUnidadMinima={editUnidadMinima} setEditUnidadMinima={setEditUnidadMinima}
+        editStockTotal={editStockTotal} setEditStockTotal={setEditStockTotal}
+        guardandoEdicion={guardandoEdicion} cambiandoEstado={cambiandoEstado}
+        manejarCambiarEstado={manejarCambiarEstado} manejarGuardarEdicion={manejarGuardarEdicion}
+        cerrarModal={cerrarModal}
+      />
 
     </div>
   );

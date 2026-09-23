@@ -7,8 +7,10 @@ import { useAuth } from "../../context/AuthContext";
 import type { MovimientoLogistico, ResumenSemanal } from "../../interfaces/Logistica";
 import type { Alquiler } from "../../interfaces/Alquiler";
 import { toaster } from "../../components/ui/toaster";
-import { InputMoneda } from "../../components/inputs/InputMoneda";
 import { ADMIN_O_FACTURACION, tienePermiso } from "../../utils/permisos";
+
+import { CrearGastoSection } from "../../components/gastosComponents/CrearGastoSection";
+import { ListaGastos } from "../../components/gastosComponents/ListaGastos";
 
 export function Gastos() {
   const { usuario } = useAuth();
@@ -127,152 +129,24 @@ export function Gastos() {
     <div className="stack gap-8">
       <h1 className="heading-xl">Gastos logísticos</h1>
 
-      <div className="card">
-        <h2 className="heading-md" style={{ marginBottom: 8 }}>
-          Registrar gasto
-        </h2>
+      <CrearGastoSection
+        busquedaAlquiler={busquedaAlquiler}
+        setBusquedaAlquiler={setBusquedaAlquiler}
+        alquileresFiltrados={alquileresFiltrados}
+        idsAlquilerSeleccionados={idsAlquilerSeleccionados}
+        alternarAlquiler={alternarAlquiler}
+        valor={valor} setValor={setValor}
+        descripcion={descripcion} setDescripcion={setDescripcion}
+        esRecogida={esRecogida} setEsRecogida={setEsRecogida}
+        creando={creando} manejarCrear={manejarCrear}
+      />
 
-        <p className="text-sm text-muted" style={{ marginBottom: 16 }}>
-          logistica_alquiler no distingue "gasto puro" de entrega/recogida: hay que indicar a
-          cuál de las dos se asocia (según el backend). Puedes seleccionar varios alquileres si
-          el mismo gasto (ej. un viaje) los cubre a todos.
-        </p>
-
-        <div style={{ marginBottom: 16 }}>
-          <label className="field-label">Alquileres asociados a este gasto</label>
-          <input
-            className="input"
-            placeholder="Buscar por # de alquiler o cliente..."
-            value={busquedaAlquiler}
-            onChange={(e) => setBusquedaAlquiler(e.target.value)}
-            style={{ marginBottom: 8 }}
-          />
-
-          <div
-            className="stack gap-1"
-            style={{
-              maxHeight: 180,
-              overflowY: "auto",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              padding: 8,
-            }}
-          >
-            {alquileresFiltrados.map((a) => (
-              <label key={a.id_alquiler} className="checkbox-row">
-                <input
-                  type="checkbox"
-                  checked={idsAlquilerSeleccionados.includes(a.id_alquiler)}
-                  onChange={() => alternarAlquiler(a.id_alquiler)}
-                />
-                #{a.id_alquiler} — {a.nombres_cliente} {a.apellidos_cliente} (
-                {a.estado_alquiler})
-              </label>
-            ))}
-
-            {alquileresFiltrados.length === 0 && (
-              <p className="text-sm text-muted">Sin resultados.</p>
-            )}
-          </div>
-
-          {idsAlquilerSeleccionados.length > 0 && (
-            <p className="text-sm text-muted" style={{ marginTop: 4 }}>
-              Seleccionados: {idsAlquilerSeleccionados.map((id) => `#${id}`).join(", ")}
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 grid-cols-2-md" style={{ marginBottom: 16 }}>
-          <div>
-            <label className="field-label">Valor del gasto</label>
-            <InputMoneda value={valor} onChange={setValor} />
-          </div>
-
-          <div>
-            <label className="field-label">Descripción (opcional)</label>
-            <input className="input" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
-          </div>
-        </div>
-
-        <label className="checkbox-row" style={{ marginBottom: 16 }}>
-          <input
-            type="checkbox"
-            checked={esRecogida}
-            onChange={(e) => setEsRecogida(e.target.checked)}
-          />
-          Asociado a una recogida (si no, se asocia a una entrega)
-        </label>
-
-        <div>
-          <button type="button" className="btn btn-primary" disabled={creando} onClick={manejarCrear}>
-            {creando ? "Registrando..." : "Registrar gasto"}
-          </button>
-        </div>
-      </div>
-
-      {puedeVerResumen && (
-        <div>
-          <h2 className="heading-md" style={{ marginBottom: 12 }}>
-            Resumen semanal (RN-GAS-07)
-          </h2>
-
-          <div className="table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Semana</th>
-                  <th>Registros</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {resumen.map((r) => (
-                  <tr key={r.semana_inicio}>
-                    <td>{r.semana_inicio}</td>
-                    <td>{r.cantidad_registros}</td>
-                    <td>${r.total_gasto.toLocaleString("es-CO")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {!cargando && resumen.length === 0 && <p className="table-empty">Sin datos.</p>}
-          </div>
-        </div>
-      )}
-
-      <div>
-        <h2 className="heading-md" style={{ marginBottom: 12 }}>
-          Todos los gastos
-        </h2>
-
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Alquiler</th>
-                <th>Responsable</th>
-                <th>Fecha</th>
-                <th>Tipo</th>
-                <th>Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gastos.map((g) => (
-                <tr key={g.id_logistica_alquiler}>
-                  <td>#{g.id_alquiler}</td>
-                  <td>{g.nombres_logistico}</td>
-                  <td>{g.fecha_gasto}</td>
-                  <td>{g.es_recogida ? "Recogida" : "Entrega"}</td>
-                  <td>${g.valor_gasto_logistico.toLocaleString("es-CO")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {!cargando && gastos.length === 0 && <p className="table-empty">No hay gastos registrados.</p>}
-        </div>
-      </div>
+      <ListaGastos
+        puedeVerResumen={puedeVerResumen}
+        resumen={resumen}
+        gastos={gastos}
+        cargando={cargando}
+      />
     </div>
   );
 }

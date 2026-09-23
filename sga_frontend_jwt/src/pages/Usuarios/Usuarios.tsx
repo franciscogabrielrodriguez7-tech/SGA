@@ -8,6 +8,11 @@ import { useAuth } from "../../context/AuthContext";
 import { SOLO_ADMIN, tienePermiso } from "../../utils/permisos";
 import { phoneValidation } from "../../utils/validations";
 
+import { CrearUsuarioSection } from "../../components/usuariosComponents/CrearUsuarioSection";
+import { ListaUsuariosDesktop } from "../../components/usuariosComponents/ListaUsuariosDesktop";
+import { ListaUsuariosMobile } from "../../components/usuariosComponents/ListaUsuariosMobile";
+import { ModalEditarUsuario } from "../../components/usuariosComponents/ModalEditarUsuario";
+
 // Solo los 3 roles internos son actores reales de esta pantalla de
 // administración: 'cliente' se gestiona desde /clientes.
 const ROLES: RolUsuario[] = ["admin", "encargado_facturacion", "encargado_logistico"];
@@ -44,10 +49,6 @@ export function Usuarios() {
 
   const cargar = () => {
     setCargando(true);
-    // El backend no filtra usuarios inactivos automáticamente en el listado,
-    // así que lo filtramos en el frontend según el toggle (igual que con productos,
-    // pero el endpoint de usuarios no tiene un parametro solo_activos implementado,
-    // trae todos).
     usuariosApi
       .listar(filtroRol || undefined)
       .then((data) => {
@@ -203,65 +204,18 @@ export function Usuarios() {
       <h1 className="heading-xl">Usuarios (Personal)</h1>
 
       {puedeGestionar && (
-        <div className="card">
-          <h2 className="heading-md" style={{ marginBottom: 16 }}>
-            Nuevo usuario
-          </h2>
-
-          <div className="grid grid-cols-1 grid-cols-3-md" style={{ marginBottom: 16 }}>
-            <div>
-              <label className="field-label">Tipo doc.</label>
-              <select className="input" value={tipoDocumento} onChange={(e) => setTipoDocumento(e.target.value as TipoDocumento)}>
-                {TIPOS_DOCUMENTO.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="col-span-2-md">
-              <label className="field-label">Documento</label>
-              <input className="input" value={idUsuario} onChange={(e) => setIdUsuario(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Rol</label>
-              <select className="input" value={rol} onChange={(e) => setRol(e.target.value as RolUsuario)}>
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="field-label">Nombres</label>
-              <input className="input" value={nombres} onChange={(e) => setNombres(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Apellidos</label>
-              <input className="input" value={apellidos} onChange={(e) => setApellidos(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Teléfono</label>
-              <input className="input" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
-            </div>
-            
-            <div>
-              <label className="field-label">Correo Electrónico</label>
-              <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Contraseña inicial</label>
-              <input className="input" type="password" value={contrasena} onChange={(e) => setContrasena(e.target.value)} />
-            </div>
-          </div>
-
-          <button type="button" className="btn btn-primary" disabled={creando} onClick={manejarCrear}>
-            {creando ? "Creando..." : "Crear usuario"}
-          </button>
-        </div>
+        <CrearUsuarioSection
+          tipoDocumento={tipoDocumento} setTipoDocumento={setTipoDocumento}
+          idUsuario={idUsuario} setIdUsuario={setIdUsuario}
+          rol={rol} setRol={setRol}
+          nombres={nombres} setNombres={setNombres}
+          apellidos={apellidos} setApellidos={setApellidos}
+          telefono={telefono} setTelefono={setTelefono}
+          email={email} setEmail={setEmail}
+          contrasena={contrasena} setContrasena={setContrasena}
+          creando={creando} manejarCrear={manejarCrear}
+          TIPOS_DOCUMENTO={TIPOS_DOCUMENTO} ROLES={ROLES}
+        />
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
@@ -287,158 +241,31 @@ export function Usuarios() {
         )}
       </div>
 
-      <div className="table-wrap hide-on-mobile">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Documento</th>
-              <th>Nombre</th>
-              <th>Rol</th>
-              <th>Teléfono</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.map((u) => {
-              const opaco = !u.estado_registro;
-              return (
-                <tr 
-                  key={u.id_usuario}
-                  onClick={() => abrirModalEdicion(u)}
-                  style={{ 
-                    cursor: puedeGestionar ? "pointer" : "default",
-                    opacity: opaco ? 0.5 : 1,
-                    transition: "opacity 0.2s"
-                  }}
-                  title={puedeGestionar ? "Haz clic para editar" : ""}
-                  className={puedeGestionar ? "row-hover" : ""}
-                >
-                  <td className="text-bold">{u.id_usuario}</td>
-                  <td>{u.nombres_usuario} {u.apellidos_usuario}</td>
-                  <td><span className="badge">{u.rol_usuario}</span></td>
-                  <td>{u.telefono_usuario}</td>
-                  <td>
-                    <span className={`badge ${u.estado_registro ? "" : "badge-gray"}`}>
-                      {u.estado_registro ? "Activo" : "Inactivo"}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {!cargando && usuarios.length === 0 && (
-          <p className="table-empty">No hay usuarios registrados.</p>
-        )}
-      </div>
+      <ListaUsuariosDesktop
+        usuarios={usuarios}
+        cargando={cargando}
+        puedeGestionar={puedeGestionar}
+        abrirModalEdicion={abrirModalEdicion}
+      />
 
-      <div className="show-mobile-cards">
-        {usuarios.map((u) => {
-          const opaco = !u.estado_registro;
-          return (
-            <div
-              key={u.id_usuario}
-              onClick={() => abrirModalEdicion(u)}
-              className="list-card"
-              style={{
-                cursor: puedeGestionar ? "pointer" : "default",
-                opacity: opaco ? 0.6 : 1,
-              }}
-            >
-              <div className="list-card-header">
-                <span className="list-card-title">{u.nombres_usuario} {u.apellidos_usuario}</span>
-                <span className={`badge ${u.estado_registro ? "" : "badge-gray"}`}>
-                  {u.estado_registro ? "Activo" : "Inactivo"}
-                </span>
-              </div>
-              <div className="stack gap-1">
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span className="text-sm text-muted">Doc: {u.id_usuario}</span>
-                  <span className="text-sm text-muted">{u.telefono_usuario}</span>
-                </div>
-                <div>
-                  <span className="badge badge-lg" style={{ marginTop: 4 }}>{u.rol_usuario}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        {!cargando && usuarios.length === 0 && (
-          <p className="text-muted">No hay usuarios registrados.</p>
-        )}
-      </div>
+      <ListaUsuariosMobile
+        usuarios={usuarios}
+        cargando={cargando}
+        puedeGestionar={puedeGestionar}
+        abrirModalEdicion={abrirModalEdicion}
+      />
 
-      {/* MODAL DE EDICIÓN */}
-      {usuarioEditando && (
-        <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 className="heading-lg">Editar Usuario</h2>
-              <button className="btn" onClick={cerrarModal} style={{ padding: '4px 8px' }}>✕</button>
-            </div>
-
-            <div className="stack gap-4" style={{ marginBottom: 24 }}>
-              <p className="text-sm text-muted">
-                Documento: <strong style={{ color: "var(--color-fg-default)" }}>{usuarioEditando.tipo_documento} {usuarioEditando.id_usuario}</strong>
-              </p>
-              
-              <div className="grid grid-cols-1 grid-cols-2-md">
-                <div>
-                  <label className="field-label">Nombres</label>
-                  <input className="input" value={editNombres} onChange={(e) => setEditNombres(e.target.value)} />
-                </div>
-                <div>
-                  <label className="field-label">Apellidos</label>
-                  <input className="input" value={editApellidos} onChange={(e) => setEditApellidos(e.target.value)} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 grid-cols-2-md">
-                <div>
-                  <label className="field-label">Teléfono</label>
-                  <input className="input" value={editTelefono} onChange={(e) => setEditTelefono(e.target.value)} />
-                </div>
-                <div>
-                  <label className="field-label">Correo Electrónico</label>
-                  <input className="input" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <label className="field-label">Rol del sistema</label>
-                <select className="input" value={editRol} onChange={(e) => setEditRol(e.target.value as RolUsuario)}>
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>{r}</option>
-                  ))}
-                </select>
-              </div>
-
-            </div>
-
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-              <button 
-                type="button" 
-                className="btn btn-outline" 
-                onClick={manejarCambiarEstado}
-                disabled={cambiandoEstado || guardandoEdicion}
-                style={{ color: usuarioEditando.estado_registro ? "var(--color-danger)" : "var(--color-primary)", borderColor: "currentColor" }}
-              >
-                {cambiandoEstado ? "Procesando..." : (usuarioEditando.estado_registro ? "Desactivar Usuario" : "Activar Usuario")}
-              </button>
-              
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button type="button" className="btn btn-outline" onClick={cerrarModal}>
-                  Cancelar
-                </button>
-                <button type="button" className="btn btn-primary" onClick={manejarGuardarEdicion} disabled={guardandoEdicion || cambiandoEstado}>
-                  {guardandoEdicion ? "Guardando..." : "Guardar Cambios"}
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
+      <ModalEditarUsuario
+        usuarioEditando={usuarioEditando}
+        editRol={editRol} setEditRol={setEditRol}
+        editNombres={editNombres} setEditNombres={setEditNombres}
+        editApellidos={editApellidos} setEditApellidos={setEditApellidos}
+        editTelefono={editTelefono} setEditTelefono={setEditTelefono}
+        editEmail={editEmail} setEditEmail={setEditEmail}
+        guardandoEdicion={guardandoEdicion} cambiandoEstado={cambiandoEstado}
+        manejarCambiarEstado={manejarCambiarEstado} manejarGuardarEdicion={manejarGuardarEdicion}
+        cerrarModal={cerrarModal} ROLES={ROLES}
+      />
 
     </div>
   );

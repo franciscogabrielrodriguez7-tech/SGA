@@ -5,12 +5,10 @@ import { alquileresApi } from "../../api/alquileres";
 import { ApiError } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import type { Alquiler, EstadoAlquiler } from "../../interfaces/Alquiler";
-import { ESTADOS_ALQUILER } from "../../interfaces/Alquiler";
 import type { MovimientoLogistico } from "../../interfaces/Logistica";
 import { toaster } from "../../components/ui/toaster";
 import { ADMIN_O_FACTURACION, tienePermiso } from "../../utils/permisos";
 import {
-  OPCIONES_UNIDAD_TIEMPO,
   convertirADias,
   unidadMinimaPermiteUnidadTiempo,
   unidadTiempoMasRestrictiva,
@@ -19,6 +17,12 @@ import {
 import { calcularPrecioConjunto } from "../../utils/precios";
 import type { DetalleAlquilerLinea } from "../../interfaces/Alquiler";
 import { calcularEtiquetaVencimiento, claseBadgePorTono } from "../../utils/vencimiento";
+
+import { DatosGeneralesSection } from "../../components/alquilerDetalleComponents/DatosGeneralesSection";
+import { DetalleProductosSection } from "../../components/alquilerDetalleComponents/DetalleProductosSection";
+import { CambiarEstadoSection } from "../../components/alquilerDetalleComponents/CambiarEstadoSection";
+import { RenovarSection } from "../../components/alquilerDetalleComponents/RenovarSection";
+import { LogisticaSection } from "../../components/alquilerDetalleComponents/LogisticaSection";
 
 export function AlquilerDetalle() {
   const { id } = useParams<{ id: string }>();
@@ -257,273 +261,37 @@ export function AlquilerDetalle() {
         </button>
       </div>
 
-      {/* Datos generales */}
-      <div className="card stack gap-2">
-        <p>
-          <b>Cliente:</b> {alquiler.nombres_cliente} {alquiler.apellidos_cliente} (
-          {alquiler.id_usuario_cliente})
-        </p>
-        <p>
-          <b>Creado por:</b> {alquiler.nombres_creador} {alquiler.apellidos_creador}
-        </p>
-        <p>
-          <b>Dirección:</b> {alquiler.direccion} — {alquiler.barrio}
-        </p>
-        <p>
-          <b>Depósito:</b> ${alquiler.deposito.toLocaleString("es-CO")}
-        </p>
-        <p>
-          <b>Precio del alquiler:</b> ${alquiler.precio_alquiler.toLocaleString("es-CO")}
-        </p>
-        <p>
-          <b>Fecha de inicio:</b> {alquiler.fecha_inicio} — {alquiler.tiempo_alquiler_dias} día(s)
-        </p>
-        <p>
-          <b>Logística:</b> {alquiler.se_lleva ? "Se lleva" : "No se lleva"} ·{" "}
-          {alquiler.se_recoge ? "Se recoge" : "No se recoge"}
-        </p>
-      </div>
+      <DatosGeneralesSection alquiler={alquiler} />
 
-      {/* Detalle de productos */}
-      <div>
-        <h2 className="heading-md" style={{ marginBottom: 12 }}>
-          Productos
-        </h2>
+      <DetalleProductosSection detallesLinea={alquiler.detalles} />
 
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio conjunto</th>
-                <th>Extra</th>
-              </tr>
-            </thead>
-            <tbody>
-              {alquiler.detalles.map((d) => (
-                <tr key={d.id_detalle_alquiler}>
-                  <td>{d.nombre_producto}</td>
-                  <td>{d.cantidad_productos}</td>
-                  <td>${d.precio_conjunto.toLocaleString("es-CO")}</td>
-                  <td>{d.es_producto_extra ? "Sí" : "No"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <CambiarEstadoSection
+        nuevoEstado={nuevoEstado} setNuevoEstado={setNuevoEstado}
+        manejarCambioEstado={manejarCambioEstado}
+        puedeGestionarFacturacion={puedeGestionarFacturacion}
+        manejarCancelar={manejarCancelar}
+      />
 
-      {/* Acciones de estado */}
-      <div className="card">
-        <h2 className="heading-md" style={{ marginBottom: 16 }}>
-          Cambiar estado
-        </h2>
-
-        <div className="hstack gap-3 flex-wrap">
-          <select
-            className="input"
-            style={{ width: "auto" }}
-            value={nuevoEstado}
-            onChange={(e) => setNuevoEstado(e.target.value as EstadoAlquiler)}
-          >
-            <option value="">Selecciona un estado</option>
-            {ESTADOS_ALQUILER.map((estado) => (
-              <option key={estado} value={estado}>
-                {estado}
-              </option>
-            ))}
-          </select>
-
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={manejarCambioEstado}
-            disabled={!nuevoEstado}
-          >
-            Aplicar
-          </button>
-
-          {puedeGestionarFacturacion && (
-            <button
-              type="button"
-              className="btn btn-danger-outline"
-              onClick={manejarCancelar}
-              style={{ marginLeft: "auto" }}
-            >
-              Cancelar alquiler
-            </button>
-          )}
-        </div>
-
-        <p className="text-sm text-muted" style={{ marginTop: 8 }}>
-          El backend valida la secuencia oficial (pendiente → activo → vencido → recogido →
-          terminado, con cancelado como alternativa) y rechaza transiciones inválidas.
-        </p>
-      </div>
-
-      {/* Renovación — solo admin / encargado_facturacion (backend: ADMIN_O_FACTURACION) */}
       {puedeGestionarFacturacion && (
-        <div className="card">
-          <h2 className="heading-md" style={{ marginBottom: 16 }}>
-            Renovar (RN-REN)
-          </h2>
-
-          <div className="hstack gap-2">
-            <input
-              className="input"
-              style={{ maxWidth: 100 }}
-              type="number"
-              min={1}
-              value={cantidadRenovacion}
-              onChange={(e) => setCantidadRenovacion(Number(e.target.value))}
-            />
-            <select
-              className="input"
-              style={{ maxWidth: 130 }}
-              value={unidadRenovacion}
-              onChange={(e) => setUnidadRenovacion(e.target.value as UnidadTiempo)}
-            >
-              {OPCIONES_UNIDAD_TIEMPO.map((opcion) => {
-                const deshabilitada = !unidadMinimaPermiteUnidadTiempo(
-                  ({ dias: "DIA", semanas: "SEMANA", meses: "MES" } as const)[
-                    unidadMinimaRestrictivaRenovacion
-                  ],
-                  opcion.valor,
-                );
-
-                return (
-                  <option key={opcion.valor} value={opcion.valor} disabled={deshabilitada}>
-                    {opcion.etiqueta}
-                    {deshabilitada ? " (no disponible)" : ""}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
-          <p className="text-sm text-muted" style={{ marginTop: 8 }}>
-            Equivale a {diasRenovacion} día(s). Solo disponible cuando el alquiler está
-            'activo' o 'vencido'.
-          </p>
-
-          {unidadMinimaRestrictivaRenovacion !== "dias" && (
-            <p className="text-sm text-warning">
-              Uno o más productos de este alquiler solo pueden renovarse por{" "}
-              {unidadMinimaRestrictivaRenovacion === "semanas" ? "semana o mes" : "mes"}.
-            </p>
-          )}
-
-          <div className="stack gap-2" style={{ marginTop: 12 }}>
-            <div className="hstack justify-between text-sm">
-              <span>Cargo de renovación (solo productos × tiempo, sin depósito ni transporte)</span>
-              <span>${cargoRenovacionSugerido.toLocaleString("es-CO")}</span>
-            </div>
-
-            <label className="field-label">Nuevo precio total del alquiler</label>
-            <input
-              className="input"
-              type="number"
-              min={0}
-              value={precioTotalTrasRenovacionFinal}
-              onChange={(e) => setPrecioTotalTrasRenovacion(Number(e.target.value))}
-            />
-
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ alignSelf: "flex-start" }}
-              onClick={manejarRenovar}
-            >
-              Renovar
-            </button>
-          </div>
-        </div>
+        <RenovarSection
+          cantidadRenovacion={cantidadRenovacion} setCantidadRenovacion={setCantidadRenovacion}
+          unidadRenovacion={unidadRenovacion} setUnidadRenovacion={setUnidadRenovacion}
+          unidadMinimaRestrictivaRenovacion={unidadMinimaRestrictivaRenovacion}
+          diasRenovacion={diasRenovacion}
+          cargoRenovacionSugerido={cargoRenovacionSugerido}
+          precioTotalTrasRenovacionFinal={precioTotalTrasRenovacionFinal}
+          setPrecioTotalTrasRenovacion={setPrecioTotalTrasRenovacion}
+          manejarRenovar={manejarRenovar}
+        />
       )}
 
-      {/* Entregas */}
-      <div className="card">
-        <h2 className="heading-md" style={{ marginBottom: 16 }}>
-          Entregas
-        </h2>
-
-        <div className="stack gap-2" style={{ marginBottom: 16 }}>
-          {entregas.length === 0 && (
-            <p className="text-muted text-sm">Aún no hay entregas registradas.</p>
-          )}
-          {entregas.map((e) => (
-            <div key={e.id_logistica_alquiler} className="card text-sm">
-              <p>
-                {e.fecha_gasto} — {e.nombres_logistico}
-              </p>
-              {e.observaciones_logistica_alquiler && (
-                <p className="text-muted">{e.observaciones_logistica_alquiler}</p>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="stack gap-2">
-          <input
-            className="input"
-            placeholder="Observaciones de la entrega (opcional)"
-            value={observacionesEntrega}
-            onChange={(e) => setObservacionesEntrega(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn btn-primary"
-            style={{ alignSelf: "flex-start" }}
-            onClick={manejarRegistrarEntrega}
-          >
-            Registrar entrega
-          </button>
-        </div>
-      </div>
-
-      {/* Recogidas */}
-      <div className="card">
-        <h2 className="heading-md" style={{ marginBottom: 16 }}>
-          Recogidas
-        </h2>
-
-        <div className="stack gap-2" style={{ marginBottom: 16 }}>
-          {recogidas.length === 0 && (
-            <p className="text-muted text-sm">Aún no hay recogidas registradas.</p>
-          )}
-          {recogidas.map((r) => (
-            <div key={r.id_logistica_alquiler} className="card text-sm">
-              <p>
-                {r.fecha_gasto} — {r.nombres_logistico}
-              </p>
-              {r.observaciones_logistica_alquiler && (
-                <p className="text-muted">{r.observaciones_logistica_alquiler}</p>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="stack gap-2">
-          <input
-            className="input"
-            placeholder="Observaciones de la recogida (opcional)"
-            value={observacionesRecogida}
-            onChange={(e) => setObservacionesRecogida(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn btn-primary"
-            style={{ alignSelf: "flex-start" }}
-            onClick={manejarRegistrarRecogida}
-          >
-            Registrar recogida
-          </button>
-        </div>
-
-        <p className="text-sm text-muted" style={{ marginTop: 8 }}>
-          RN-LOG-04: no se permite registrar una recogida sin una entrega previa.
-        </p>
-      </div>
+      <LogisticaSection
+        entregas={entregas} recogidas={recogidas}
+        observacionesEntrega={observacionesEntrega} setObservacionesEntrega={setObservacionesEntrega}
+        manejarRegistrarEntrega={manejarRegistrarEntrega}
+        observacionesRecogida={observacionesRecogida} setObservacionesRecogida={setObservacionesRecogida}
+        manejarRegistrarRecogida={manejarRegistrarRecogida}
+      />
     </div>
   );
 }

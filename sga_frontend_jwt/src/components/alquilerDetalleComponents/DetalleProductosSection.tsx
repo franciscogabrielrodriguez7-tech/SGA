@@ -30,7 +30,7 @@ export function DetalleProductosSection({ detallesLinea }: DetalleProductosSecti
                 <td>
                   {d.es_producto_extra
                     ? `Sí ($${d.precio_base_extra.toLocaleString("es-CO")} c/u)`
-                    : "No"}
+                    : `No ($${d.precio_base_producto.toLocaleString("es-CO")} c/u)`}
                 </td>
               </tr>
             ))}

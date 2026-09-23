@@ -330,7 +330,9 @@ export function CrearAlquiler() {
             cantidad_productos: d.cantidad,
             precio_conjunto: productoActual
               ? calcularPrecioConjunto(
-                  productoActual.precio_base_producto,
+                  d.esExtra
+                    ? productoActual.precio_base_extra
+                    : productoActual.precio_base_producto,
                   productoActual.unidad_minima_alquiler,
                   d.cantidad,
                   tiempoAlquilerDias,

@@ -86,7 +86,7 @@ def listar_detalles_por_alquiler(db: Session, id_alquiler: int):
     sql = text("""
         SELECT
             d.id_detalle_alquiler, d.id_alquiler, d.id_producto,
-            p.nombre_producto, p.precio_base_producto, p.unidad_minima_alquiler,
+            p.nombre_producto, p.precio_base_producto, p.precio_base_extra, p.unidad_minima_alquiler,
             d.cantidad_productos, d.precio_conjunto,
             d.es_producto_extra, d.estado_registro, d.fecha_creacion,
             d.fecha_actualizacion

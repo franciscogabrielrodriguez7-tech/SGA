@@ -13,7 +13,7 @@ interface RenovarSectionProps {
   diasRenovacion: number;
   cargoRenovacionSugerido: number;
   precioTotalTrasRenovacionFinal: number;
-  setPrecioTotalTrasRenovacion: (v: number) => void;
+  setPrecioTotalTrasRenovacion: (v: number | null) => void;
   manejarRenovar: () => void;
 }
 

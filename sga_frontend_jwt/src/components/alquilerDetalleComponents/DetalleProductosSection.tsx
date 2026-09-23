@@ -27,7 +27,11 @@ export function DetalleProductosSection({ detallesLinea }: DetalleProductosSecti
                 <td>{d.nombre_producto}</td>
                 <td>{d.cantidad_productos}</td>
                 <td>${d.precio_conjunto.toLocaleString("es-CO")}</td>
-                <td>{d.es_producto_extra ? "Sí" : "No"}</td>
+                <td>
+                  {d.es_producto_extra
+                    ? `Sí ($${d.precio_base_extra.toLocaleString("es-CO")} c/u)`
+                    : "No"}
+                </td>
               </tr>
             ))}
           </tbody>

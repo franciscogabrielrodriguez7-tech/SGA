@@ -110,6 +110,7 @@ export interface DetalleAlquilerLinea {
   id_producto: number;
   nombre_producto: string;
   precio_base_producto: number;
+  precio_base_extra: number;
   unidad_minima_alquiler: UnidadMinimaAlquiler;
   cantidad_productos: number;
   precio_conjunto: number;

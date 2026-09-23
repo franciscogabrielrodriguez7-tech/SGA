@@ -263,7 +263,7 @@ export function AlquilerDetalle() {
 
       <DatosGeneralesSection alquiler={alquiler} />
 
-      <DetalleProductosSection detallesLinea={alquiler.detalles} />
+      <DetalleProductosSection detallesLinea={detallesLinea} />
 
       <CambiarEstadoSection
         nuevoEstado={nuevoEstado} setNuevoEstado={setNuevoEstado}

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, TIMESTAMP, CheckConstraint, text
+from sqlalchemy import Column, Integer, String, Numeric, Boolean, TIMESTAMP, CheckConstraint, Index, text
 
 from app.config.database import Base
 
@@ -55,6 +55,12 @@ class Producto(Base):
         CheckConstraint(
             "precio_base_extra >= 0",
             name="chk_producto_precio_extra",
+        ),
+        # Autocompletado y búsqueda de productos por nombre (solo activos)
+        Index(
+            "idx_producto_nombre",
+            "nombre_producto",
+            postgresql_where=text("estado_registro IS TRUE"),
         ),
     )
 

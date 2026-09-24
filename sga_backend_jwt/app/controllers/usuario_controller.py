@@ -247,10 +247,10 @@ def login_usuario(
         return None
 
     if resultado.rol_usuario == "cliente":
-        raise ValueError("Los usuarios con rol 'cliente' no tienen acceso al sistema")
+        return None
 
     if not resultado.estado_registro:
-        raise ValueError("El usuario está desactivado y no puede iniciar sesión")
+        return None
 
     if not verificar_contrasena(contrasena_plana, resultado.contrasena_usuario):
         return None

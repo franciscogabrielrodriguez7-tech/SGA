@@ -2,14 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { authApi } from "../../api/auth";
-import { ApiError } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { toaster } from "../../components/ui/toaster";
-import { phoneValidation } from "../../utils/validations";
 import "./Login.css";
 
 export function Login() {
-  const [telefono, setTelefono] = useState("");
+  const [identificador, setIdentificador] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
   const [cargando, setCargando] = useState(false);
@@ -20,20 +18,10 @@ export function Login() {
   const manejarSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!telefono || !contrasena) {
+    if (!identificador.trim() || !contrasena.trim()) {
       toaster.create({
-        title: "Faltan datos",
-        description: "Ingresa teléfono y contraseña.",
-        type: "warning",
-      });
-      return;
-    }
-
-    const valRes = phoneValidation.safeParse(telefono);
-    if (!valRes.success) {
-      toaster.create({
-        title: "Teléfono inválido",
-        description: valRes.error.errors[0].message,
+        title: "Faltan credenciales",
+        description: "Ingresa tu teléfono o email y tu contraseña.",
         type: "warning",
       });
       return;
@@ -41,11 +29,14 @@ export function Login() {
 
     setCargando(true);
 
+    // Detectar si el identificador es email (contiene @) o teléfono.
+    const esEmail = identificador.includes("@");
+    const payload = esEmail
+      ? { email_usuario: identificador.trim(), contrasena_usuario: contrasena }
+      : { telefono_usuario: identificador.trim(), contrasena_usuario: contrasena };
+
     try {
-      const respuesta = await authApi.login({
-        telefono_usuario: telefono,
-        contrasena_usuario: contrasena,
-      });
+      const respuesta = await authApi.login(payload);
 
       iniciarSesion(respuesta);
 
@@ -55,15 +46,12 @@ export function Login() {
       });
 
       navigate("/");
-    } catch (error) {
-      const mensaje =
-        error instanceof ApiError
-          ? error.message
-          : "No se pudo iniciar sesión.";
-
+    } catch {
+      // Mensaje genérico siempre — nunca revelar si el usuario existe
+      // o si la contraseña es la que falla (buena práctica de seguridad).
       toaster.create({
-        title: "Error al iniciar sesión",
-        description: mensaje,
+        title: "Credenciales incorrectas",
+        description: "El teléfono, email o contraseña no coinciden.",
         type: "error",
       });
     } finally {
@@ -82,12 +70,13 @@ export function Login() {
         </div>
 
         <div>
-          <label className="field-label">Teléfono</label>
+          <label className="field-label">Teléfono o Email</label>
           <input
             className="input"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            placeholder="3001234567"
+            value={identificador}
+            onChange={(e) => setIdentificador(e.target.value)}
+            placeholder="3001234567 o correo@empresa.com"
+            autoComplete="username"
             autoFocus
           />
         </div>

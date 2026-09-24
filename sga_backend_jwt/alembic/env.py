@@ -20,12 +20,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.config.database import Base
 from app.config.settings import DATABASE_URL
-from app.models.usuario import Usuario
-from app.models.producto import Producto
-from app.models.alquiler import Alquiler
-from app.models.detalle_alquiler import DetalleAlquiler
-from app.models.logistica_alquiler import LogisticaAlquiler
-from app.models.logistica_alquiler_alquiler import LogisticaAlquilerAlquiler
+# Importar el paquete de modelos activa todos los __init__.py y registra
+# cada modelo en Base.metadata. Si agregas un modelo nuevo, solo debes
+# importarlo en app/models/__init__.py — aquí no hay que tocar nada.
+import app.models  # noqa: F401
 
 # add your model's MetaData object here
 # for 'autogenerate' support

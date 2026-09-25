@@ -9,19 +9,6 @@ from app.utils.audit_context import set_audit_context
 from app.utils.db_errors import extraer_mensaje_negocio
 
 
-SELECT_USUARIO_CAMPOS = """
-    id_usuario,
-    rol_usuario,
-    nombres_usuario,
-    apellidos_usuario,
-    email_usuario,
-    telefono_usuario,
-    tipo_documento,
-    estado_registro,
-    fecha_creacion,
-    fecha_actualizacion
-"""
-
 
 # =========================================================
 # CREAR USUARIO (personal interno)
@@ -29,29 +16,14 @@ SELECT_USUARIO_CAMPOS = """
 
 def crear_usuario(db: Session, datos, usuario_actual):
 
-    existente = db.execute(
-        text("SELECT id_usuario FROM usuario WHERE id_usuario = :id_usuario"),
-        {"id_usuario": datos.id_usuario}
-    ).first()
-
-    if existente:
+    if db.query(Usuario).filter(Usuario.id_usuario == datos.id_usuario).first():
         raise ValueError("Ya existe un usuario registrado con ese id_usuario")
 
-    telefono_existente = db.execute(
-        text("SELECT id_usuario FROM usuario WHERE telefono_usuario = :telefono"),
-        {"telefono": datos.telefono_usuario}
-    ).first()
-
-    if telefono_existente:
+    if db.query(Usuario).filter(Usuario.telefono_usuario == datos.telefono_usuario).first():
         raise ValueError("Ya existe un usuario registrado con ese número de teléfono")
 
     if datos.email_usuario:
-        email_existente = db.execute(
-            text("SELECT id_usuario FROM usuario WHERE email_usuario = :email"),
-            {"email": datos.email_usuario}
-        ).first()
-
-        if email_existente:
+        if db.query(Usuario).filter(Usuario.email_usuario == datos.email_usuario).first():
             raise ValueError("Ya existe un usuario registrado con ese correo electrónico")
 
     try:
@@ -85,14 +57,7 @@ def crear_usuario(db: Session, datos, usuario_actual):
 
 def obtener_usuario(db: Session, id_usuario: str):
 
-    sql = text(f"SELECT {SELECT_USUARIO_CAMPOS} FROM usuario WHERE id_usuario = :id_usuario")
-
-    resultado = db.execute(sql, {"id_usuario": id_usuario}).first()
-
-    if not resultado:
-        return None
-
-    return dict(resultado._mapping)
+    return db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
 
 
 # =========================================================
@@ -107,21 +72,15 @@ def obtener_usuario(db: Session, id_usuario: str):
 
 def obtener_usuarios(db: Session, rol_usuario: str = None):
 
-    sql = f"SELECT {SELECT_USUARIO_CAMPOS} FROM usuario"
-
-    parametros = {}
+    query = db.query(Usuario)
 
     if rol_usuario:
-        sql += " WHERE rol_usuario = :rol_usuario"
-        parametros["rol_usuario"] = rol_usuario
+        query = query.filter(Usuario.rol_usuario == rol_usuario)
     else:
-        sql += " WHERE rol_usuario <> 'cliente'"
+        # Por defecto excluye clientes; se gestionan en /api/sga/clientes
+        query = query.filter(Usuario.rol_usuario != "cliente")
 
-    sql += " ORDER BY nombres_usuario, apellidos_usuario"
-
-    resultado = db.execute(text(sql), parametros)
-
-    return [dict(row._mapping) for row in resultado]
+    return query.order_by(Usuario.nombres_usuario, Usuario.apellidos_usuario).all()
 
 
 # =========================================================

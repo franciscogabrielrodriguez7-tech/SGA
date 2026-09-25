@@ -59,6 +59,11 @@ def crear_gasto(db: Session, datos, usuario_actual):
 
 def obtener_gastos(db: Session, id_alquiler: int = None):
 
+    # [NOTA ARQUITECTURA]: Se utiliza SQL crudo aquí para manejar de 
+    # forma directa y optimizada las agregaciones complejas (array_agg)
+    # y los múltiples JOINs. Aunque es viable pasarlo a ORM (db.query),
+    # el SQL crudo ofrece mayor control sobre el plan de ejecución en 
+    # reportes estadísticos o listados complejos como este.
     sql = """
         SELECT
             l.id_logistica_alquiler,

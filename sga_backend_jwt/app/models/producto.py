@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, TIMESTAMP, CheckConstraint, text
+from sqlalchemy import Column, Integer, String, Numeric, Boolean, TIMESTAMP, CheckConstraint, Index, text
 
 from app.config.database import Base
 
@@ -26,6 +26,11 @@ class Producto(Base):
     # lo mantienen sincronizado los triggers de detalle_alquiler
     # (fn_sincronizar_stock_producto). El backend solo lo lee.
     stock_alquilado = Column(Integer, nullable=False, server_default="0")
+
+    @property
+    def stock_disponible(self) -> int:
+        """Calculado en Python: equivale a (stock_total - stock_alquilado) del SQL original."""
+        return (self.stock_total or 0) - (self.stock_alquilado or 0)
 
     # Unidad mínima con la que puede alquilarse el producto. Ver
     # chk_producto_unidad_minima_alquiler en 01_tablas.sql y
@@ -55,6 +60,12 @@ class Producto(Base):
         CheckConstraint(
             "precio_base_extra >= 0",
             name="chk_producto_precio_extra",
+        ),
+        # Autocompletado y búsqueda de productos por nombre (solo activos)
+        Index(
+            "idx_producto_nombre",
+            "nombre_producto",
+            postgresql_where=text("estado_registro IS TRUE"),
         ),
     )
 

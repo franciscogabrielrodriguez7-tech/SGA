@@ -1,4 +1,3 @@
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import DBAPIError
 
@@ -6,21 +5,6 @@ from app.models.producto import Producto
 from app.utils.audit_context import set_audit_context
 from app.utils.db_errors import extraer_mensaje_negocio
 
-
-SELECT_PRODUCTO_CAMPOS = """
-    id_producto,
-    nombre_producto,
-    descripcion_producto,
-    precio_base_producto,
-    precio_base_extra,
-    unidad_minima_alquiler,
-    stock_total,
-    stock_alquilado,
-    (stock_total - stock_alquilado) AS stock_disponible,
-    estado_registro,
-    fecha_creacion,
-    fecha_actualizacion
-"""
 
 
 def crear_producto(db: Session, datos, usuario_actual):
@@ -54,28 +38,17 @@ def crear_producto(db: Session, datos, usuario_actual):
 
 def obtener_productos(db: Session, solo_activos: bool = True):
 
-    sql = f"SELECT {SELECT_PRODUCTO_CAMPOS} FROM producto"
+    query = db.query(Producto)
 
     if solo_activos:
-        sql += " WHERE estado_registro = TRUE"
+        query = query.filter(Producto.estado_registro == True)  # noqa: E712
 
-    sql += " ORDER BY nombre_producto"
-
-    resultado = db.execute(text(sql))
-
-    return [dict(row._mapping) for row in resultado]
+    return query.order_by(Producto.nombre_producto).all()
 
 
 def obtener_producto(db: Session, id_producto: int):
 
-    sql = text(f"SELECT {SELECT_PRODUCTO_CAMPOS} FROM producto WHERE id_producto = :id_producto")
-
-    resultado = db.execute(sql, {"id_producto": id_producto}).first()
-
-    if not resultado:
-        return None
-
-    return dict(resultado._mapping)
+    return db.query(Producto).filter(Producto.id_producto == id_producto).first()
 
 
 def actualizar_producto(db: Session, id_producto: int, datos, usuario_actual):

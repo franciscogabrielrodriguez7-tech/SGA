@@ -4,19 +4,23 @@ import { productosApi } from "../../api/productos";
 import { ApiError } from "../../api/client";
 import type { Producto, UnidadMinimaAlquiler } from "../../interfaces/Producto";
 import { toaster } from "../../components/ui/toaster";
-import { InputMoneda } from "../../components/inputs/InputMoneda";
 import { useAuth } from "../../context/AuthContext";
 import { SOLO_ADMIN, tienePermiso } from "../../utils/permisos";
+
+import { CrearProductoSection } from "../../components/productosComponents/CrearProductoSection";
+import { ListaProductosDesktop } from "../../components/productosComponents/ListaProductosDesktop";
+import { ListaProductosMobile } from "../../components/productosComponents/ListaProductosMobile";
+import { ModalEditarProducto } from "../../components/productosComponents/ModalEditarProducto";
 
 export function Productos() {
   const { usuario } = useAuth();
   // POST/PATCH /productos son SOLO_ADMIN en el backend
-  // (app/routes/producto_routes.py): encargado_facturacion y
-  // encargado_logistico solo pueden consultar (STAFF_INTERNO).
   const puedeGestionar = tienePermiso(usuario?.rol_usuario, SOLO_ADMIN);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [mostrarInactivos, setMostrarInactivos] = useState(false);
 
+  // Form states (Crear)
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precioBase, setPrecioBase] = useState(0);
@@ -25,10 +29,21 @@ export function Productos() {
   const [unidadMinima, setUnidadMinima] = useState<UnidadMinimaAlquiler>("DIA");
   const [creando, setCreando] = useState(false);
 
+  // Modal states (Editar)
+  const [productoEditando, setProductoEditando] = useState<Producto | null>(null);
+  const [editNombre, setEditNombre] = useState("");
+  const [editDescripcion, setEditDescripcion] = useState("");
+  const [editPrecioBase, setEditPrecioBase] = useState(0);
+  const [editPrecioExtra, setEditPrecioExtra] = useState(0);
+  const [editStockTotal, setEditStockTotal] = useState(1);
+  const [editUnidadMinima, setEditUnidadMinima] = useState<UnidadMinimaAlquiler>("DIA");
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
+  const [cambiandoEstado, setCambiandoEstado] = useState(false);
+
   const cargar = () => {
     setCargando(true);
     productosApi
-      .listar()
+      .listar(!mostrarInactivos)
       .then(setProductos)
       .catch((error) => {
         const mensaje = error instanceof ApiError ? error.message : "Error al cargar productos";
@@ -37,7 +52,7 @@ export function Productos() {
       .finally(() => setCargando(false));
   };
 
-  useEffect(cargar, []);
+  useEffect(cargar, [mostrarInactivos]);
 
   const manejarCrear = async () => {
     if (!nombre || !descripcion || stockTotal < 1) {
@@ -80,118 +95,125 @@ export function Productos() {
     }
   };
 
+  const abrirModalEdicion = (producto: Producto) => {
+    if (!puedeGestionar) return;
+    setProductoEditando(producto);
+    setEditNombre(producto.nombre_producto);
+    setEditDescripcion(producto.descripcion_producto || "");
+    setEditPrecioBase(producto.precio_base_producto);
+    setEditPrecioExtra(producto.precio_base_extra);
+    setEditStockTotal(producto.stock_total);
+    setEditUnidadMinima(producto.unidad_minima_alquiler);
+  };
+
+  const cerrarModal = () => {
+    setProductoEditando(null);
+  };
+
+  const manejarGuardarEdicion = async () => {
+    if (!productoEditando) return;
+    if (!editNombre || editStockTotal < 1) {
+      toaster.create({ title: "Atención", description: "Nombre y stock total (mayor a 0) son obligatorios.", type: "warning" });
+      return;
+    }
+
+    setGuardandoEdicion(true);
+    try {
+      await productosApi.actualizar(productoEditando.id_producto, {
+        nombre_producto: editNombre,
+        descripcion_producto: editDescripcion,
+        precio_base_producto: editPrecioBase,
+        precio_base_extra: editPrecioExtra,
+        stock_total: editStockTotal,
+        unidad_minima_alquiler: editUnidadMinima,
+      });
+      toaster.create({ title: "Producto actualizado", type: "success" });
+      cargar();
+      cerrarModal();
+    } catch (error) {
+      const mensaje = error instanceof ApiError ? error.message : "Error al actualizar producto";
+      toaster.create({ title: "Error", description: mensaje, type: "error" });
+    } finally {
+      setGuardandoEdicion(false);
+    }
+  };
+
+  const manejarCambiarEstado = async () => {
+    if (!productoEditando) return;
+    
+    const nuevoEstado = !productoEditando.estado_registro;
+    const accion = nuevoEstado ? "Activar" : "Desactivar";
+
+    if (!window.confirm(`¿Estás seguro de ${accion.toLowerCase()} este producto?`)) return;
+
+    setCambiandoEstado(true);
+    try {
+      await productosApi.cambiarEstado(productoEditando.id_producto, nuevoEstado);
+      toaster.create({ title: `Producto ${nuevoEstado ? 'activado' : 'desactivado'} con éxito`, type: "success" });
+      cargar();
+      cerrarModal();
+    } catch (error) {
+      const mensaje = error instanceof ApiError ? error.message : `Error al ${accion.toLowerCase()} el producto`;
+      toaster.create({ title: "Error", description: mensaje, type: "error" });
+    } finally {
+      setCambiandoEstado(false);
+    }
+  };
+
   return (
     <div className="stack gap-8">
       <h1 className="heading-xl">Productos</h1>
 
       {puedeGestionar && (
-        <div className="card">
-          <h2 className="heading-md" style={{ marginBottom: 16 }}>
-            Nuevo producto
-          </h2>
-
-          <div className="grid grid-cols-1 grid-cols-2-md" style={{ marginBottom: 16 }}>
-            <div>
-              <label className="field-label">Nombre</label>
-              <input className="input" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Descripción</label>
-              <input className="input" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="field-label">Precio base</label>
-              <InputMoneda value={precioBase} onChange={setPrecioBase} />
-            </div>
-
-            <div>
-              <label className="field-label">Precio extra</label>
-              <InputMoneda
-                value={precioExtra ?? precioBase}
-                onChange={setPrecioExtra}
-              />
-              <p className="text-sm text-muted" style={{ marginTop: 4 }}>
-                Precio cuando se añade como accesorio extra. Si no se cambia, usa el precio base.
-              </p>
-            </div>
-
-            <div>
-              <label className="field-label">Unidad mínima de alquiler</label>
-              <select
-                className="input"
-                value={unidadMinima}
-                onChange={(e) => setUnidadMinima(e.target.value as UnidadMinimaAlquiler)}
-              >
-                <option value="DIA">Día (precio base es por día)</option>
-                <option value="SEMANA">Semana (precio base es por semana)</option>
-                <option value="MES">Mes (precio base es por mes)</option>
-              </select>
-              <p className="text-sm text-muted" style={{ marginTop: 4 }}>
-                Un producto solo puede alquilarse en su unidad mínima o una superior
-                (ej. "Semana" también permite "Mes", pero no "Día").
-              </p>
-            </div>
-
-            <div>
-              <label className="field-label">Stock total</label>
-              <input
-                className="input"
-                type="number"
-                min={1}
-                value={stockTotal}
-                onChange={(e) => setStockTotal(Number(e.target.value))}
-              />
-            </div>
-          </div>
-
-          <button type="button" className="btn btn-primary" disabled={creando} onClick={manejarCrear}>
-            {creando ? "Creando..." : "Crear producto"}
-          </button>
-        </div>
+        <CrearProductoSection
+          nombre={nombre} setNombre={setNombre}
+          descripcion={descripcion} setDescripcion={setDescripcion}
+          precioBase={precioBase} setPrecioBase={setPrecioBase}
+          precioExtra={precioExtra} setPrecioExtra={setPrecioExtra}
+          unidadMinima={unidadMinima} setUnidadMinima={setUnidadMinima}
+          stockTotal={stockTotal} setStockTotal={setStockTotal}
+          creando={creando} manejarCrear={manejarCrear}
+        />
       )}
 
-      <div className="table-wrap">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Precio base</th>
-              <th>Precio extra</th>
-              <th>Unidad</th>
-              <th>Stock total</th>
-              <th>Alquilado</th>
-              <th>Disponible</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((p) => (
-              <tr key={p.id_producto}>
-                <td>{p.id_producto}</td>
-                <td>{p.nombre_producto}</td>
-                <td>${p.precio_base_producto.toLocaleString("es-CO")}</td>
-                <td>${p.precio_base_extra.toLocaleString("es-CO")}</td>
-                <td><span className="badge">{{ DIA: "Día", SEMANA: "Semana", MES: "Mes" }[p.unidad_minima_alquiler]}</span></td>
-                <td>{p.stock_total}</td>
-                <td>{p.stock_alquilado}</td>
-                <td>{p.stock_disponible}</td>
-                <td>
-                  <span className={`badge ${p.estado_registro ? "" : "badge-gray"}`}>
-                    {p.estado_registro ? "Activo" : "Inactivo"}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {puedeGestionar && (
+        <label className="checkbox-row" style={{ alignSelf: "flex-end" }}>
+          <input 
+            type="checkbox" 
+            checked={mostrarInactivos} 
+            onChange={(e) => setMostrarInactivos(e.target.checked)} 
+          />
+          <span className="text-sm">Mostrar productos inactivos</span>
+        </label>
+      )}
 
-        {!cargando && productos.length === 0 && (
-          <p className="table-empty">No hay productos registrados.</p>
-        )}
-      </div>
+      <ListaProductosDesktop
+        productos={productos}
+        cargando={cargando}
+        puedeGestionar={puedeGestionar}
+        abrirModalEdicion={abrirModalEdicion}
+      />
+
+      <ListaProductosMobile
+        productos={productos}
+        cargando={cargando}
+        puedeGestionar={puedeGestionar}
+        abrirModalEdicion={abrirModalEdicion}
+      />
+
+      <ModalEditarProducto
+        productoEditando={productoEditando}
+        editNombre={editNombre} setEditNombre={setEditNombre}
+        editDescripcion={editDescripcion} setEditDescripcion={setEditDescripcion}
+        editPrecioBase={editPrecioBase} setEditPrecioBase={setEditPrecioBase}
+        editPrecioExtra={editPrecioExtra} setEditPrecioExtra={setEditPrecioExtra}
+        editUnidadMinima={editUnidadMinima} setEditUnidadMinima={setEditUnidadMinima}
+        editStockTotal={editStockTotal} setEditStockTotal={setEditStockTotal}
+        guardandoEdicion={guardandoEdicion} cambiandoEstado={cambiandoEstado}
+        manejarCambiarEstado={manejarCambiarEstado} manejarGuardarEdicion={manejarGuardarEdicion}
+        cerrarModal={cerrarModal}
+      />
+
     </div>
   );
 }

@@ -31,4 +31,11 @@ export const productosApi = {
       },
     );
   },
+
+  cambiarEstado(idProducto: number, estado: boolean) {
+    return apiRequest<Producto>(`/productos/${idProducto}/estado`, {
+      method: "PATCH",
+      body: { estado_registro: estado },
+    });
+  },
 };

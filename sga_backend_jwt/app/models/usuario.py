@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, TIMESTAMP, text
+from sqlalchemy import Column, String, Boolean, TIMESTAMP, Index, text
 
 from app.config.database import Base
 
@@ -31,4 +31,19 @@ class Usuario(Base):
 
     fecha_actualizacion = Column(
         TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP")
+    )
+
+    __table_args__ = (
+        # Filtro por rol en el listado de usuarios (solo usuarios activos)
+        Index(
+            "idx_usuario_rol",
+            "rol_usuario",
+            postgresql_where=text("estado_registro IS TRUE"),
+        ),
+        # Acelera el login por email (solo filas donde email no es null)
+        Index(
+            "idx_usuario_email",
+            "email_usuario",
+            postgresql_where=text("email_usuario IS NOT NULL"),
+        ),
     )

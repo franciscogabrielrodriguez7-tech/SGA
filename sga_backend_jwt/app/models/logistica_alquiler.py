@@ -8,6 +8,7 @@ from sqlalchemy import (
     Text,
     ForeignKey,
     CheckConstraint,
+    Index,
     text,
 )
 
@@ -34,7 +35,9 @@ class LogisticaAlquiler(Base):
 
     # CRÍTICO: jamás se recibe del payload — se inyecta desde el JWT.
     id_usuario_logistico = Column(
-        String(20), ForeignKey("usuario.id_usuario"), nullable=False
+        String(20),
+        ForeignKey("usuario.id_usuario", name="fk_logistica_usuario", onupdate="CASCADE", ondelete="RESTRICT"),
+        nullable=False
     )
 
     # 'ENTREGA' | 'RECOGIDA' | 'GASTO'
@@ -65,4 +68,6 @@ class LogisticaAlquiler(Base):
             "tipo_movimiento IN ('ENTREGA', 'RECOGIDA', 'GASTO')",
             name="chk_logistica_tipo_movimiento",
         ),
+        # Reportes de actividades asignadas a un empleado logístico
+        Index("idx_logistica_usuario", "id_usuario_logistico"),
     )

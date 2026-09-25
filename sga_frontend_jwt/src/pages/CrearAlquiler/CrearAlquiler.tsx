@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { ProductoSelect } from "../../components/productos/ProductoSelect";
-import { InputMoneda } from "../../components/inputs/InputMoneda";
 import { toaster } from "../../components/ui/toaster";
+import { ClienteSection } from "../../components/alquilerComponents/ClienteSection";
+import { AlquilerSection } from "../../components/alquilerComponents/AlquilerSection";
+import { LogisticaSection } from "../../components/alquilerComponents/LogisticaSection";
+import { ProductosSection } from "../../components/alquilerComponents/ProductosSection";
+import { ResumenAlquiler } from "../../components/alquilerComponents/ResumenAlquiler";
 
 import { productosApi } from "../../api/productos";
 import { clientesApi } from "../../api/clientes";
@@ -18,7 +21,6 @@ import type { Producto } from "../../interfaces/Producto";
 import { validarAlquiler } from "../../utils/validacionesAlquiler";
 import { obtenerFechaActual } from "../../components/inputs/inputFecha";
 import {
-  OPCIONES_UNIDAD_TIEMPO,
   convertirADias,
   unidadMinimaPermiteUnidadTiempo,
   unidadTiempoMasRestrictiva,
@@ -328,7 +330,9 @@ export function CrearAlquiler() {
             cantidad_productos: d.cantidad,
             precio_conjunto: productoActual
               ? calcularPrecioConjunto(
-                  productoActual.precio_base_producto,
+                  d.esExtra
+                    ? productoActual.precio_base_extra
+                    : productoActual.precio_base_producto,
                   productoActual.unidad_minima_alquiler,
                   d.cantidad,
                   tiempoAlquilerDias,
@@ -377,475 +381,72 @@ export function CrearAlquiler() {
       </div>
 
       {/* Cliente */}
-      <h2 className="heading-lg" style={{ marginBottom: 16 }}>
-        Cliente
-      </h2>
+<ClienteSection
+  datosCliente={datosCliente}
+  setDatosCliente={setDatosCliente}
+  estadoCliente={estadoCliente}
+  buscandoCliente={buscandoCliente}
+  buscarClientePorDocumento={buscarClientePorDocumento}
+  nombresRef={nombresRef}
+  apellidosRef={apellidosRef}
+  telefonoRef={telefonoRef}
+  direccionRef={direccionRef}
+/>
 
-      <div className="card stack gap-4" style={{ marginBottom: 32 }}>
-        <p className="text-bold">Datos del cliente</p>
-
-        {estadoCliente === "encontrado" && (
-          <p className="text-sm text-success">
-            ✓ Cliente encontrado (ya registrado).
-          </p>
-        )}
-        {estadoCliente === "no-encontrado" && (
-          <p className="text-sm text-warning">
-            Cliente no encontrado — se registrará como nuevo al crear el
-            alquiler.
-          </p>
-        )}
-
-        <div className="grid grid-cols-1 grid-cols-2-md">
-          <div>
-            <label className="field-label">Tipo de documento</label>
-            <select
-              className="input"
-              value={datosCliente.tipo_documento}
-              onChange={(e) =>
-                setDatosCliente((actuales) => ({
-                  ...actuales,
-                  tipo_documento: e.target.value as Cliente["tipo_documento"],
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  nombresRef.current?.focus();
-                }
-              }}
-            >
-              <option value="CC">CC</option>
-              <option value="CE">CE</option>
-              <option value="NIT">NIT</option>
-              <option value="PPT">PPT</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="field-label">Número de documento</label>
-            <input
-              className="input"
-              value={datosCliente.id_usuario}
-              onChange={(e) => {
-                const documento = e.target.value;
-                setDatosCliente({
-                  id_usuario: documento,
-                  tipo_documento: "CC",
-                  nombres_usuario: "",
-                  apellidos_usuario: "",
-                  telefono_usuario: "",
-                });
-                setEstadoCliente("sin-verificar");
-              }}
-              onBlur={() => buscarClientePorDocumento(datosCliente.id_usuario)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  buscarClientePorDocumento(datosCliente.id_usuario);
-                }
-              }}
-              placeholder={
-                buscandoCliente ? "Buscando..." : "Número de documento"
-              }
-            />
-          </div>
-
-          <div>
-            <label className="field-label">Nombres</label>
-            <input
-              ref={nombresRef}
-              className="input"
-              value={datosCliente.nombres_usuario}
-              placeholder="Nombres del cliente"
-              onChange={(e) =>
-                setDatosCliente((actuales) => ({
-                  ...actuales,
-                  nombres_usuario: e.target.value,
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  apellidosRef.current?.focus();
-                }
-              }}
-            />
-          </div>
-
-          <div>
-            <label className="field-label">Apellidos</label>
-            <input
-              ref={apellidosRef}
-              className="input"
-              value={datosCliente.apellidos_usuario}
-              placeholder="Apellidos del cliente"
-              onChange={(e) =>
-                setDatosCliente((actuales) => ({
-                  ...actuales,
-                  apellidos_usuario: e.target.value,
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  telefonoRef.current?.focus();
-                }
-              }}
-            />
-          </div>
-
-          <div>
-            <label className="field-label">Teléfono</label>
-            <input
-              maxLength={10}
-              ref={telefonoRef}
-              className="input"
-              value={datosCliente.telefono_usuario}
-              placeholder="Teléfono del cliente"
-              onChange={(e) =>
-                setDatosCliente((actuales) => ({
-                  ...actuales,
-                  telefono_usuario: e.target.value,
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  direccionRef.current?.focus();
-                }
-              }}
-            />
-          </div>
-        </div>
-      </div>
-      {/* Alquiler */}
-      <h2 className="heading-lg" style={{ marginBottom: 16 }}>
-        Alquiler
-      </h2>
-      <div className="card stack gap-4" style={{ marginBottom: 32 }}>
-        <div>
-          <label className="field-label">Dirección</label>
-          <input
-            ref={direccionRef}
-            className="input"
-            placeholder="Dirección"
-            value={direccion}
-            onChange={(e) => setDireccion(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                barrioRef.current?.focus();
-              }
-            }}
-          />
-        </div>
-
-        <div>
-          <label className="field-label">Barrio</label>
-          <input
-            ref={barrioRef}
-            className="input"
-            placeholder="Barrio"
-            value={barrio}
-            onChange={(e) => setBarrio(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                fechaInicioRef.current?.focus();
-              }
-            }}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 grid-cols-2-md">
-          <div>
-            <label className="field-label">Fecha de inicio</label>
-            <input
-              className="input"
-              type="date"
-              ref={fechaInicioRef}
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  tiempoAlquilerRef.current?.focus();
-                }
-              }}
-            />
-          </div>
-
-          <div>
-            <label className="field-label">Tiempo de alquiler</label>
-            <div className="hstack gap-2">
-              <input
-                ref={tiempoAlquilerRef}
-                className="input"
-                type="number"
-                min={1}
-                placeholder="Cantidad"
-                onFocus={(e) => e.target.select()}
-                value={cantidadTiempo}
-                onChange={(e) => setCantidadTiempo(parseInt(e.target.value) || 1)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    depositoRef.current?.focus();
-                  }
-                }}
-              />
-
-              <select
-                className="input"
-                style={{ maxWidth: 130 }}
-                value={unidadTiempo}
-                onChange={(e) => setUnidadTiempo(e.target.value as UnidadTiempo)}
-              >
-                {OPCIONES_UNIDAD_TIEMPO.map((opcion) => {
-                  const deshabilitada = !unidadMinimaPermiteUnidadTiempo(
-                    ({ dias: "DIA", semanas: "SEMANA", meses: "MES" } as const)[
-                      unidadMinimaRestrictiva
-                    ],
-                    opcion.valor,
-                  );
-
-                  return (
-                    <option key={opcion.valor} value={opcion.valor} disabled={deshabilitada}>
-                      {opcion.etiqueta}
-                      {deshabilitada ? " (no disponible)" : ""}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <p className="text-sm text-muted" style={{ marginTop: 4 }}>
-              Equivale a {tiempoAlquilerDias} día(s). El backend siempre guarda la
-              duración en días.
-            </p>
-
-            {unidadMinimaRestrictiva !== "dias" && (
-              <p className="text-sm text-warning" style={{ marginTop: 4 }}>
-                Uno o más productos de este alquiler solo pueden alquilarse por{" "}
-                {unidadMinimaRestrictiva === "semanas" ? "semana o mes" : "mes"}.
-              </p>
-            )}
-
-            <div style={{ marginTop: 16 }}>
-              <label className="field-label">Depósito</label>
-              <InputMoneda
-                ref={depositoRef}
-                value={deposito}
-                onChange={setDeposito}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Logística */}
-      <h2 className="heading-lg" style={{ marginBottom: 16 }}>
-        Logística
-      </h2>
-      <div className="hstack gap-8" style={{ marginBottom: 32 }}>
-        <label className="checkbox-row">
-          <input
-            type="checkbox"
-            checked={seLleva}
-            onChange={(e) => setSeLleva(e.target.checked)}
-          />
-          Se lleva
-        </label>
-
-        <label className="checkbox-row">
-          <input
-            type="checkbox"
-            checked={seRecoge}
-            onChange={(e) => setSeRecoge(e.target.checked)}
-          />
-          Se recoge
-        </label>
-      </div>
-
-      {/* Productos */}
-      <h2 className="heading-lg" style={{ marginBottom: 16 }}>
-        Productos
-      </h2>
-
-      {cargandoProductos && <p className="text-muted">Cargando productos...</p>}
-
-      <div className="stack gap-4" style={{ marginBottom: 32 }}>
-        {detallesProducto.map((detalle, indice) => {
-          const productoActual = productos.find(
-            (p) => p.id_producto === detalle.productoId,
-          );
-          const precioConjunto = productoActual
-            ? calcularPrecioConjunto(
-                productoActual.precio_base_producto,
-                productoActual.unidad_minima_alquiler,
-                detalle.cantidad,
-                tiempoAlquilerDias,
-              )
-            : 0;
-
-          return (
-            <div key={indice} className="card">
-              <div className="grid grid-cols-1 grid-cols-3-md">
-                <div>
-                  <label className="field-label">Producto</label>
-                  <ProductoSelect
-                    productos={productos}
-                    value={detalle.productoId}
-                    onProductoChange={(idProducto) => {
-                      setDetallesProducto((actuales) =>
-                        actuales.map((d, i) =>
-                          i === indice ? { ...d, productoId: idProducto } : d,
-                        ),
-                      );
-                    }}
-                  />
-                  {productoActual && (
-                    <p className="text-sm text-muted" style={{ marginTop: 4 }}>
-                      ${productoActual.precio_base_producto.toLocaleString("es-CO")} /{" "}
-                      {{ DIA: "día", SEMANA: "semana", MES: "mes" }[
-                        productoActual.unidad_minima_alquiler
-                      ]}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="field-label">Cantidad</label>
-                  <input
-                    className="input"
-                    type="number"
-                    min={1}
-                    value={detalle.cantidad}
-                    onChange={(e) => {
-                      const cantidad = Number(e.target.value);
-                      setDetallesProducto((actuales) =>
-                        actuales.map((d, i) =>
-                          i === indice ? { ...d, cantidad } : d,
-                        ),
-                      );
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label className="field-label">Precio conjunto</label>
-                  <input
-                    className="input"
-                    value={`$${precioConjunto.toLocaleString("es-CO")}`}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              <label className="checkbox-row" style={{ marginTop: 16 }}>
-                <input
-                  type="checkbox"
-                  checked={detalle.esExtra}
-                  onChange={(e) => {
-                    const esExtra = e.target.checked;
-                    setDetallesProducto((actuales) =>
-                      actuales.map((d, i) =>
-                        i === indice ? { ...d, esExtra } : d,
-                      ),
-                    );
-                  }}
-                />
-                Producto extra (permite repetir el mismo producto en otra línea)
-              </label>
-
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                style={{ marginTop: 16 }}
-                onClick={() => eliminarProducto(indice)}
-              >
-                Eliminar producto
-              </button>
-            </div>
-          );
-        })}
-
-        <button
-          type="button"
-          className="btn btn-outline"
-          style={{ alignSelf: "flex-start" }}
-          onClick={agregarProducto}
-        >
-          + Agregar producto
-        </button>
-      </div>
-
-      {/* Resumen */}
-      <h2 className="heading-lg" style={{ marginBottom: 16 }}>
-        Resumen del alquiler
-      </h2>
-
-      <div className="card stack gap-3" style={{ marginBottom: 32 }}>
-        <div className="hstack justify-between">
-          <span>Productos</span>
-          <span>${totalProductos.toLocaleString("es-CO")}</span>
-        </div>
-
-        <ul className="stack gap-1" style={{ marginTop: -4, marginBottom: 4, paddingLeft: 20 }}>
-          {detallesProducto.map((detalle, indice) => {
-            const productoActual = productos.find((p) => p.id_producto === detalle.productoId);
-            if (!productoActual) return null;
-
-            const precioUsar = detalle.esExtra
-              ? productoActual.precio_base_extra
-              : productoActual.precio_base_producto;
-
-            const precioConjunto = calcularPrecioConjunto(
-              precioUsar,
-              productoActual.unidad_minima_alquiler,
-              detalle.cantidad,
-              tiempoAlquilerDias,
-            );
-
-            return (
-              <li key={indice} className="hstack justify-between text-sm text-muted">
-                <span>
-                  {detalle.esExtra ? "Extra: " : ""}
-                  {productoActual.nombre_producto} ({detalle.cantidad})
-                </span>
-                <span>${precioConjunto.toLocaleString("es-CO")}</span>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="hstack justify-between">
-          <span>Entrega</span>
-          <span>${costoEntrega.toLocaleString("es-CO")}</span>
-        </div>
-        <div className="hstack justify-between">
-          <span>Recogida</span>
-          <span>${costoRecogida.toLocaleString("es-CO")}</span>
-        </div>
-        <div className="hstack justify-between">
-          <span>Depósito</span>
-          <span>${deposito.toLocaleString("es-CO")}</span>
-        </div>
-        <div className="hstack justify-between text-bold">
-          <span>Precio calculado</span>
-          <span>${precioSugerido.toLocaleString("es-CO")}</span>
-        </div>
-
-        <div style={{ paddingTop: 12 }}>
-          <label className="field-label">Precio final del alquiler</label>
-          <InputMoneda
-            value={precioAlquilerFinal}
-            onChange={(nuevoPrecio) => setPrecioAlquiler(nuevoPrecio)}
-          />
-        </div>
-      </div>
-
+{/* Alquiler */}
+<AlquilerSection
+  direccion={direccion}
+  setDireccion={setDireccion}
+  barrio={barrio}
+  setBarrio={setBarrio}
+  fechaInicio={fechaInicio}
+  setFechaInicio={setFechaInicio}
+  cantidadTiempo={cantidadTiempo}
+  setCantidadTiempo={setCantidadTiempo}
+  unidadTiempo={unidadTiempo}
+  setUnidadTiempo={setUnidadTiempo}
+  deposito={deposito}
+  setDeposito={setDeposito}
+  tiempoAlquilerDias={tiempoAlquilerDias}
+  unidadMinimaRestrictiva={unidadMinimaRestrictiva}
+  direccionRef={direccionRef}
+  barrioRef={barrioRef}
+  fechaInicioRef={fechaInicioRef}
+  tiempoAlquilerRef={tiempoAlquilerRef}
+  depositoRef={depositoRef}
+/>
+{/* Logística */}
+<LogisticaSection
+  seLleva={seLleva}
+  setSeLleva={setSeLleva}
+  seRecoge={seRecoge}
+  setSeRecoge={setSeRecoge}
+/>
+{/* Productos */}
+<ProductosSection
+  productos={productos}
+  cargandoProductos={cargandoProductos}
+  detallesProducto={detallesProducto}
+  setDetallesProducto={setDetallesProducto}
+  tiempoAlquilerDias={tiempoAlquilerDias}
+  eliminarProducto={eliminarProducto}
+  agregarProducto={agregarProducto}
+/>
+{/* Resumen */}
+<ResumenAlquiler
+  cantidadTiempo={cantidadTiempo}
+  unidadTiempo={unidadTiempo}
+  detallesProducto={detallesProducto}
+  productos={productos}
+  tiempoAlquilerDias={tiempoAlquilerDias}
+  totalProductos={totalProductos}
+  costoEntrega={costoEntrega}
+  costoRecogida={costoRecogida}
+  deposito={deposito}
+  precioSugerido={precioSugerido}
+  precioAlquilerFinal={precioAlquilerFinal}
+  setPrecioAlquiler={setPrecioAlquiler}
+/>
       {/* Acciones */}
       <div className="hstack justify-end gap-3">
         <button

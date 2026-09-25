@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, Index
 from app.config.database import Base
 
 
@@ -26,4 +26,9 @@ class LogisticaAlquilerAlquiler(Base):
         Integer,
         ForeignKey("alquiler.id_alquiler", onupdate="CASCADE", ondelete="RESTRICT"),
         primary_key=True,
+    )
+
+    __table_args__ = (
+        # JOIN rápido entre logística y alquiler al filtrar por alquiler
+        Index("idx_logalq_alquiler", "id_alquiler"),
     )

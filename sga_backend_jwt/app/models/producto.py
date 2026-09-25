@@ -27,6 +27,11 @@ class Producto(Base):
     # (fn_sincronizar_stock_producto). El backend solo lo lee.
     stock_alquilado = Column(Integer, nullable=False, server_default="0")
 
+    @property
+    def stock_disponible(self) -> int:
+        """Calculado en Python: equivale a (stock_total - stock_alquilado) del SQL original."""
+        return (self.stock_total or 0) - (self.stock_alquilado or 0)
+
     # Unidad mínima con la que puede alquilarse el producto. Ver
     # chk_producto_unidad_minima_alquiler en 01_tablas.sql y
     # app/utils/unidades.py para la jerarquía DIA < SEMANA < MES.

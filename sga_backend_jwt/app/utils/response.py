@@ -11,6 +11,24 @@ from fastapi.responses import JSONResponse
 # CONVERTIR DATOS A FORMATO JSON
 # =========================================================
 
+def _orm_to_dict(obj) -> dict:
+    """
+    Convierte un objeto ORM de SQLAlchemy a dict, incluyendo @property.
+    Excluye los metadatos internos de SQLAlchemy (_sa_instance_state).
+    """
+    # Atributos de columna (del __dict__ de SQLAlchemy)
+    result = {
+        k: v
+        for k, v in obj.__dict__.items()
+        if not k.startswith("_")
+    }
+    # Añadir @property definidos en el modelo (ej. stock_disponible)
+    for name in dir(type(obj)):
+        if isinstance(getattr(type(obj), name, None), property):
+            result[name] = getattr(obj, name)
+    return result
+
+
 def convertir_json(data: Any):
 
     if isinstance(data, dict):
@@ -30,6 +48,10 @@ def convertir_json(data: Any):
 
     if isinstance(data, Decimal):
         return float(data)
+
+    # Objeto ORM de SQLAlchemy (tiene __tablename__ como señal)
+    if hasattr(data, "__tablename__"):
+        return convertir_json(_orm_to_dict(data))
 
     return data
 

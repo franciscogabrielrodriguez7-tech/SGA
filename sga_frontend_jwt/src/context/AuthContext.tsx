@@ -20,6 +20,7 @@ import {
 
 import type { LoginResponse } from "../interfaces/Usuario";
 import { toaster } from "../components/ui/toaster";
+import { jwtExpirado } from "../utils/jwt";
 
 const STORAGE_KEY = "sga_sesion_usuario";
 
@@ -36,7 +37,22 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<LoginResponse | null>(() => {
     const guardado = localStorage.getItem(STORAGE_KEY);
-    return guardado ? (JSON.parse(guardado) as LoginResponse) : null;
+    if (!guardado) return null;
+
+    try {
+      const datos = JSON.parse(guardado) as LoginResponse;
+      // Si el token ya venció, descartamos la sesión en el arranque para
+      // evitar el flash de 404 que ocurría antes de que llegara el 401
+      // del backend.
+      if (jwtExpirado(datos.access_token)) {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return datos;
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
   });
 
   useEffect(() => {

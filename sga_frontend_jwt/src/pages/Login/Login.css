@@ -1,16 +1,184 @@
+/*
+ * Login.css — Estilos exclusivos de la pantalla de Login.
+ *
+ * DECISIÓN DE DISEÑO (Enfoque 2 — Brand Theme Fijo):
+ * El login mantiene siempre el tema oscuro de la marca, independiente
+ * de la preferencia del sistema o del toggle sol/luna del dashboard.
+ * Las variables de color se declaran en scope local (.login-page) en
+ * lugar de usar var(--color-*) del tema global, para que nunca hereden
+ * ni el modo claro ni el modo oscuro del resto de la aplicación.
+ */
+
+/* ─── Variables de color locales (dark-brand fijos) ──────────────────── */
+.login-page {
+  /* Fondo: gradiente oscuro que va del azul-tinta al cian-oscuro */
+  --_login-bg-from: #0B1220;      /* ink-950 */
+  --_login-bg-to:   #0C3E3D;      /* brand-950 */
+
+  /* Superficie de la tarjeta: cristal semitransparente (glassmorphism) */
+  --_login-surface: rgba(22, 32, 43, 0.75);  /* ink-900 con alpha */
+  --_login-border:  rgba(43, 230, 225, 0.18); /* brand-500 muy sutil */
+  --_login-shadow:  0 24px 64px rgba(11, 18, 32, 0.55),
+                    0 0 0 1px rgba(43, 230, 225, 0.08);
+
+  /* Tipografía */
+  --_login-fg:      #F5F8F8;      /* ink-50 */
+  --_login-muted:   #A9B4BE;      /* ink-300 */
+
+  /* Inputs */
+  --_login-input-bg:      rgba(11, 18, 32, 0.5);
+  --_login-input-border:  rgba(61, 74, 87, 0.8); /* ink-700 */
+  --_login-input-focus:   #2BE6E1;               /* brand-500 */
+
+  /* Botón primario */
+  --_login-btn-bg:      #2BE6E1;
+  --_login-btn-color:   #063C3A;  /* brand-950 — texto oscuro sobre cian */
+  --_login-btn-hover:   #4CE0DB;  /* brand-400 */
+}
+
+/* ─── Layout ──────────────────────────────────────────────────────────── */
 .login-page {
   min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-app);
+
+  /* Gradiente de fondo oscuro */
+  background: linear-gradient(
+    135deg,
+    var(--_login-bg-from) 0%,
+    var(--_login-bg-to) 100%
+  );
+
+  /* Patrón sutil de puntos para dar profundidad */
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(43, 230, 225, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(44, 118, 230, 0.06) 0%, transparent 50%),
+    linear-gradient(135deg, var(--_login-bg-from) 0%, var(--_login-bg-to) 100%);
 }
 
+/* ─── Tarjeta (glassmorphism) ─────────────────────────────────────────── */
 .login-card {
-  width: 360px;
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-8);
+  width: 380px;
+  max-width: calc(100vw - 2rem);
+
+  background: var(--_login-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  border: 1px solid var(--_login-border);
+  border-radius: 20px;
+  box-shadow: var(--_login-shadow);
+  padding: 2.5rem 2rem;
+
+  /* Color de texto local — no hereda del tema global */
+  color: var(--_login-fg);
+
+  animation: login-card-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes login-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ─── Tipografía interna ──────────────────────────────────────────────── */
+.login-card h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #2BE6E1; /* brand-500 siempre */
+}
+
+.login-card p {
+  color: var(--_login-muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.login-card .field-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--_login-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* ─── Inputs (sobreescriben el tema global dentro del login) ──────────── */
+.login-card .input {
+  width: 100%;
+  background: var(--_login-input-bg);
+  border: 1px solid var(--_login-input-border);
+  border-radius: 10px;
+  color: var(--_login-fg);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.login-card .input::placeholder {
+  color: rgba(169, 180, 190, 0.5); /* ink-300 con alpha */
+}
+
+.login-card .input:focus {
+  border-color: var(--_login-input-focus);
+  box-shadow: 0 0 0 3px rgba(43, 230, 225, 0.15);
+}
+
+/* ─── Botón primario del Login ────────────────────────────────────────── */
+.login-card .btn-primary {
+  width: 100%;
+  background: var(--_login-btn-bg);
+  color: var(--_login-btn-color);
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(43, 230, 225, 0.3);
+}
+
+.login-card .btn-primary:hover:not(:disabled) {
+  background: var(--_login-btn-hover);
+  box-shadow: 0 6px 24px rgba(43, 230, 225, 0.45);
+  transform: translateY(-1px);
+}
+
+.login-card .btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-card .btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ─── Botón secundario (ver/ocultar contraseña) ───────────────────────── */
+.login-card .btn-secondary {
+  background: var(--_login-input-bg);
+  border: 1px solid var(--_login-input-border);
+  border-radius: 10px;
+  color: var(--_login-muted);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.login-card .btn-secondary:hover {
+  border-color: var(--_login-input-focus);
+  color: var(--_login-fg);
 }

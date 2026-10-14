@@ -502,21 +502,9 @@ def renovar_alquiler(db: Session, id_alquiler: int, dias: int, usuario_actual, p
         raise ValueError(extraer_mensaje_negocio(error))
 
     # El UPDATE anterior disparó trg_auditoria_alquiler, que insertó un
-    # evento en auditoria_sistema. Se recupera su id para que el
-    # cliente HTTP pueda consultarlo luego vía GET /renovaciones/{id}.
-    id_auditoria = db.execute(
-        text("""
-            SELECT id_auditoria FROM auditoria_sistema
-            WHERE nombre_tabla = 'alquiler' AND id_registro_afectado = :id_alquiler
-            ORDER BY id_auditoria DESC LIMIT 1
-        """),
-        {"id_alquiler": str(id_alquiler)}
-    ).scalar()
-
-    alquiler_actualizado = obtener_alquiler(db, id_alquiler)
-    alquiler_actualizado["id_auditoria_renovacion"] = id_auditoria
-
-    return alquiler_actualizado
+    # evento en auditoria_sistema. El frontend lo muestra a través de
+    # GET /alquileres/{id}/historial (sección "Historial y trazabilidad").
+    return obtener_alquiler(db, id_alquiler)
 
 
 # =========================================================

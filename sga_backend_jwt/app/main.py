@@ -105,12 +105,8 @@ from app.routes.auth_routes import router as auth_router
 from app.routes.usuario_routes import router as usuario_router
 from app.routes.cliente_routes import router as cliente_router
 from app.routes.producto_routes import router as producto_router
-from app.routes.inventario_routes import router as inventario_router
 from app.routes.alquiler_routes import router as alquiler_router
-from app.routes.detalle_alquiler_routes import (
-    router as detalle_alquiler_router,
-    router_renovaciones as renovaciones_router,
-)
+from app.routes.detalle_alquiler_routes import router as detalle_alquiler_router
 from app.routes.gastos_routes import router as gastos_router
 
 
@@ -129,10 +125,8 @@ app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(usuario_router, prefix=API_PREFIX)
 app.include_router(cliente_router, prefix=API_PREFIX)
 app.include_router(producto_router, prefix=API_PREFIX)
-app.include_router(inventario_router, prefix=API_PREFIX)
 app.include_router(alquiler_router, prefix=API_PREFIX)
 app.include_router(detalle_alquiler_router, prefix=API_PREFIX)
-app.include_router(renovaciones_router, prefix=API_PREFIX)
 app.include_router(gastos_router, prefix=API_PREFIX)
 
 

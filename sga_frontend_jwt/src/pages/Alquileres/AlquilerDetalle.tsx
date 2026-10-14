@@ -23,6 +23,7 @@ import { DetalleProductosSection } from "../../components/alquilerDetalleCompone
 import { CambiarEstadoSection } from "../../components/alquilerDetalleComponents/CambiarEstadoSection";
 import { RenovarSection } from "../../components/alquilerDetalleComponents/RenovarSection";
 import { LogisticaSection } from "../../components/alquilerDetalleComponents/LogisticaSection";
+import { HistorialSection } from "../../components/alquilerDetalleComponents/HistorialSection";
 
 export function AlquilerDetalle() {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +36,10 @@ export function AlquilerDetalle() {
   const [entregas, setEntregas] = useState<MovimientoLogistico[]>([]);
   const [recogidas, setRecogidas] = useState<MovimientoLogistico[]>([]);
   const [cargando, setCargando] = useState(true);
+  // Se incrementa tras cada acción que escribe en "alquiler" (y por tanto
+  // genera un evento en auditoria_sistema) para que el historial se recargue.
+  const [recargaHistorial, setRecargaHistorial] = useState(0);
+  const refrescarHistorial = () => setRecargaHistorial((n) => n + 1);
 
   const [nuevoEstado, setNuevoEstado] = useState<EstadoAlquiler | "">("");
   const [cantidadRenovacion, setCantidadRenovacion] = useState(1);
@@ -135,6 +140,7 @@ export function AlquilerDetalle() {
       const actualizado = await alquileresApi.cambiarEstado(idAlquiler, nuevoEstado);
       setAlquiler(actualizado);
       setNuevoEstado("");
+      refrescarHistorial();
 
       toaster.create({
         title: "Estado actualizado",
@@ -157,6 +163,7 @@ export function AlquilerDetalle() {
         precioTotalTrasRenovacionFinal,
       );
       setAlquiler(actualizado);
+      refrescarHistorial();
 
       toaster.create({
         title: "Alquiler renovado",
@@ -187,6 +194,7 @@ export function AlquilerDetalle() {
 
       setObservacionesEntrega("");
       cargarTodo();
+      refrescarHistorial();
     } catch (error) {
       const mensaje =
         error instanceof ApiError ? error.message : "No se pudo registrar la entrega";
@@ -211,6 +219,7 @@ export function AlquilerDetalle() {
 
       setObservacionesRecogida("");
       cargarTodo();
+      refrescarHistorial();
     } catch (error) {
       const mensaje =
         error instanceof ApiError ? error.message : "No se pudo registrar la recogida";
@@ -225,6 +234,7 @@ export function AlquilerDetalle() {
     try {
       const actualizado = await alquileresApi.cancelar(idAlquiler);
       setAlquiler(actualizado);
+      refrescarHistorial();
 
       toaster.create({ title: "Alquiler cancelado", type: "success" });
     } catch (error) {
@@ -292,6 +302,10 @@ export function AlquilerDetalle() {
         observacionesRecogida={observacionesRecogida} setObservacionesRecogida={setObservacionesRecogida}
         manejarRegistrarRecogida={manejarRegistrarRecogida}
       />
+
+      {puedeGestionarFacturacion && (
+        <HistorialSection idAlquiler={idAlquiler} recargaToken={recargaHistorial} />
+      )}
     </div>
   );
 }

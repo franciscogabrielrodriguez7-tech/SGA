@@ -85,7 +85,6 @@ def consultar_producto(id_producto: int, db: Session = Depends(get_db)):
 
 
 @router.patch("/{id_producto}", dependencies=[Depends(requiere_rol(*SOLO_ADMIN))])
-@router.put("/{id_producto}", dependencies=[Depends(requiere_rol(*SOLO_ADMIN))])
 def modificar_producto(
     id_producto: int,
     datos: ProductoUpdate,

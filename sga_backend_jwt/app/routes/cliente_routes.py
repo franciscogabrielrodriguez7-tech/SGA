@@ -87,7 +87,6 @@ def consultar_cliente(id_usuario: str, db: Session = Depends(get_db)):
 
 
 @router.patch("/{id_usuario}", dependencies=[Depends(requiere_rol(*ADMIN_O_FACTURACION))])
-@router.put("/{id_usuario}", dependencies=[Depends(requiere_rol(*ADMIN_O_FACTURACION))])
 def modificar_cliente(
     id_usuario: str,
     datos: ClienteUpdate,

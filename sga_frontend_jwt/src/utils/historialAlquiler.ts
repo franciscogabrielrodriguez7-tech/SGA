@@ -175,13 +175,19 @@ export function clasificarEvento(evento: EventoAuditoriaAlquiler): EventoClasifi
   const despues = evento.datos_nuevos ?? {};
   const modificados = camposModificados(antes, despues);
 
-  // Renovación: aumentó la duración. Si además cambió el precio, se
-  // considera parte de la misma renovación (POST /renovaciones permite
-  // enviar el nuevo total junto con los días).
+  // Renovación: aumentó la duración de un alquiler que ya estaba en obra
+  // ('activo' o 'vencido'). En 'pendiente' los equipos no han salido de
+  // bodega, así que ese aumento es un ajuste del pedido (edición), igual
+  // que como lo trata actualizar_alquiler en el backend. Si además cambió
+  // el precio, se considera parte de la misma renovación.
   const duracionAnterior = aNumero(antes.tiempo_alquiler_dias);
   const duracionNueva = aNumero(despues.tiempo_alquiler_dias);
+  const estabaEnObra = ["activo", "vencido"].includes(String(antes.estado_alquiler ?? ""));
   const esRenovacion =
-    duracionAnterior !== null && duracionNueva !== null && duracionNueva > duracionAnterior;
+    estabaEnObra &&
+    duracionAnterior !== null &&
+    duracionNueva !== null &&
+    duracionNueva > duracionAnterior;
 
   if (esRenovacion) {
     base.categorias.push("renovacion");

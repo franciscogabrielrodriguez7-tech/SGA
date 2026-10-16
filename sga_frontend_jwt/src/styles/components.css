@@ -197,11 +197,28 @@ select.input:focus {
 }
 
 /* ---------------------------------------------------------------------------
-   Utilidades responsive (mismo breakpoint que AppShell: 767px)
+   Utilidades responsive (mismo breakpoint que AppShell: 767px,
+   más breakpoint de detalle: 900px para el layout Main+Sidebar)
    --------------------------------------------------------------------------- */
 
 .show-mobile-cards {
   display: none;
+}
+
+/* hide-on-desktop: visible solo en móvil (<900px) — para la barra de tabs del detalle */
+.hide-on-desktop {
+  display: flex;
+}
+
+@media (min-width: 900px) {
+  .hide-on-desktop {
+    display: none;
+  }
+
+  /* En desktop el contenido de tabs se muestra siempre en el detalle-grid */
+  .show-mobile-cards {
+    display: none !important;
+  }
 }
 
 @media (max-width: 767px) {
@@ -209,6 +226,15 @@ select.input:focus {
     display: none;
   }
 
+  .show-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+}
+
+/* Entre 768px y 899px: show-mobile-cards visible (detalle aún en columna única) */
+@media (min-width: 768px) and (max-width: 899px) {
   .show-mobile-cards {
     display: flex;
     flex-direction: column;
@@ -472,4 +498,60 @@ select.input:focus {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Tarjeta compacta de productos (ProductosCompactoSection — sidebar derecho)
+   --------------------------------------------------------------------------- */
+
+.productos-compacto-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 240px;
+  overflow-y: auto;
+  margin: var(--space-3) 0;
+}
+
+.productos-compacto-lista::-webkit-scrollbar {
+  width: 4px;
+}
+.productos-compacto-lista::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.producto-compacto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+}
+
+.producto-compacto-nombre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.producto-compacto-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+  color: var(--color-fg-default);
+  flex-shrink: 0;
+}
+
+.productos-compacto-footer {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
 }

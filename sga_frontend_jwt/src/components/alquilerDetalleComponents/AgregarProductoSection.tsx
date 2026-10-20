@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type { Producto } from "../../interfaces/Producto";
 import type { DetalleAlquilerLinea } from "../../interfaces/Alquiler";

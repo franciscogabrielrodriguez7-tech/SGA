@@ -222,3 +222,5 @@ node_modules/
 dist/
 .env
 
+# Docker — archivos de entorno con secretos reales (no el .example)
+.env.docker

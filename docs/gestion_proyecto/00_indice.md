@@ -1,9 +1,9 @@
 # SGA — Índice de Gestión del Proyecto
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · commit `12760d4b86d40e0eefa7ef8cc4a9bb68292b476c`
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`
 > **Estructura creada:** 2026-10-28 · Fase 0.2 (organización documental preparatoria)
-> **Estado:** documentos organizados y copiados — pendiente de commit/push (requiere autorización)
+> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` incorporados al árbol de trabajo, pendientes de revisión del propietario y de commit
 
 ---
 
@@ -46,8 +46,10 @@ docs/gestion_proyecto/
 │   ├── DXC-2026-004_frontend_componentes.md
 │   ├── DXC-2026-005_reglas_negocio_rbac.md
 │   └── DXC-2026-006_despliegue_configuracion.md
-├── 05_roadmap/                         ← Planes por etapas (vacío por ahora)
-│   └── .gitkeep
+├── 05_roadmap/                         ← Planeación documental (roadmap RDM- pendiente)
+│   ├── .gitkeep
+│   ├── MAT-2026-001_matriz_maestra_documental.md
+│   └── CHK-2026-001_checklist_tareas_sga.md
 └── 06_evidencias/                      ← Verificaciones y comprobaciones
     ├── EVD-2026-001_verificacion_linea_base_fase01.md
     ├── EVD-2026-002_verificacion_clasificacion_evidencias_fase0_paso03.md
@@ -55,9 +57,10 @@ docs/gestion_proyecto/
 ```
 
 > [!NOTE]
-> Las carpetas `02_consultas_tecnicas/`, `03_decisiones/` y `05_roadmap/` contienen únicamente
+> Las carpetas `02_consultas_tecnicas/` y `03_decisiones/` contienen únicamente
 > un archivo `.gitkeep` vacío para preservar la estructura de directorios en Git sin generar documentos
 > placeholder ficticios (F-39). Se poblarán con su primer documento real cuando corresponda.
+> `05_roadmap/` conserva su `.gitkeep` junto a los documentos de planeación documental (§6).
 
 ---
 
@@ -117,8 +120,16 @@ Cada uno incluye un **banner de vigencia** al inicio.
 
 ## 6. Roadmap
 
-> Carpeta vacía. El plan de etapas y estado de gates se registrará aquí con formato `RDM-AAAA-NNN_slug.md`.
-> No se genera un roadmap nuevo en esta fase.
+Documentos de planeación documental de `05_roadmap/`. Son **documentos vivos**: se actualizan mediante cambios versionados en Git.
+
+| ID | Archivo | Naturaleza | Estado |
+|---|---|---|---|
+| MAT-2026-001 | [MAT-2026-001_matriz_maestra_documental.md](05_roadmap/MAT-2026-001_matriz_maestra_documental.md) | Matriz maestra documental: inventario de documentos, catálogo de documentos oficiales y correspondencia con `RM-DOC-001`…`RM-DOC-018` y `EVD-2026-003` | En revisión por el propietario (sin commit) |
+| CHK-2026-001 | [CHK-2026-001_checklist_tareas_sga.md](05_roadmap/CHK-2026-001_checklist_tareas_sga.md) | Checklist de las tareas documentales `RM-DOC-001`…`RM-DOC-018` | En revisión por el propietario (sin commit) |
+
+> El roadmap oficial usará el formato `RDM-AAAA-NNN_slug.md` (ruta prevista: `05_roadmap/RDM-2026-001_roadmap_correccion_sga.md`).
+> **No existe todavía** y no se crea hasta que su contenido esté completo y aprobado.
+> La checklist cubre únicamente tareas documentales; no sustituye al roadmap de correcciones técnicas.
 
 ---
 
@@ -165,6 +176,8 @@ Estos documentos permanecen en sus ubicaciones originales dentro de `SGA_repo/SG
 | `DEC-` | Decisión | `03_decisiones/` | `DEC-AAAA-NNN_slug_corto.md` |
 | `DXC-` | Diagnóstico | `04_diagnostico/` | `DXC-AAAA-NNN_area.md` |
 | `RDM-` | Roadmap | `05_roadmap/` | `RDM-AAAA-NNN_slug.md` |
+| `MAT-` | Matriz documental | `05_roadmap/` | `MAT-AAAA-NNN_slug.md` |
+| `CHK-` | Checklist de tareas | `05_roadmap/` | `CHK-AAAA-NNN_slug.md` |
 | `EVD-` | Evidencia | `06_evidencias/` | `EVD-AAAA-NNN_slug.md` |
 
 Donde `AAAA` = año, `NNN` = correlativo desde `001` dentro del prefijo.

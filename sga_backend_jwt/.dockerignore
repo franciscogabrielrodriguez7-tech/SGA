@@ -1,0 +1,55 @@
+# =============================================================================
+# .dockerignore — Backend SGA (FastAPI)
+# Excluye archivos innecesarios del contexto de build de Docker.
+# Un contexto limpio = builds más rápidos y capas de imagen más pequeñas.
+# =============================================================================
+
+# Entorno virtual Python — las dependencias se instalan dentro del contenedor
+venv/
+.venv/
+env/
+ENV/
+
+# Cache de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de secretos — NUNCA deben entrar en la imagen
+.env
+.env.*
+!.env.example
+
+# Herramientas de análisis estático y tests
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Artefactos de distribución Python
+dist/
+build/
+
+# Control de versiones
+.git/
+.gitignore
+
+# Documentación y archivos del proyecto no necesarios en runtime
+docs/
+*.md
+LICENSE
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

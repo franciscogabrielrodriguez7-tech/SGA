@@ -1,10 +1,23 @@
-import type { DetalleAlquilerLinea } from "../../interfaces/Alquiler";
+import type { DetalleAlquilerLinea, EstadoAlquiler } from "../../interfaces/Alquiler";
+import { AgregarProductoSection } from "./AgregarProductoSection";
 
 interface DetalleProductosSectionProps {
   detallesLinea: DetalleAlquilerLinea[];
+  idAlquiler: number;
+  estadoAlquiler: EstadoAlquiler;
+  tiempoAlquilerDias: number;
+  puedeGestionar: boolean;
+  onProductoAgregado: () => void;
 }
 
-export function DetalleProductosSection({ detallesLinea }: DetalleProductosSectionProps) {
+export function DetalleProductosSection({
+  detallesLinea,
+  idAlquiler,
+  estadoAlquiler,
+  tiempoAlquilerDias,
+  puedeGestionar,
+  onProductoAgregado,
+}: DetalleProductosSectionProps) {
   return (
     <div>
       <h2 className="heading-md" style={{ marginBottom: 12 }}>
@@ -37,6 +50,17 @@ export function DetalleProductosSection({ detallesLinea }: DetalleProductosSecti
           </tbody>
         </table>
       </div>
+
+      {puedeGestionar && (
+        <AgregarProductoSection
+          idAlquiler={idAlquiler}
+          estadoAlquiler={estadoAlquiler}
+          tiempoAlquilerDias={tiempoAlquilerDias}
+          detallesActuales={detallesLinea}
+          onProductoAgregado={onProductoAgregado}
+        />
+      )}
     </div>
   );
 }
+

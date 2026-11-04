@@ -197,11 +197,28 @@ select.input:focus {
 }
 
 /* ---------------------------------------------------------------------------
-   Utilidades responsive (mismo breakpoint que AppShell: 767px)
+   Utilidades responsive (mismo breakpoint que AppShell: 767px,
+   más breakpoint de detalle: 900px para el layout Main+Sidebar)
    --------------------------------------------------------------------------- */
 
 .show-mobile-cards {
   display: none;
+}
+
+/* hide-on-desktop: visible solo en móvil (<900px) — para la barra de tabs del detalle */
+.hide-on-desktop {
+  display: flex;
+}
+
+@media (min-width: 900px) {
+  .hide-on-desktop {
+    display: none;
+  }
+
+  /* En desktop el contenido de tabs se muestra siempre en el detalle-grid */
+  .show-mobile-cards {
+    display: none !important;
+  }
 }
 
 @media (max-width: 767px) {
@@ -209,6 +226,15 @@ select.input:focus {
     display: none;
   }
 
+  .show-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+}
+
+/* Entre 768px y 899px: show-mobile-cards visible (detalle aún en columna única) */
+@media (min-width: 768px) and (max-width: 899px) {
   .show-mobile-cards {
     display: flex;
     flex-direction: column;
@@ -380,4 +406,152 @@ select.input:focus {
 
 .row-hover:hover {
   background-color: color-mix(in srgb, var(--color-brand-solid) 5%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Chips de filtro (Historial del alquiler)
+   --------------------------------------------------------------------------- */
+
+.historial-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-fg-default);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--color-brand-solid);
+  color: var(--color-brand-fg);
+}
+
+.chip-active,
+.chip-active:hover {
+  background: var(--color-brand-solid);
+  border-color: var(--color-brand-solid);
+  color: var(--color-brand-contrast);
+}
+
+.chip-count {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Línea de tiempo (Historial del alquiler)
+   --------------------------------------------------------------------------- */
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.timeline-item {
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  animation: toast-in 0.15s ease;
+}
+
+.timeline-creacion   { border-left-color: var(--color-success); }
+.timeline-renovacion { border-left-color: var(--color-brand-solid); }
+.timeline-estado     { border-left-color: var(--color-warning); }
+.timeline-edicion    { border-left-color: var(--ink-700); }
+.timeline-eliminacion { border-left-color: var(--color-danger); }
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.timeline-body {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Tarjeta compacta de productos (ProductosCompactoSection — sidebar derecho)
+   --------------------------------------------------------------------------- */
+
+.productos-compacto-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 240px;
+  overflow-y: auto;
+  margin: var(--space-3) 0;
+}
+
+.productos-compacto-lista::-webkit-scrollbar {
+  width: 4px;
+}
+.productos-compacto-lista::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.producto-compacto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+}
+
+.producto-compacto-nombre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.producto-compacto-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+  color: var(--color-fg-default);
+  flex-shrink: 0;
+}
+
+.productos-compacto-footer {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
 }

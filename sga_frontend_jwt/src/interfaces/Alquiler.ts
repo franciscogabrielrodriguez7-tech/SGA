@@ -93,13 +93,30 @@ export interface AlquilerUpdatePayload {
   se_recoge?: boolean;
 }
 
+// Fila de auditoria_sistema tal como la arma to_jsonb(OLD/NEW) en
+// fn_auditar_cambios (02_funciones_y_triggers.sql): la fila completa de
+// "alquiler" antes y después del cambio.
+export type SnapshotAlquilerAuditoria = Record<string, unknown>;
+
+export interface EventoAuditoriaAlquiler {
+  id_auditoria: number;
+  tipo_operacion: "INSERT" | "UPDATE" | "DELETE";
+  datos_anteriores: SnapshotAlquilerAuditoria | null;
+  datos_nuevos: SnapshotAlquilerAuditoria | null;
+  // NULL cuando el cambio lo hizo el propio sistema (p. ej. el paso
+  // automático a 'vencido'), sin usuario autenticado.
+  id_usuario_accion: string | null;
+  nombres_usuario_accion: string | null;
+  apellidos_usuario_accion: string | null;
+  fecha_accion: string;
+}
+
+// Corresponde a GET /alquileres/{id}/historial
+// (historial_alquiler en auditoria_controller.py).
 export interface HistorialAlquiler {
   id_alquiler: number;
-  estado_actual: EstadoAlquiler;
-  fecha_creacion: string;
-  fecha_ultima_actualizacion: string;
-  historial_completo_disponible: false;
-  nota: string;
+  total_eventos: number;
+  eventos: EventoAuditoriaAlquiler[];
 }
 
 // Corresponde a GET /alquileres/{id}/detalles

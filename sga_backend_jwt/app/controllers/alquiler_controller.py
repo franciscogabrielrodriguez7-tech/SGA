@@ -264,19 +264,46 @@ def actualizar_alquiler(db: Session, id_alquiler: int, datos, usuario_actual):
             f"{', '.join(sorted(no_permitidos))} (ver matriz de edición por estado)."
         )
 
-    # tiempo_alquiler_dias: un aumento se trata como RENOVACIÓN (mismas
-    # reglas); una reducción es corrección administrativa, validada
-    # para que no produzca un vencimiento en el pasado.
+    # Fecha de inicio (solo editable en 'pendiente', ver matriz): el
+    # trigger trg_validar_fecha_inicio solo corre en INSERT, así que la
+    # regla "no puede ser anterior a hoy" se aplica aquí para la edición.
+    if "fecha_inicio" in campos and campos["fecha_inicio"] < fecha_actual_bogota():
+        raise ValueError(
+            f"La fecha de inicio ({campos['fecha_inicio'].isoformat()}) no puede "
+            "ser anterior a hoy."
+        )
+
+    # tiempo_alquiler_dias — regla según el estado:
+    #   * pendiente: los equipos aún no salen de bodega; cambiar la
+    #     duración es un AJUSTE DEL PEDIDO (edición manual), no una
+    #     renovación.
+    #   * activo / vencido: un aumento es una RENOVACIÓN (mismas reglas
+    #     que POST /renovaciones, incluida la reactivación de 'vencido');
+    #     una reducción es una corrección administrativa (devolución
+    #     anticipada) que no puede dejar el vencimiento en el pasado.
+    # En todos los casos la nueva duración debe respetar la unidad
+    # mínima de los productos del alquiler (misma regla que creación y
+    # renovación).
     if "tiempo_alquiler_dias" in campos:
 
         tiempo_nuevo = campos.pop("tiempo_alquiler_dias")
 
+        if tiempo_nuevo != alquiler.tiempo_alquiler_dias:
+            validar_tiempo_alquiler_para_productos(
+                tiempo_nuevo, _unidades_minimas_del_alquiler(db, id_alquiler)
+            )
+
         if tiempo_nuevo > alquiler.tiempo_alquiler_dias:
             dias_extra = tiempo_nuevo - alquiler.tiempo_alquiler_dias
-            _aplicar_renovacion(alquiler, dias_extra)
+
+            if alquiler.estado_alquiler == "pendiente":
+                alquiler.tiempo_alquiler_dias = tiempo_nuevo
+            else:
+                _aplicar_renovacion(alquiler, dias_extra)
 
         elif tiempo_nuevo < alquiler.tiempo_alquiler_dias:
-            nueva_fecha = calcular_fecha_vencimiento(alquiler.fecha_inicio, tiempo_nuevo)
+            fecha_base = campos.get("fecha_inicio", alquiler.fecha_inicio)
+            nueva_fecha = calcular_fecha_vencimiento(fecha_base, tiempo_nuevo)
 
             if nueva_fecha < fecha_actual_bogota():
                 raise ValueError(
@@ -439,6 +466,22 @@ def alquileres_pendientes_entrega(db: Session, solo_transporte: bool = False):
 # app/controllers/auditoria_controller.py para consultarla).
 # =========================================================
 
+def _unidades_minimas_del_alquiler(db: Session, id_alquiler: int):
+    """Unidades mínimas de los productos activos de un alquiler."""
+
+    filas = (
+        db.query(Producto.unidad_minima_alquiler)
+        .join(DetalleAlquiler, DetalleAlquiler.id_producto == Producto.id_producto)
+        .filter(
+            DetalleAlquiler.id_alquiler == id_alquiler,
+            DetalleAlquiler.estado_registro == True,  # noqa: E712
+        )
+        .all()
+    )
+
+    return [fila[0] for fila in filas]
+
+
 def _aplicar_renovacion(alquiler: Alquiler, dias: int):
 
     alquiler.tiempo_alquiler_dias = alquiler.tiempo_alquiler_dias + dias
@@ -472,17 +515,7 @@ def renovar_alquiler(db: Session, id_alquiler: int, dias: int, usuario_actual, p
     # Misma regla de unidad_minima_alquiler que en la creación: los
     # días de renovación deben ser compatibles con la unidad más
     # restrictiva de los productos YA incluidos en este alquiler.
-    unidades_minimas = (
-        db.query(Producto.unidad_minima_alquiler)
-        .join(DetalleAlquiler, DetalleAlquiler.id_producto == Producto.id_producto)
-        .filter(
-            DetalleAlquiler.id_alquiler == id_alquiler,
-            DetalleAlquiler.estado_registro == True,
-        )
-        .all()
-    )
-
-    validar_tiempo_alquiler_para_productos(dias, [fila[0] for fila in unidades_minimas])
+    validar_tiempo_alquiler_para_productos(dias, _unidades_minimas_del_alquiler(db, id_alquiler))
 
     _aplicar_renovacion(alquiler, dias)
 
@@ -502,32 +535,25 @@ def renovar_alquiler(db: Session, id_alquiler: int, dias: int, usuario_actual, p
         raise ValueError(extraer_mensaje_negocio(error))
 
     # El UPDATE anterior disparó trg_auditoria_alquiler, que insertó un
-    # evento en auditoria_sistema. Se recupera su id para que el
-    # cliente HTTP pueda consultarlo luego vía GET /renovaciones/{id}.
-    id_auditoria = db.execute(
-        text("""
-            SELECT id_auditoria FROM auditoria_sistema
-            WHERE nombre_tabla = 'alquiler' AND id_registro_afectado = :id_alquiler
-            ORDER BY id_auditoria DESC LIMIT 1
-        """),
-        {"id_alquiler": str(id_alquiler)}
-    ).scalar()
-
-    alquiler_actualizado = obtener_alquiler(db, id_alquiler)
-    alquiler_actualizado["id_auditoria_renovacion"] = id_auditoria
-
-    return alquiler_actualizado
+    # evento en auditoria_sistema. El frontend lo muestra a través de
+    # GET /alquileres/{id}/historial (sección "Historial y trazabilidad").
+    return obtener_alquiler(db, id_alquiler)
 
 
 # =========================================================
-# ENTREGA — despacho inicial en obra (pendiente -> activo)
+# ENTREGA — despacho a obra
+# -----------------------------------------------------------
+#   * 'pendiente' -> primera entrega; el alquiler pasa a 'activo'.
+#   * 'activo'    -> ENTREGA ADICIONAL (productos agregados después de
+#     la primera entrega); el estado no cambia.
 # =========================================================
 
 def registrar_entrega(db: Session, id_alquiler: int, datos, usuario_actual):
     """
     Registra una entrega (ENTREGA) en logistica_alquiler y crea la fila
     correspondiente en la tabla puente logistica_alquiler_alquiler.
-    Transiciona el alquiler de 'pendiente' → 'activo'.
+    Si el alquiler está 'pendiente' lo transiciona a 'activo'; si ya
+    está 'activo' se registra como entrega adicional.
     """
 
     verificar_y_actualizar_vencidos(db)
@@ -537,10 +563,10 @@ def registrar_entrega(db: Session, id_alquiler: int, datos, usuario_actual):
     if not alquiler:
         return None
 
-    if alquiler.estado_alquiler != "pendiente":
+    if alquiler.estado_alquiler not in ("pendiente", "activo"):
         raise ValueError(
             "Solo se puede registrar una entrega cuando el alquiler "
-            f"está en estado 'pendiente'. Estado actual: '{alquiler.estado_alquiler}'"
+            f"está 'pendiente' o 'activo'. Estado actual: '{alquiler.estado_alquiler}'"
         )
 
     try:
@@ -563,7 +589,7 @@ def registrar_entrega(db: Session, id_alquiler: int, datos, usuario_actual):
         )
         db.add(puente)
 
-        alquiler.estado_alquiler = "activo"
+        alquiler.estado_alquiler = "activo"  # no-op si ya estaba 'activo'
 
         db.commit()
         db.refresh(entrega)

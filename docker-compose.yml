@@ -1,0 +1,121 @@
+# =============================================================================
+# docker-compose.yml — Orquestación completa del stack SGA
+# =============================================================================
+#
+# Servicios:
+#   postgres  → Base de datos PostgreSQL 16 con volumen persistente
+#   backend   → FastAPI (Uvicorn) — espera a que postgres esté saludable
+#   frontend  → React/Nginx — reverse proxy de /api/ hacia backend
+#
+# Uso rápido:
+#   1. cp .env.docker.example .env.docker
+#   2. Editar .env.docker con valores reales (especialmente POSTGRES_PASSWORD y JWT_SECRET_KEY)
+#   3. docker compose --env-file .env.docker up --build -d
+#   4. Abrir http://localhost en el navegador
+# =============================================================================
+
+services:
+
+  # ── Base de datos PostgreSQL ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: sga_postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    volumes:
+      # Volumen nombrado → los datos sobreviven a reinicios y rebuilds
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - sga_network
+
+    # Healthcheck: el backend no arranca hasta que postgres responda
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    # El puerto solo se expone en localhost para acceso con clientes de BD
+    # (DBeaver, pgAdmin, etc.). Eliminar en producción si no se necesita.
+    ports:
+      - "5432:5432"
+
+
+  # ── Backend FastAPI ───────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./sga_backend_jwt
+      dockerfile: Dockerfile
+    container_name: sga_backend
+    restart: unless-stopped
+
+    environment:
+      DATABASE_URL:      ${DATABASE_URL}
+      JWT_SECRET_KEY:    ${JWT_SECRET_KEY}
+      JWT_ALGORITHM:     ${JWT_ALGORITHM:-HS256}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-480}
+      CORS_ORIGINS:      ${CORS_ORIGINS}
+
+    # Depende de que postgres esté en estado "healthy" (no solo "started")
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - sga_network
+
+    # El puerto solo se expone localmente para diagnóstico.
+    # En producción, el tráfico llega via Nginx (frontend → /api/).
+    ports:
+      - "8000:8000"
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/docs || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+  # ── Frontend React + Nginx ────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./sga_frontend_jwt
+      dockerfile: Dockerfile
+      args:
+        # VITE_API_URL queda grabado en el bundle estático durante el build.
+        # Con Nginx reverse proxy se usa la ruta relativa /api/sga:
+        # el navegador envía a localhost:80/api/sga → Nginx lo redirige al backend.
+        VITE_API_URL: ${VITE_API_URL:-/api/sga}
+    container_name: sga_frontend
+    restart: unless-stopped
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    networks:
+      - sga_network
+
+    ports:
+      - "80:80"
+
+
+# ── Volúmenes persistentes ────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    name: sga_postgres_data
+
+
+# ── Red interna aislada ───────────────────────────────────────────────────────
+networks:
+  sga_network:
+    name: sga_network
+    driver: bridge

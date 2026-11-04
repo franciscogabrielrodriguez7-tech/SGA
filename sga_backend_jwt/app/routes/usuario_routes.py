@@ -123,7 +123,6 @@ def consultar_usuario(id_usuario: str, db: Session = Depends(get_db)):
 # =========================================================
 
 @router.patch("/{id_usuario}", dependencies=[Depends(requiere_rol(*SOLO_ADMIN))])
-@router.put("/{id_usuario}", dependencies=[Depends(requiere_rol(*SOLO_ADMIN))])
 def modificar_usuario(
     id_usuario: str,
     datos: UsuarioUpdate,

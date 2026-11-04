@@ -165,7 +165,6 @@ def consultar_detalles_alquiler(id_alquiler: int, db: Session = Depends(get_db))
 
 
 @router.patch("/{id_alquiler}", dependencies=[Depends(requiere_rol(*ADMIN_O_FACTURACION))])
-@router.put("/{id_alquiler}", dependencies=[Depends(requiere_rol(*ADMIN_O_FACTURACION))])
 def modificar_alquiler(
     id_alquiler: int,
     datos: AlquilerUpdate,

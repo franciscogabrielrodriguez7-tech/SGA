@@ -1,9 +1,5 @@
 -- =========================================================
--- NOTA (Gabriel): el seed original venía con 'hash_pwd_123' como
--- contraseña de todos los empleados (texto plano, no un hash real de
--- bcrypt). Como el proyecto exige login vía JWT + bcrypt, se generó
--- aquí un hash bcrypt real para que el login funcione de inmediato en
--- ambiente de pruebas. Contraseña en texto plano para TODOS los
+-- Contraseña de prueba  para TODOS los
 -- empleados de este seed: Sga2026*
 -- =========================================================
 

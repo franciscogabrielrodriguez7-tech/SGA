@@ -92,17 +92,26 @@ Instrucciones detalladas en [`sga_frontend_jwt/README.md`](./sga_frontend_jwt/RE
 
 ## Acceso Inicial
 
-Una vez que ambos servidores estén corriendo, abre tu navegador en `http://localhost:5173`.
+### 1. Entorno de desarrollo local
 
-El `03_seed_data.sql` crea los siguientes usuarios de prueba:
+Una vez que ambos servidores (backend y frontend) estén ejecutándose localmente conforme a las instrucciones previas:
 
-| Documento | Contraseña | Rol |
-|---|---|---|
-| `100000001` | `admin123` | Administrador |
-| `100000002` | `encargado123` | Encargado de Facturación |
-| `100000003` | `logistico123` | Encargado Logístico |
+1. Abre tu navegador en `http://localhost:5173`.
+2. Para acceder al sistema, se requiere un usuario registrado en la base de datos local.
+3. Inicia sesión ingresando el correo electrónico (`email_usuario`) o teléfono (`telefono_usuario`) y la contraseña configurada.
 
-> 🔐 Cambia estas contraseñas inmediatamente en un entorno de producción.
+> ℹ️ **Nota sobre datos de desarrollo:** El repositorio incluye el archivo `database/01_esquema/03_seed_data.sql`, el cual contiene exclusivamente registros ficticios de prueba para el desarrollo local. Para consultar los datos de prueba disponibles en dicho entorno, remítase al encabezado de dicho archivo. Este script no se ejecuta en producción, no debe utilizarse en dicho entorno, ni la documentación expone información, credenciales o contenidos de la base de datos desplegada.
+
+### 2. Entorno de producción
+
+El procedimiento actualmente confirmado para la inicialización y el acceso inicial en producción comprende:
+
+1. **Inicialización de la base de datos:** Conectarse directamente a la base de datos PostgreSQL de producción mediante **pgAdmin 4** (herramienta exclusiva confirmada para este procedimiento).
+2. **Comprobación de usuarios:** Verificar que no existan usuarios previamente registrados en la tabla `usuario`.
+3. **Creación del primer administrador y datos iniciales:** Crear manualmente el primer usuario con rol de administrador (`rol_usuario = 'admin'`), junto con los datos semilla necesarios para la inicialización del sistema.
+   - *Limitación documental:* No está documentado en el repositorio con suficiente detalle cuáles son específicamente estos datos semilla requeridos para producción ni cuál es su procedencia exacta.
+4. **Inicio de sesión en producción:** El acceso debe realizarse a través de la interfaz web desplegada en Vercel, utilizando las credenciales del usuario administrador creado.
+   - *Limitación documental:* La URL pública definitiva del despliegue en Vercel no se encuentra versionada en los archivos del repositorio (su configuración se gestiona en la plataforma Vercel) y queda pendiente de confirmación formal.
 
 ---
 

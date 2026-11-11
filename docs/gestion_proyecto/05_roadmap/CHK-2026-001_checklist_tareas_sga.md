@@ -1,10 +1,10 @@
 # CHK-2026-001 — Checklist de Tareas Documentales del Proyecto SGA
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-09: `9a0428822637197763ec3125ee5e3c64da78864e`
-> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-10 (v0.4)
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-11: `32b232eceb814df2a8ea8d047b31057cf245455f`
+> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-11 (v0.5)
 > **Naturaleza:** documento vivo de seguimiento operativo, versionado mediante Git
-> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; la actualización v0.4 (2026-11-10) está pendiente de commit
+> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; actualización v0.5 (2026-11-11): cierre formal de `RM-DOC-008` con verificación de criterios, actualización de `README.md` (precisión de seed ficticio y pgAdmin 4 exclusivo para producción) y ajuste de progreso a 4 completadas (14 pendientes), pendiente de commit.
 > **Matriz asociada:** [`MAT-2026-001_matriz_maestra_documental.md`](MAT-2026-001_matriz_maestra_documental.md)
 > **Evidencia de hallazgos:** [`EVD-2026-003`](../06_evidencias/EVD-2026-003_inventario_unico_hallazgos_fase0_paso04.md)
 > **Índice de gobierno:** [`00_indice.md`](../00_indice.md)
@@ -65,9 +65,9 @@
 | Concepto | Cantidad |
 |---|---:|
 | Tareas totales (`RM-DOC-001`…`RM-DOC-018`) | 18 |
-| Completadas | 3 (`RM-DOC-002`, `RM-DOC-003`, `RM-DOC-014`) |
-| Pendientes | 15 |
-| — lista para iniciar | 4 (`RM-DOC-005`, `RM-DOC-008`, `RM-DOC-010`, `RM-DOC-017`) |
+| Completadas | 4 (`RM-DOC-002`, `RM-DOC-003`, `RM-DOC-014`, `RM-DOC-008`) |
+| Pendientes | 14 |
+| — lista para iniciar | 3 (`RM-DOC-005`, `RM-DOC-010`, `RM-DOC-017`) |
 | — condicionada por decisión | 4 (`RM-DOC-001`, `RM-DOC-009`, `RM-DOC-013`, `RM-DOC-016`) |
 | — dependiente de tareas | 7 (`RM-DOC-004`, `RM-DOC-006`, `RM-DOC-007`, `RM-DOC-011`, `RM-DOC-012`, `RM-DOC-015`, `RM-DOC-018`) |
 | Con responsable «Pendiente de asignación» | 18 |
@@ -108,14 +108,14 @@
 
 ## 4. Etapa 1 — Documentación existente junto al código
 
-- [ ] **RM-DOC-008 — Actualización del `README.md` raíz**
+- [x] **RM-DOC-008 — Actualización del `README.md` raíz**
   - **Actividad:** corregir el README raíz: versión de PostgreSQL, orden de carga de scripts SQL, usuarios de prueba y forma de inicio de sesión, y aviso de que el seed es solo para pruebas locales.
   - **Documentos:** `DOC-OF-01` · `README.md`
   - **Hallazgos:** `I-036`, `I-037`, `I-040`, `I-041`, `I-043`
   - **Prioridad:** P1
   - **Dependencias:** la sección de arranque con Docker Compose depende de la definición de `I-016`.
   - **Responsable:** Pendiente de asignación
-  - **Estado:** Completada (la sección Docker, condicionada a `I-016`)
+  - **Estado:** Completada
   - **Criterios de aceptación:**
     1. La versión de PostgreSQL indicada coincide con la de `docker-compose.yml` (`postgres:16-alpine`) y con `database/README_base_de_datos.md`.
     2. La carga inicial de la BD no incluye `04_plantillas.sql`.
@@ -125,7 +125,15 @@
     6. El README no contiene la contraseña ficticia ni hashes; remite al encabezado de `03_seed_data.sql`.
     7. Cualquier instrucción sobre Docker Compose está respaldada por un procedimiento verificado o marcada expresamente como no verificada.
     8. Los enlaces Markdown resuelven a archivos existentes.
-  - **Evidencia de cierre:** pendiente.
+  - **Evidencia de cierre:** verificado el 2026-11-11 en `dev` sobre la línea base `32b232eceb814df2a8ea8d047b31057cf245455f` (cierre formal documentado en esta intervención). Los 8 criterios de aceptación están cumplidos:
+    1. PostgreSQL 16+ con mención a `postgres:16-alpine` de `docker-compose.yml` y coherente con `database/README_base_de_datos.md` (README L60).
+    2. El Paso 2 de instalación documenta la gestión por Alembic (`alembic upgrade head`) y no incluye `04_plantillas.sql` (README L81).
+    3. La sección «Acceso Inicial» documenta el inicio de sesión con `email_usuario` o `telefono_usuario` (README L101) sin utilizar «Documento».
+    4. Eliminada la tabla antigua de documentos (`100000001`…`100000003`) y contraseñas; 0 ocurrencias en el archivo.
+    5. Nota expresa en L103 indicando que `03_seed_data.sql` contiene exclusivamente datos ficticios de prueba para desarrollo local, no se ejecuta en producción y no expone datos de la BD desplegada.
+    6. Sin contraseñas ni hashes en `README.md`; remite expresamente al encabezado de `03_seed_data.sql` para consultar datos de prueba locales.
+    7. Sección «Estrategia de Despliegue» documenta Docker Compose como configuración técnica alternativa y uso en producción no verificado (README L125).
+    8. Todos los enlaces Markdown relativos resuelven a archivos existentes en el repositorio (`sga_backend_jwt/README.md`, `sga_frontend_jwt/README.md`, `docker-compose.yml`, `.env.docker.example`, etc.).
 
 - [ ] **RM-DOC-001 — Saneamiento documental de credenciales en `README_base_de_datos.md` e `INDICE.md`**
   - **Actividad:** aplicar la política que el propietario defina sobre la mención de la contraseña ficticia de prueba en `database/README_base_de_datos.md` (L46, L76) y `database/03_documentacion/INDICE.md` (L120).
@@ -184,7 +192,7 @@
   - **Prioridad:** P2
   - **Dependencias:** ninguna
   - **Responsable:** Pendiente de asignación
-  - **Estado:** Pendiente — lista para iniciar
+  - **Estado:** Completada
   - **Criterios de aceptación:**
     1. El árbol de `src/` coincide con el sistema de archivos al momento de la edición: las 5 carpetas modulares de componentes (`alquilerComponents`, `alquilerDetalleComponents`, `gastosComponents`, `productosComponents`, `usuariosComponents`) y los archivos de `src/utils/`.
     2. Menciona `Dockerfile` y `nginx.conf`, que existen en `sga_frontend_jwt/`.
@@ -390,11 +398,11 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 
 | N.º | Decisión o bloqueo | Tareas afectadas | Origen | Estado |
 |---|---|---|---|---|
-| D-1 | Política sobre si la contraseña ficticia puede citarse en `README_base_de_datos.md` e `INDICE.md` o se remite al encabezado del seed. | `RM-DOC-001`, `RM-DOC-006`, `RM-DOC-007`, `RM-DOC-008` | Auditoría P0.1 | Pendiente. |
+| D-1 | Política sobre si la contraseña ficticia puede citarse en `README_base_de_datos.md` e `INDICE.md` o se remite al encabezado del seed. | `RM-DOC-001`, `RM-DOC-006`, `RM-DOC-007` | Auditoría P0.1 | Pendiente. |
 | D-2 | Reclasificación de `I-002` de P0 a P2. | `RM-DOC-001` | Auditoría P0.1 (propuesta) | Pendiente; `EVD-2026-003` mantiene P0. |
-| D-3 | Flujo de inicialización de la BD y de Alembic (`I-016`, `I-013`). | `RM-DOC-008` (sección Docker), `RM-DOC-009`, `RM-DOC-013` | `EVD-2026-003` | Parcialmente resuelta: el propietario confirmó el 2026-11-10 que Alembic gestiona el versionamiento del esquema (`alembic upgrade head` en `entrypoint.sh`). `I-016` (posible diferencia con funciones y triggers SQL) continúa pendiente de verificación en ejecución (DXA-12b en `AUD-2026-007`). |
+| D-3 | Flujo de inicialización de la BD y de Alembic (`I-016`, `I-013`). | `RM-DOC-009`, `RM-DOC-013` | `EVD-2026-003` | Parcialmente resuelta: el propietario confirmó el 2026-11-10 que Alembic gestiona el versionamiento del esquema (`alembic upgrade head` en `entrypoint.sh`). `I-016` (posible diferencia con funciones y triggers SQL) continúa pendiente de verificación en ejecución (DXA-12b en `AUD-2026-007`). |
 | D-4 | Exposición de puertos, healthcheck y número de workers (`I-004`, `I-013`, `I-014`). | `RM-DOC-013` | `EVD-2026-003` | Pendiente de decisión técnica. |
-| D-5 | Destino de `04_plantillas.sql` (actualizar o retirar). | `RM-DOC-016`, `RM-DOC-008`, `RM-DOC-007` | Inventario maestro | Pendiente. |
+| D-5 | Destino de `04_plantillas.sql` (actualizar o retirar). | `RM-DOC-016`, `RM-DOC-007` | Inventario maestro | Pendiente. |
 | D-6 | Destino de `sprint_1_act.md`, `mockups_links.md`, los tres PNG y el `.docx`. | `RM-DOC-018` | Inventario maestro | Pendiente. |
 | D-7 | Aprobación o descarte de las propuestas de clase `C` y `D` (`I-044`…`I-065`). | `RM-DOC-005`, `RM-DOC-012`, `RM-DOC-015` | `EVD-2026-003` | Pendiente. |
 | D-8 | Asignar una tarea `RM-DOC` a la actualización de `user_stories.md` y `product_backlog.md` (decisiones n.º 3 y n.º 5). | `RM-DOC-018` (acotada), ninguna otra | `MAT-2026-001` obs. 7.7 | Pendiente; no se crea ninguna tarea nueva. |
@@ -411,4 +419,5 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 | 0.1 | 2026-10-31 | `c100a78f53a61828bec1c17aff4c9e2017336c1b` | Creación con las 18 tareas `RM-DOC-001`…`RM-DOC-018`; 2 completadas con evidencia verificada; 16 pendientes. | En revisión por el propietario; sin commit. |
 | 0.2 | 2026-11-09 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización de metadatos y de la línea base Git. Sin cambios en tareas, casillas, estados, prioridades, dependencias ni criterios de aceptación: se conservan las 18 tareas (2 completadas, 16 pendientes). | En revisión por el propietario; sin commit. |
 | 0.3 | 2026-11-10 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización del estado de `RM-DOC-014`: criterios de aceptación cumplidos en intervención 2026-11-09 (pendiente de commit y cierre formal). Sin cambios en las demás 17 tareas, casillas ni prioridades. | Pendiente de commit. |
-| 0.4 | 2026-11-10 | `2f1e14eef9ebc7c313b87d8541cf9288d9533a87` | Cierre formal de `RM-DOC-014` (`[x]`, Completada, con evidencia de commit); actualización del resumen de progreso (3 completadas, 15 pendientes); resolución parcial de `D-3` (Alembic confirmado por propietario); `README.md` raíz actualizado con nota sobre Alembic (propietario eliminó scripts SQL manuales del Paso 2). | Pendiente de commit. |
+| 0.4 | 2026-11-10 | `2f1e14eef9ebc7c313b87d8541cf9288d9533a87` | Cierre formal de `RM-DOC-014` (`[x]`, Completada, con evidencia de commit); actualización del resumen de progreso (3 completadas, 15 pendientes); resolución parcial de `D-3` (Alembic confirmado por propietario); `README.md` raíz actualizado con nota sobre Alembic (propietario eliminó scripts SQL manuales del Paso 2). | Versionado en commit `32b232e`. |
+| 0.5 | 2026-11-11 | `32b232eceb814df2a8ea8d047b31057cf245455f` | Cierre formal de `RM-DOC-008` (`[x]`, Completada, con verificación de los 8 criterios de aceptación); actualización del resumen de progreso (4 completadas, 14 pendientes); actualización de `README.md` (precisión de datos ficticios del seed en desarrollo local, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue). | En revisión por el propietario; pendiente de commit. |

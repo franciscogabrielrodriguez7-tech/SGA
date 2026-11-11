@@ -1,9 +1,9 @@
 # SGA — Índice de Gestión del Proyecto
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base documental de Fase 0: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-10: `9a0428822637197763ec3125ee5e3c64da78864e` (coincide con `origin/dev` según la referencia de seguimiento local; `deployment` en `3ee0d66`)
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base documental de Fase 0: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-11: `32b232eceb814df2a8ea8d047b31057cf245455f` (coincide con `origin/dev` según la referencia de seguimiento local; `deployment` en `3ee0d66`)
 > **Estructura creada:** 2026-10-28 · Fase 0.2 (organización documental preparatoria)
-> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` versionados en `dev` (commit `0f56f5d`) y presentes en `deployment` (merge `3ee0d66`); sin registro formal de aprobación de su contenido por el propietario. Versionado en commit `2f1e14e` (2026-11-10): `README.md`, `sga_frontend_jwt/README.md`, `00_indice.md`, `MAT-2026-001`, `CHK-2026-001`, `AUD-2026-007`. Nueva actualización del 2026-11-10 (`RM-DOC-014` cierre + Alembic) pendiente de commit.
+> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` versionados en `dev` (commit `0f56f5d`) y presentes en `deployment` (merge `3ee0d66`); sin registro formal de aprobación de su contenido por el propietario. Versionado en commit `32b232e` (2026-11-10): cierre formal de `RM-DOC-014`, decisión sobre Alembic y actualización de READMEs. Actualización documental del 2026-11-11 (v0.5): cierre formal de `RM-DOC-008`, actualización de `README.md` (separación local/producción, seed con datos ficticios de prueba, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue) y sincronización de matriz y checklist, pendiente de commit.
 
 ---
 
@@ -152,7 +152,7 @@ Estos documentos permanecen en sus ubicaciones originales dentro de `SGA_repo/SG
 
 | Documento | Ubicación | Estado | Nota |
 |---|---|---|---|
-| `README.md` raíz | [`README.md`](../../README.md) | ⚠️ Actualizado 2026-11-10: badges, estrategia de despliegue, correcciones IA-001/IA-002, nota sobre Alembic; propietario eliminó paso de scripts SQL manuales. Pendiente de commit. Siguen pendientes: credenciales incorrectas y usuarios de prueba (`RM-DOC-008`). | Cara del proyecto; no mover |
+| `README.md` raíz | [`README.md`](../../README.md) | ✅ Actualizado 2026-11-11. `RM-DOC-008` **cerrada**. Separación de entorno local (datos ficticios de seed para desarrollo) y producción (pgAdmin 4 exclusivo, sin datos sensibles). Credenciales erróneas eliminadas, login por `email_usuario`/`telefono_usuario`, versión PostgreSQL aclarada y gestión de esquema por Alembic. | Cara del proyecto; no mover |
 | `AGENTS.md` raíz | [`AGENTS.md`](../../AGENTS.md) | ✅ Vigente (creado en Fase 0) | Instrucciones operativas exclusivas para OpenCode (solo lectura); permanece en la raíz |
 | `database/README_base_de_datos.md` | [`database/README_base_de_datos.md`](../../database/README_base_de_datos.md) | ⚠️ Desactualizada + **credencial en texto plano** (R-08) | Saneamiento R-08 pendiente (P0, fuera de este alcance) |
 | `database/03_documentacion/INDICE.md` | [`database/03_documentacion/INDICE.md`](../../database/03_documentacion/INDICE.md) | ⚠️ Esquema antiguo + **credencial** (R-08, F-43) | Ídem |

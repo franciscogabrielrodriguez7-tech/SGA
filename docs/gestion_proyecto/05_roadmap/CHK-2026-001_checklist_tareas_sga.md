@@ -2,9 +2,9 @@
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
 > **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-09: `9a0428822637197763ec3125ee5e3c64da78864e`
-> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-10 (v0.3)
+> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-10 (v0.4)
 > **Naturaleza:** documento vivo de seguimiento operativo, versionado mediante Git
-> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; las actualizaciones v0.2 (2026-11-09) y v0.3 (2026-11-10) están pendientes de commit
+> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; la actualización v0.4 (2026-11-10) está pendiente de commit
 > **Matriz asociada:** [`MAT-2026-001_matriz_maestra_documental.md`](MAT-2026-001_matriz_maestra_documental.md)
 > **Evidencia de hallazgos:** [`EVD-2026-003`](../06_evidencias/EVD-2026-003_inventario_unico_hallazgos_fase0_paso04.md)
 > **Índice de gobierno:** [`00_indice.md`](../00_indice.md)
@@ -65,9 +65,9 @@
 | Concepto | Cantidad |
 |---|---:|
 | Tareas totales (`RM-DOC-001`…`RM-DOC-018`) | 18 |
-| Completadas | 2 (`RM-DOC-002`, `RM-DOC-003`) |
-| Pendientes | 16 |
-| — lista para iniciar | 5 (`RM-DOC-005`, `RM-DOC-008`, `RM-DOC-010`, `RM-DOC-014`, `RM-DOC-017`) |
+| Completadas | 3 (`RM-DOC-002`, `RM-DOC-003`, `RM-DOC-014`) |
+| Pendientes | 15 |
+| — lista para iniciar | 4 (`RM-DOC-005`, `RM-DOC-008`, `RM-DOC-010`, `RM-DOC-017`) |
 | — condicionada por decisión | 4 (`RM-DOC-001`, `RM-DOC-009`, `RM-DOC-013`, `RM-DOC-016`) |
 | — dependiente de tareas | 7 (`RM-DOC-004`, `RM-DOC-006`, `RM-DOC-007`, `RM-DOC-011`, `RM-DOC-012`, `RM-DOC-015`, `RM-DOC-018`) |
 | Con responsable «Pendiente de asignación» | 18 |
@@ -115,7 +115,7 @@
   - **Prioridad:** P1
   - **Dependencias:** la sección de arranque con Docker Compose depende de la definición de `I-016`.
   - **Responsable:** Pendiente de asignación
-  - **Estado:** Pendiente — criterios de aceptación cumplidos en la intervención del 2026-11-09 (pendiente de commit y cierre formal con evidencia) (la sección Docker, condicionada a `I-016`)
+  - **Estado:** Completada (la sección Docker, condicionada a `I-016`)
   - **Criterios de aceptación:**
     1. La versión de PostgreSQL indicada coincide con la de `docker-compose.yml` (`postgres:16-alpine`) y con `database/README_base_de_datos.md`.
     2. La carga inicial de la BD no incluye `04_plantillas.sql`.
@@ -177,7 +177,7 @@
     6. Los enlaces Markdown resuelven a archivos existentes.
   - **Evidencia de cierre:** pendiente.
 
-- [ ] **RM-DOC-014 — Actualización del README del frontend**
+- [x] **RM-DOC-014 — Actualización del README del frontend**
   - **Actividad:** actualizar `sga_frontend_jwt/README.md` con la estructura real de `src/` y el modo de construcción con Docker/Nginx.
   - **Documentos:** `DOC-OF-03` · `sga_frontend_jwt/README.md`
   - **Hallazgos:** `I-021`, `I-043`, `I-075`
@@ -190,7 +190,11 @@
     2. Menciona `Dockerfile` y `nginx.conf`, que existen en `sga_frontend_jwt/`.
     3. La nota sobre CORS refleja que el origen se configura mediante `CORS_ORIGINS` en `settings.py`, no con una lista fija en `main.py`.
     4. Los comandos `npm` documentados corresponden a los scripts de `package.json`.
-  - **Evidencia de cierre:** intervención 2026-11-09: árbol real de `src/` con 5 carpetas modulares de componentes y 9 utilidades; `Dockerfile`, `nginx.conf`, CORS y comandos `npm` verificados. Confirmación de Vercel por propietario. Pendiente de commit y de registro formal de evidencia de cierre (`AUD-*` o `EVD-*`).
+  - **Evidencia de cierre:** commit `2f1e14eef9ebc7c313b87d8541cf9288d9533a87` (`dev`). Criterios verificados el 2026-11-10:
+    1. Árbol `src/` con 5 carpetas modulares (`alquilerComponents`, `alquilerDetalleComponents`, `gastosComponents`, `productosComponents`, `usuariosComponents`) y 9 archivos en `src/utils/` — verificado contra `git ls-files src` en commit `9a04288`.
+    2. `Dockerfile` y `nginx.conf` mencionados en el árbol (líneas 110–111) y existentes físicamente (`Test-Path` = True).
+    3. CORS documentado como `CORS_ORIGINS` en `settings.py` (línea 174 del README frontend; verificado en `sga_backend_jwt/app/config/settings.py` L34–39).
+    4. Comandos `npm run dev/lint/build/preview` coinciden exactamente con `scripts` de `package.json`.
 
 ---
 
@@ -388,7 +392,7 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 |---|---|---|---|---|
 | D-1 | Política sobre si la contraseña ficticia puede citarse en `README_base_de_datos.md` e `INDICE.md` o se remite al encabezado del seed. | `RM-DOC-001`, `RM-DOC-006`, `RM-DOC-007`, `RM-DOC-008` | Auditoría P0.1 | Pendiente. |
 | D-2 | Reclasificación de `I-002` de P0 a P2. | `RM-DOC-001` | Auditoría P0.1 (propuesta) | Pendiente; `EVD-2026-003` mantiene P0. |
-| D-3 | Flujo de inicialización de la BD y de Alembic (`I-016`, `I-013`). | `RM-DOC-008` (sección Docker), `RM-DOC-009`, `RM-DOC-013` | `EVD-2026-003` | Pendiente de decisión técnica. `I-016` figura como *Probable*. |
+| D-3 | Flujo de inicialización de la BD y de Alembic (`I-016`, `I-013`). | `RM-DOC-008` (sección Docker), `RM-DOC-009`, `RM-DOC-013` | `EVD-2026-003` | Parcialmente resuelta: el propietario confirmó el 2026-11-10 que Alembic gestiona el versionamiento del esquema (`alembic upgrade head` en `entrypoint.sh`). `I-016` (posible diferencia con funciones y triggers SQL) continúa pendiente de verificación en ejecución (DXA-12b en `AUD-2026-007`). |
 | D-4 | Exposición de puertos, healthcheck y número de workers (`I-004`, `I-013`, `I-014`). | `RM-DOC-013` | `EVD-2026-003` | Pendiente de decisión técnica. |
 | D-5 | Destino de `04_plantillas.sql` (actualizar o retirar). | `RM-DOC-016`, `RM-DOC-008`, `RM-DOC-007` | Inventario maestro | Pendiente. |
 | D-6 | Destino de `sprint_1_act.md`, `mockups_links.md`, los tres PNG y el `.docx`. | `RM-DOC-018` | Inventario maestro | Pendiente. |
@@ -407,3 +411,4 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 | 0.1 | 2026-10-31 | `c100a78f53a61828bec1c17aff4c9e2017336c1b` | Creación con las 18 tareas `RM-DOC-001`…`RM-DOC-018`; 2 completadas con evidencia verificada; 16 pendientes. | En revisión por el propietario; sin commit. |
 | 0.2 | 2026-11-09 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización de metadatos y de la línea base Git. Sin cambios en tareas, casillas, estados, prioridades, dependencias ni criterios de aceptación: se conservan las 18 tareas (2 completadas, 16 pendientes). | En revisión por el propietario; sin commit. |
 | 0.3 | 2026-11-10 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización del estado de `RM-DOC-014`: criterios de aceptación cumplidos en intervención 2026-11-09 (pendiente de commit y cierre formal). Sin cambios en las demás 17 tareas, casillas ni prioridades. | Pendiente de commit. |
+| 0.4 | 2026-11-10 | `2f1e14eef9ebc7c313b87d8541cf9288d9533a87` | Cierre formal de `RM-DOC-014` (`[x]`, Completada, con evidencia de commit); actualización del resumen de progreso (3 completadas, 15 pendientes); resolución parcial de `D-3` (Alembic confirmado por propietario); `README.md` raíz actualizado con nota sobre Alembic (propietario eliminó scripts SQL manuales del Paso 2). | Pendiente de commit. |

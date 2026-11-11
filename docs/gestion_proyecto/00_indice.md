@@ -1,9 +1,9 @@
 # SGA — Índice de Gestión del Proyecto
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base documental de Fase 0: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-10: `9a0428822637197763ec3125ee5e3c64da78864e` (coincide con `origin/dev` según la referencia de seguimiento local; `deployment` en `3ee0d66`)
 > **Estructura creada:** 2026-10-28 · Fase 0.2 (organización documental preparatoria)
-> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` incorporados al árbol de trabajo, pendientes de revisión del propietario y de commit
+> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` versionados en `dev` (commit `0f56f5d`) y presentes en `deployment` (merge `3ee0d66`); sin registro formal de aprobación de su contenido por el propietario. Cambios documentales del 2026-11-09/10 pendientes de commit: `README.md`, `sga_frontend_jwt/README.md`, `00_indice.md`, `MAT-2026-001`, `CHK-2026-001`, `AUD-2026-007` (nuevo)
 
 ---
 
@@ -34,7 +34,8 @@ docs/gestion_proyecto/
 │   ├── AUD-2026-003_consolidacion_comparativa_fase0_paso02.md
 │   ├── AUD-2026-004_inventario_original_fase0_paso04.md
 │   ├── AUD-2026-005_revision_consistencia_fase0_paso04.md
-│   └── AUD-2026-006_ajuste_final_consistencia_fase0_paso04.md
+│   ├── AUD-2026-006_ajuste_final_consistencia_fase0_paso04.md
+│   └── AUD-2026-007_hallazgos_tecnicos_auditoria_estatica_opencode.md
 ├── 02_consultas_tecnicas/              ← Preguntas técnicas y respuestas (vacío por ahora)
 │   └── .gitkeep
 ├── 03_decisiones/                      ← Decisiones aprobadas / ADRs (vacío por ahora)
@@ -71,11 +72,12 @@ Documentos de solo lectura histórica. **No se modifica su contenido.**
 | ID | Archivo | Commit de referencia | Estado | Vigencia |
 |---|---|---|---|---|
 | AUD-2026-001 | [AUD-2026-001_auditoria_inicial_dev_14726ad.md](01_auditorias/AUD-2026-001_auditoria_inicial_dev_14726ad.md) | `dev` @ `14726ad` | **Histórico** (contrastado por AUD-2026-002) | 49 hallazgos F-01…F-49; vigente como registro histórico |
-| AUD-2026-002 | [AUD-2026-002_auditoria_dev_remota_12760d4.md](01_auditorias/AUD-2026-002_auditoria_dev_remota_12760d4.md) | `origin/dev` @ `12760d4` | **Vigente** (HEAD actual) | 16 hallazgos R-01…R-16; base confirmada Fase 0.1 |
+| AUD-2026-002 | [AUD-2026-002_auditoria_dev_remota_12760d4.md](01_auditorias/AUD-2026-002_auditoria_dev_remota_12760d4.md) | `origin/dev` @ `12760d4` | **Vigente** (HEAD en la fecha de la auditoría) | 16 hallazgos R-01…R-16; base confirmada Fase 0.1 |
 | AUD-2026-003 | [AUD-2026-003_consolidacion_comparativa_fase0_paso02.md](01_auditorias/AUD-2026-003_consolidacion_comparativa_fase0_paso02.md) | `dev` / `origin/dev` @ `12760d4` | **Vigente** (Fase 0, paso 0.2) | Consolidación comparativa F-01…F-49 ↔ R-01…R-16; matriz de correspondencias; clasificación corregida; condiciones del paso 0.2 |
 | AUD-2026-004 | [AUD-2026-004_inventario_original_fase0_paso04.md](01_auditorias/AUD-2026-004_inventario_original_fase0_paso04.md) | `dev` @ `12760d4` | **Histórico** (Fase 0, paso 0.4 — revisado por AUD-2026-005 y AUD-2026-006) | Entrega original de OpenCode del inventario único del paso 0.4; conservada íntegra para trazabilidad (versión definitiva consolidada en EVD-2026-003) |
 | AUD-2026-005 | [AUD-2026-005_revision_consistencia_fase0_paso04.md](01_auditorias/AUD-2026-005_revision_consistencia_fase0_paso04.md) | `dev` @ `12760d4` | **Histórico** (Fase 0, paso 0.4 — ajustado por AUD-2026-006) | Primera revisión de consistencia del paso 0.4 (INC-1…INC-7: ajuste de 92 a 91 elementos, C-14, prioridades y clasificación P-01…P-26) |
 | AUD-2026-006 | [AUD-2026-006_ajuste_final_consistencia_fase0_paso04.md](01_auditorias/AUD-2026-006_ajuste_final_consistencia_fase0_paso04.md) | `dev` @ `12760d4` | **Histórico** (Fase 0, paso 0.4 — aplicado en EVD-2026-003) | Ajuste final de consistencia del paso 0.4 con recuentos definitivos reconstruidos y sustituciones S-1…S-6 aplicadas en EVD-2026-003 |
+| AUD-2026-007 | [AUD-2026-007_hallazgos_tecnicos_auditoria_estatica_opencode.md](01_auditorias/AUD-2026-007_hallazgos_tecnicos_auditoria_estatica_opencode.md) | `dev` @ `9a04288` | **Vigente** (Fase 0, ampliación posterior) | Hallazgos técnicos de auditoría estática: DXA-06 (exposición hash contraseña, probable P0), DXA-12b (inicialización BD incompleta en Docker, probable P1), DXA-41 (`stamp` vs `upgrade`, verificado P2) y discrepancias documentales DXA-D1…DXA-D7. Pendiente de revisión del propietario. |
 
 > [!IMPORTANT]
 > AUD-2026-002 es la auditoría vigente. AUD-2026-001 se conserva como registro histórico
@@ -100,21 +102,21 @@ Documentos de solo lectura histórica. **No se modifica su contenido.**
 ## 5. Diagnósticos
 
 Diagnósticos técnicos por área obtenidos mediante ingeniería inversa del código fuente.
-**Todos corresponden al commit `14726ad`** (anterior al HEAD actual `12760d4`).
+**Todos corresponden al commit `14726ad`** (anterior al `HEAD` `12760d4` auditado en AUD-2026-002; el `HEAD` actual figura en la cabecera).
 Cada uno incluye un **banner de vigencia** al inicio.
 
 | ID | Archivo | Área | Vigencia | Advertencias principales |
 |---|---|---|---|---|
-| DXC-2026-001 | [DXC-2026-001_arquitectura.md](04_diagnostico/DXC-2026-001_arquitectura.md) | Arquitectura, capas, flujo de datos | ⚠️ Parcialmente obsoleto | Menciona router `inventario` (eliminado, R-07); referencias a Vercel/Render (reemplazado por Docker, R-09) |
+| DXC-2026-001 | [DXC-2026-001_arquitectura.md](04_diagnostico/DXC-2026-001_arquitectura.md) | Arquitectura, capas, flujo de datos | ⚠️ Parcialmente obsoleto | Menciona router `inventario` (eliminado, R-07); referencias a Vercel/Render (R-09; destino del frontend actualizado por decisión del propietario, ver `MAT-2026-001` §2.1.c) |
 | DXC-2026-002 | [DXC-2026-002_base_de_datos.md](04_diagnostico/DXC-2026-002_base_de_datos.md) | Esquema BD, ORM, migraciones | ⚠️ Obsoleto en migraciones | Cita baseline `d4f74f3d4896` (**eliminado**; reemplazado por `0001_initial_schema`, F-32) |
 | DXC-2026-003 | [DXC-2026-003_api_contrato.md](04_diagnostico/DXC-2026-003_api_contrato.md) | Contrato de 45 endpoints REST | ⚠️ Obsoleto (45 → 38 endpoints) | Documenta routers `inventario`/`renovaciones` GET (**eliminados**, R-07) |
 | DXC-2026-004 | [DXC-2026-004_frontend_componentes.md](04_diagnostico/DXC-2026-004_frontend_componentes.md) | Componentes React, CSS | ⚠️ Parcialmente obsoleto | No incluye 25 componentes nuevos (commits 2026-09-22 → 2026-10-15) |
 | DXC-2026-005 | [DXC-2026-005_reglas_negocio_rbac.md](04_diagnostico/DXC-2026-005_reglas_negocio_rbac.md) | Reglas de negocio, RBAC | ✅ Mayormente vigente | RBAC intacto (S-10); contrastar con AUD-2026-002 |
-| DXC-2026-006 | [DXC-2026-006_despliegue_configuracion.md](04_diagnostico/DXC-2026-006_despliegue_configuracion.md) | Despliegue y configuración | ⛔ Obsoleto | Describe Render+Vercel+`vercel.json` (retirado, R-09); stack real: Docker Compose. **Tabla de credenciales saneada** (R-08) |
+| DXC-2026-006 | [DXC-2026-006_despliegue_configuracion.md](04_diagnostico/DXC-2026-006_despliegue_configuracion.md) | Despliegue y configuración | ⛔ Obsoleto | Describe Render+Vercel+`vercel.json` (retirado en `f19e845`, R-09); stack real al auditar: Docker Compose. `vercel.json` se reintrodujo en `9a04288`; Vercel es el destino principal del frontend por decisión del propietario, sin despliegue verificado (ver `MAT-2026-001`, §2.1.c y §7.11). **Tabla de credenciales saneada** (R-08) |
 
 > [!WARNING]
 > Los diagnósticos describen el estado del código a 2026-10-19 (`14726ad`).
-> No son descripciones del estado actual (`12760d4`). Consultar AUD-2026-002 para el estado vigente.
+> No son descripciones del estado actual (`12760d4` auditado en AUD-2026-002; `HEAD` verificado el 2026-11-09: `9a04288`). Consultar AUD-2026-002 para el estado vigente.
 
 ---
 
@@ -124,8 +126,8 @@ Documentos de planeación documental de `05_roadmap/`. Son **documentos vivos**:
 
 | ID | Archivo | Naturaleza | Estado |
 |---|---|---|---|
-| MAT-2026-001 | [MAT-2026-001_matriz_maestra_documental.md](05_roadmap/MAT-2026-001_matriz_maestra_documental.md) | Matriz maestra documental: inventario de documentos, catálogo de documentos oficiales y correspondencia con `RM-DOC-001`…`RM-DOC-018` y `EVD-2026-003` | En revisión por el propietario (sin commit) |
-| CHK-2026-001 | [CHK-2026-001_checklist_tareas_sga.md](05_roadmap/CHK-2026-001_checklist_tareas_sga.md) | Checklist de las tareas documentales `RM-DOC-001`…`RM-DOC-018` | En revisión por el propietario (sin commit) |
+| MAT-2026-001 | [MAT-2026-001_matriz_maestra_documental.md](05_roadmap/MAT-2026-001_matriz_maestra_documental.md) | Matriz maestra documental: inventario de documentos, catálogo de documentos oficiales y correspondencia con `RM-DOC-001`…`RM-DOC-018` y `EVD-2026-003` | Versionado en `dev` (`0f56f5d`); contenido en revisión del propietario |
+| CHK-2026-001 | [CHK-2026-001_checklist_tareas_sga.md](05_roadmap/CHK-2026-001_checklist_tareas_sga.md) | Checklist de las tareas documentales `RM-DOC-001`…`RM-DOC-018` | Versionado en `dev` (`0f56f5d`); contenido en revisión del propietario |
 
 > El roadmap oficial usará el formato `RDM-AAAA-NNN_slug.md` (ruta prevista: `05_roadmap/RDM-2026-001_roadmap_correccion_sga.md`).
 > **No existe todavía** y no se crea hasta que su contenido esté completo y aprobado.
@@ -150,12 +152,12 @@ Estos documentos permanecen en sus ubicaciones originales dentro de `SGA_repo/SG
 
 | Documento | Ubicación | Estado | Nota |
 |---|---|---|---|
-| `README.md` raíz | [`README.md`](../../README.md) | ⚠️ Desactualizado (F-25, F-42: credenciales y PG 14) | Cara del proyecto; no mover |
+| `README.md` raíz | [`README.md`](../../README.md) | ⚠️ Parcialmente actualizado: badges de stack tecnológico, sección «Estrategia de Despliegue» y correcciones IA-001/IA-002 aplicadas el 2026-11-09/10; pendiente de commit. Siguen pendientes: credenciales incorrectas (F-25, `I-037`), orden de scripts y usuarios de prueba (`RM-DOC-008`). | Cara del proyecto; no mover |
 | `AGENTS.md` raíz | [`AGENTS.md`](../../AGENTS.md) | ✅ Vigente (creado en Fase 0) | Instrucciones operativas exclusivas para OpenCode (solo lectura); permanece en la raíz |
 | `database/README_base_de_datos.md` | [`database/README_base_de_datos.md`](../../database/README_base_de_datos.md) | ⚠️ Desactualizada + **credencial en texto plano** (R-08) | Saneamiento R-08 pendiente (P0, fuera de este alcance) |
 | `database/03_documentacion/INDICE.md` | [`database/03_documentacion/INDICE.md`](../../database/03_documentacion/INDICE.md) | ⚠️ Esquema antiguo + **credencial** (R-08, F-43) | Ídem |
 | `sga_backend_jwt/README.md` | [`sga_backend_jwt/README.md`](../../sga_backend_jwt/README.md) | ⚠️ En conflicto con `entrypoint.sh` (R-02) | Documentación junto al código |
-| `sga_frontend_jwt/README.md` | [`sga_frontend_jwt/README.md`](../../sga_frontend_jwt/README.md) | ⚠️ Sin Docker/Nginx (R-09) | Documentación junto al código |
+| `sga_frontend_jwt/README.md` | [`sga_frontend_jwt/README.md`](../../sga_frontend_jwt/README.md) | ⚠️ Actualizado el 2026-11-09: árbol de `src/` real (5 carpetas modulares de componentes, 9 utilidades), sección «Despliegue» y confirmación de Vercel operativo. Criterios de aceptación de `RM-DOC-014` cumplidos (pendiente de commit). | Documentación junto al código |
 | `docs/` placeholders × 6 | `docs/architecture/`, `docs/requirements/`, `docs/scrum/`, `docs/ui_ux/` | ⛔ Vacíos (0 B, F-39) | Decisión sobre poblar o eliminar: fase posterior |
 
 > [!CAUTION]

@@ -1,10 +1,10 @@
 # MAT-2026-001 — Matriz Maestra Documental del Proyecto SGA
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`
-> **Fecha de elaboración:** 2026-10-31
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-09: `9a0428822637197763ec3125ee5e3c64da78864e`
+> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-10 (v0.3)
 > **Naturaleza:** documento vivo, actualizable y versionado mediante Git
-> **Estado:** en revisión por el propietario (sin commit); las propuestas aquí registradas no son decisiones aprobadas salvo donde se indique expresamente
+> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; las actualizaciones v0.2 (2026-11-09) y v0.3 (2026-11-10) están pendientes de commit; las propuestas aquí registradas no son decisiones aprobadas salvo donde se indique expresamente
 > **Documento asociado:** [`CHK-2026-001_checklist_tareas_sga.md`](CHK-2026-001_checklist_tareas_sga.md)
 
 ---
@@ -13,7 +13,7 @@
 
 1. [Identificación y gobierno](#1-identificación-y-gobierno)
 2. [Decisiones aprobadas, propuestas pendientes y aspectos no verificados](#2-decisiones-aprobadas-propuestas-pendientes-y-aspectos-no-verificados)
-3. [Inventario de documentos existentes (DOC-EX-01 a DOC-EX-49)](#3-inventario-de-documentos-existentes)
+3. [Inventario de documentos existentes (DOC-EX-01 a DOC-EX-50)](#3-inventario-de-documentos-existentes)
 4. [Catálogo de documentos oficiales (DOC-OF y DOC-OP)](#4-catálogo-de-documentos-oficiales)
 5. [Documentación de pruebas y de despliegue](#5-documentación-de-pruebas-y-de-despliegue)
 6. [Correspondencia con tareas RM-DOC y hallazgos EVD-2026-003](#6-correspondencia-con-tareas-rm-doc-y-hallazgos-evd-2026-003)
@@ -32,7 +32,7 @@
 | **Propósito** | Catalogar de forma única y estable los documentos del repositorio (existentes, por actualizar y futuros), su estado real verificado, su relación con las tareas `RM-DOC-001`…`RM-DOC-018` y con los hallazgos `I-001`…`I-091` de `EVD-2026-003`. |
 | **Alcance** | Documentación técnica y de gestión del SGA: guías (`README`), plantillas de configuración, scripts SQL autodocumentados, `docs/` y `docs/gestion_proyecto/`. No cataloga código funcional ni sustituye al roadmap de correcciones técnicas. |
 | **Fecha de elaboración** | 2026-10-31 |
-| **Línea base verificada** | Rama `dev`, `HEAD` `c100a78f53a61828bec1c17aff4c9e2017336c1b` (`docs: consolidate phase 0 audit baseline`). Las cifras de tamaño y los recuentos de este documento se verificaron el 2026-10-31 sobre el árbol de trabajo. |
+| **Línea base verificada** | Rama `dev`, `HEAD` `c100a78f53a61828bec1c17aff4c9e2017336c1b` (`docs: consolidate phase 0 audit baseline`). Las cifras de tamaño y los recuentos de este documento se verificaron el 2026-10-31 sobre el árbol de trabajo. Actualización v0.2 (2026-11-09): `HEAD` `9a0428822637197763ec3125ee5e3c64da78864e`; los recuentos y tamaños del 2026-10-31 no se reverificaron salvo lo indicado en 3.5, 7.11 y 7.12. Actualización v0.3 (2026-11-10): registro de `AUD-2026-007`, decisión de Render confirmada por propietario, correcciones IA-001/IA-002 en `README.md` y finalización de `RM-DOC-014` en `sga_frontend_jwt/README.md`. |
 | **Naturaleza** | Documento vivo. Git conserva el historial de modificaciones. |
 | **Ubicación** | `docs/gestion_proyecto/05_roadmap/` |
 
@@ -84,6 +84,15 @@ Las decisiones se registran aquí tal como fueron comunicadas por el propietario
 | Decisión sobre los placeholders vacíos de `docs/`. | Pospuesta; resuelta en parte por las decisiones n.º 3 y n.º 5 de arriba (se conservan `user_stories.md` y `product_backlog.md`). El resto sigue pendiente. |
 | Credenciales de `03_seed_data.sql`: datos ficticios de prueba; no se modifican contraseñas ni hashes; no se reescribe el historial; el `README.md` se corrige posteriormente. | Aprobada (auditoría P0.1). |
 
+**c) Decisiones comunicadas por el propietario para la actualización documental del 2026-11-09 (motivada por una auditoría de solo lectura de OpenCode que el propietario sitúa el 2026-11-10)**
+
+| N.º | Decisión aprobada | Alcance y límites |
+|---|---|---|
+| 1 | Vercel es el destino principal del frontend. | Es una decisión comunicada, no un `DEC-*` ni evidencia de que el despliegue en producción se haya ejecutado y validado. |
+| 2 | Docker/Nginx se conserva como configuración técnica existente. | No se presenta como destino principal del frontend; su uso en producción no está verificado. |
+| 3 | El alcance se limita a correcciones factuales y a los README afectados. | No se modifican código, configuraciones funcionales ni base de datos. |
+| 4 | Render es el destino de producción del backend y de la base de datos PostgreSQL. | Confirmado por el propietario el 2026-11-09. No existe `DEC-*`, `render.yaml` ni `Procfile` en el repositorio. La versión real de PostgreSQL en Render no ha sido verificada independientemente. |
+
 ### 2.2 Propuestas pendientes (no aprobadas)
 
 | Propuesta | Origen | Estado |
@@ -96,6 +105,8 @@ Las decisiones se registran aquí tal como fueron comunicadas por el propietario
 | Destino de `database/01_esquema/04_plantillas.sql` (actualizar o retirar). | Inventario maestro | Pendiente de decisión (condiciona `RM-DOC-016`). |
 | Destino de `docs/ui_ux/mockups_links.md` y `docs/scrum/sprint_1_act.md`. | Inventario maestro | Pendiente de decisión (condiciona `RM-DOC-018`). |
 | Asignar tarea `RM-DOC` a la actualización de `user_stories.md` y `product_backlog.md`. | Esta matriz (observación 7.7) | Pendiente; no se crean tareas nuevas. |
+| Formalizar como `DEC-2026-NNN` la decisión de Vercel como destino principal del frontend. | Decisión 2.1.c-1 | Propuesta; no se crea ningún `DEC-*` (condiciona `RM-DOC-005`). |
+| Definir el destino de despliegue del backend y de la base de datos. | `I-043`; `vercel.json` no define reglas hacia el backend | Render confirmado como destino por el propietario el 2026-11-09 (ver decisión 2.1.c-4); no existe `DEC-*` ni `render.yaml`/`Procfile` en el repositorio (condiciona `RM-DOC-013`). |
 
 ### 2.3 Aspectos todavía no verificados
 
@@ -106,12 +117,14 @@ Las decisiones se registran aquí tal como fueron comunicadas por el propietario
 | Contenido interno de los tres PNG y del `.docx` de `docs/architecture/`. | Solo se verificaron tamaño y existencia; la decisión previa exige inspeccionarlos antes de retirarlos. |
 | Protección de ramas y uso de PR/issues (`I-066`, `I-067`). | Requieren la plataforma GitHub. |
 | Ejecución de `lint` y `build` del frontend (`I-068`). | No ejecutados. |
+| Despliegue real del frontend en Vercel: proyecto enlazado, rama conectada (`dev` o `deployment`), directorio raíz, comando de build y variables definidas en la plataforma. | Dependen de la plataforma Vercel; el repositorio solo contiene `sga_frontend_jwt/vercel.json`. |
+| Valor de `VITE_API_URL` y de `CORS_ORIGINS` en un entorno desplegado. | No existen valores de producción en el repositorio. |
 
 ---
 
 ## 3. Inventario de documentos existentes
 
-Inventario verificado de **49 identificadores (`DOC-EX-01`…`DOC-EX-49`)** que corresponden a **50 archivos**: `DOC-EX-46` agrupa `EVD-2026-002` y `EVD-2026-003`, que aquí se separan como `DOC-EX-46a` y `DOC-EX-46b` para conservar el identificador histórico. Todos los archivos están versionados en `HEAD` (`c100a78`) salvo el cambio local de `03_seed_data.sql`. Los archivos `MAT-2026-001` y `CHK-2026-001` se crearon después de esa línea base y se catalogan en el catálogo oficial (`DOC-OF-16` y `DOC-OF-17`), no aquí.
+Inventario de **50 identificadores (`DOC-EX-01`…`DOC-EX-50`)** que corresponden a **51 archivos** (los 49 identificadores y 50 archivos originales, verificados el 2026-10-31, más `DOC-EX-50`, incorporado en la v0.2): `DOC-EX-46` agrupa `EVD-2026-002` y `EVD-2026-003`, que aquí se separan como `DOC-EX-46a` y `DOC-EX-46b` para conservar el identificador histórico. Los 50 archivos originales estaban versionados en `c100a78` salvo el cambio local de `03_seed_data.sql`, versionado después en `0f56f5d`; `DOC-EX-50` se versionó en `9a04288`. Los archivos `MAT-2026-001` y `CHK-2026-001` se crearon después de esa línea base y se catalogan en el catálogo oficial (`DOC-OF-16` y `DOC-OF-17`), no aquí.
 
 **Leyenda de estado:** *Vigente* · *Parcialmente vigente* · *Desactualizado* · *Incompleto (0 B)* · *Histórico*. Los tamaños y los recuentos corresponden a la verificación del 2026-10-31. «—» en hallazgos indica que el documento no tiene un hallazgo directo en `EVD-2026-003`.
 
@@ -137,7 +150,7 @@ Inventario verificado de **49 identificadores (`DOC-EX-01`…`DOC-EX-49`)** que 
 |---|---|---|---|---|---|---|
 | **DOC-EX-12** | `database/01_esquema/01_tablas.sql` | DDL principal | Vigente (fuente de verdad DDL) | 16481 B; 7 sentencias `CREATE TABLE`. | — | L361 y L364 mencionan `estado_usuario` como nota sobre una columna inexistente. |
 | **DOC-EX-13** | `database/01_esquema/02_funciones_y_triggers.sql` | Funciones y triggers PL/pgSQL | Vigente (fuente de verdad PL/pgSQL) | 17432 B; 19 sentencias `CREATE TRIGGER`. | `I-079`, `I-056` | — |
-| **DOC-EX-14** | `database/01_esquema/03_seed_data.sql` | Datos semilla de prueba | Vigente para pruebas locales; con cambio local no preparado | 6185 B. Inserta 11 empleados (1 `admin`, 5 `encargado_facturacion`, 5 `encargado_logistico`), 10 clientes y 7 productos. Diff local: 6 líneas de comentario modificadas (1 inserción, 5 eliminaciones); 0 líneas que no sean comentario. | `I-002`, `I-041` | Contraseñas y hashes se conservan por decisión del propietario. El cambio local se mantiene sin ediciones adicionales. |
+| **DOC-EX-14** | `database/01_esquema/03_seed_data.sql` | Datos semilla de prueba | Vigente para pruebas locales; cambio de comentario versionado en `0f56f5d` | 6185 B. Inserta 11 empleados (1 `admin`, 5 `encargado_facturacion`, 5 `encargado_logistico`), 10 clientes y 7 productos. Diff verificado el 2026-10-31 (entonces local): 6 líneas de comentario modificadas (1 inserción, 5 eliminaciones); 0 líneas que no sean comentario. | `I-002`, `I-041` | Contraseñas y hashes se conservan por decisión del propietario. Sin ediciones adicionales desde su versionado (árbol de trabajo limpio el 2026-11-09). |
 | **DOC-EX-15** | `database/01_esquema/04_plantillas.sql` | Plantillas DML comentadas | Desactualizado | 9468 B. L80 y L110 usan la columna `es_recogida`; 0 coincidencias de `estado_usuario`. | `I-040` | Ver observación 7.4: `EVD-2026-003` cita `estado_usuario` en estas líneas. |
 | **DOC-EX-16** | `database/01_esquema/05_consultas.sql` | Consultas DQL de referencia | Parcialmente vigente (sin revisar) | 5458 B; 0 coincidencias de `es_recogida` y de `estado_usuario`. `README_base_de_datos.md` L48 lo marca «Sin revisar / esquema anterior». | `I-040` (citado en `EVD-2026-003`) | La afectación citada no se reproduce en el archivo actual (observación 7.4). |
 | **DOC-EX-17** | `database/01_esquema/06_vistas_dashboard.sql` | DDL de vista de dashboard | Parcialmente vigente | 1579 B; define **1** vista (`vw_dashboard_operativo`, L12). No se menciona en `README_base_de_datos.md` ni en `INDICE.md`. | `I-034` | Corrige «3 vistas» de informes previos (observación 7.2). |
@@ -165,7 +178,7 @@ Inventario verificado de **49 identificadores (`DOC-EX-01`…`DOC-EX-49`)** que 
 
 | ID | Ruta | Función y tipo | Estado real | Evidencia verificada | Hallazgos EVD-003 | Observaciones |
 |---|---|---|---|---|---|---|
-| **DOC-EX-32** | `docs/gestion_proyecto/00_indice.md` | Índice maestro de gestión | Vigente (en actualización en esta intervención) | 16043 B antes de esta intervención; registra `AUD-001`…`006`, `DXC-001`…`006`, `EVD-001`…`003` y `AGENTS.md`. | `I-035` | Su cabecera (L4 y L6) conservaba el estado previo al commit; se actualiza en esta intervención. |
+| **DOC-EX-32** | `docs/gestion_proyecto/00_indice.md` | Índice maestro de gestión | Vigente (en actualización en esta intervención) | 16043 B antes de esta intervención; registra `AUD-001`…`006`, `DXC-001`…`006`, `EVD-001`…`003` y `AGENTS.md`. | `I-035` | Su cabecera (L4 y L6) conservaba el estado previo al commit; se actualiza en esta intervención. Actualizado de nuevo el 2026-11-09 (v0.2: cabecera, estado de `MAT`/`CHK`, referencias a `HEAD` y nota sobre Vercel); pendiente de commit. |
 | **DOC-EX-33** | `docs/gestion_proyecto/01_auditorias/AUD-2026-001_auditoria_inicial_dev_14726ad.md` | Auditoría inicial | Histórico | 55059 B. | — | Inmutable. Origen de `F-01`…`F-49`. |
 | **DOC-EX-34** | `docs/gestion_proyecto/01_auditorias/AUD-2026-002_auditoria_dev_remota_12760d4.md` | Auditoría de `12760d4` | Histórico | 44693 B. | — | Origen de `R-01`…`R-16` y `S-01`…`S-10`. |
 | **DOC-EX-35** | `docs/gestion_proyecto/01_auditorias/AUD-2026-003_consolidacion_comparativa_fase0_paso02.md` | Consolidación (paso 0.2) | Histórico | 38575 B. | — | — |
@@ -184,6 +197,17 @@ Inventario verificado de **49 identificadores (`DOC-EX-01`…`DOC-EX-49`)** que 
 | **DOC-EX-47** | `docs/gestion_proyecto/02_consultas_tecnicas/.gitkeep` | Marcador de carpeta | Vigente | 2 B. | — | — |
 | **DOC-EX-48** | `docs/gestion_proyecto/03_decisiones/.gitkeep` | Marcador de carpeta | Vigente | 2 B. | — | — |
 | **DOC-EX-49** | `docs/gestion_proyecto/05_roadmap/.gitkeep` | Marcador de carpeta | Vigente (se conserva, decisión n.º 9) | 2 B. | — | — |
+
+### 3.5 Adiciones posteriores a la línea base (`DOC-EX-50`)
+
+Archivos incorporados al repositorio después de `c100a78`. Reciben el identificador correlativo siguiente a `DOC-EX-49`; no se renumera ni se modifica ningún identificador existente.
+
+| ID | Ruta | Función y tipo | Estado real | Evidencia verificada | Hallazgos EVD-003 | Observaciones |
+|---|---|---|---|---|---|---|
+| **DOC-EX-50** | `sga_frontend_jwt/vercel.json` | Configuración de despliegue del frontend en Vercel (JSON, no documentación narrativa) | Vigente como configuración existente; **despliegue no verificado** | 96 B; UTF-8 sin BOM; JSON válido con una regla `rewrites` (`/(.*)` → `/index.html`); sin reglas `redirects` ni proxy hacia el backend. Versionado en `9a04288` (`dev`); presente en `deployment` (`2f8c93f`, merge `3ee0d66`). | `I-043` (relacionado) | Reintroduce el archivo retirado en `f19e845` (versiones previas guardadas en UTF-16 con BOM). Sin registro `DOC-OF` asociado; no se crea. Decisión de Vercel como destino principal: 2.1.c. |
+
+> [!NOTE]
+> Los tamaños y líneas citados para `DOC-EX-01` y `DOC-EX-08` en 3.1 corresponden a `c100a78` y al 2026-10-31. Ambos README se modificaron el 2026-11-09 (observación 7.12); no se reverificó el resto de su contenido.
 
 ---
 
@@ -280,6 +304,8 @@ Ambos documentos son independientes (decisión n.º 6). Ninguno existe todavía.
 | Documentación de pruebas y QA | `DOC-OF-12` | `docs/testing/testing_and_qa.md` | **Ruta propuesta; archivo pendiente de creación** | La carpeta `docs/testing/` tampoco existe (verificado el 2026-10-31). Tarea asociada: `RM-DOC-017`. |
 | Guía de despliegue y operación | `DOC-OF-11` | `docs/deployment/deployment_and_operations.md` | Ruta propuesta; archivo pendiente de creación | La carpeta `docs/deployment/` tampoco existe (verificado el 2026-10-31). Tarea asociada: `RM-DOC-013`. |
 
+Para `DOC-OF-11`: por decisión del propietario (2.1.c), Vercel es el destino principal del frontend y Docker Compose/Nginx se documentará como configuración técnica existente. El destino del backend y de la base de datos sigue sin decidirse (`I-043`, observación 7.11).
+
 Reparto de contenido previsto (propuesta, no aprobada): despliegue y operación cubre Docker Compose, Nginx, variables de entorno, seguridad operativa y respaldos; pruebas y QA cubre el protocolo de verificación (scripts de `database/06_demos_endpoints/`, `npm run lint`, `npm run build`) y, cuando existan, las suites automatizadas (`I-023`).
 
 ---
@@ -329,6 +355,10 @@ Resultado del contraste del 2026-10-31 entre los informes preparatorios y el rep
 | 7.8 | El criterio original de `RM-DOC-001` exigía 0 coincidencias de credencial también en `03_seed_data.sql`. | El seed conserva por decisión del propietario el comentario con la contraseña ficticia. | El criterio de `CHK-2026-001` se limita a los dos documentos Markdown y depende de la política pendiente. |
 | 7.9 | Informes previos hablaban de «31 componentes» de frontend. | `src/components` tiene 32 archivos `.tsx` (25 en 5 carpetas modulares y 7 en `inputs`, `layout`, `productos`, `ui`); `src/utils` tiene 9 archivos. | `DOC-EX-08` usa las cifras verificadas. |
 | 7.10 | El informe previo reclasificó `RM-DOC-001` a P2. | La reclasificación de `I-002` figura como propuesta en la auditoría P0.1; no existe decisión aprobada. | Se mantiene P0 con la propuesta anotada como pendiente. |
+| 7.11 | `EVD-2026-003` registra `I-043` (P1, abierto) con «`vercel.json` ausente», y plantea las opciones de destino (a) Docker Compose, (b) Docker + orquestador, (c) PaaS con Dockerfile. | El 2026-11-09 existe `sga_frontend_jwt/vercel.json` (`9a04288`) con una regla `rewrites`; `docker-compose.yml`, los `Dockerfile` y `nginx.conf` siguen presentes; el propietario comunicó que Vercel es el destino principal del frontend. No existe `DEC-*`; `vercel.json` no define proxy hacia el backend; no hay evidencia de despliegue ejecutado ni validado. | Nueva evidencia registrada. `I-043` **no se marca como resuelto**: siguen pendientes la decisión formal, el destino del backend y de la base de datos, y la verificación en ejecución. `EVD-2026-003` no se modifica. |
+| 7.12 | `DOC-EX-01` y `DOC-EX-08` describen los README raíz y del frontend sin Vercel ni estrategia de despliegue. | El 2026-11-09 se actualizaron `README.md` (badges de stack, estrategia de despliegue, correcciones IA-001: descripción Docker correcta; IA-002: PostgreSQL 16+ con aclaración) y `sga_frontend_jwt/README.md` (árbol real de `src/`, confirmación Vercel operativo); todos pendientes de commit. | `DOC-OF-01` permanece *Existente por actualizar* (`RM-DOC-008` pendiente: credenciales incorrectas, orden de scripts, usuarios de prueba). `DOC-OF-03` avanza: criterios de aceptación de `RM-DOC-014` cumplidos; pendiente de commit y verificación formal. |
+
+| 7.13 | Hallazgos técnicos adicionales identificados por auditoría estática el 2026-11-10 y registrados en `AUD-2026-007`. | DXA-06 (exposición probable de hash de contraseña, P0), DXA-12b (inicialización incompleta de funciones y triggers en entorno Docker, probable P1) y DXA-41 (inconsistencia `stamp` vs `upgrade`, verificado, P2). Los hallazgos documentales DXA-D1…DXA-D7 consolidan discrepancias ya registradas. `EVD-2026-003` no se modifica. | `AUD-2026-007` registrado en `01_auditorias/`; `00_indice.md` actualizado para incluirlo. Las correcciones técnicas no están autorizadas en esta intervención. |
 
 ---
 
@@ -359,3 +389,5 @@ Reglas adicionales:
 | Versión | Fecha | Línea base | Cambios | Estado |
 |---|---|---|---|---|
 | 0.1 | 2026-10-31 | `c100a78f53a61828bec1c17aff4c9e2017336c1b` | Creación: inventario `DOC-EX-01`…`DOC-EX-49`, catálogo `DOC-OF-01`…`DOC-OF-21` y `DOC-OP-01`…`DOC-OP-06`, correspondencia con `RM-DOC-001`…`RM-DOC-018`, observaciones de verificación. | En revisión por el propietario; sin commit. |
+| 0.2 | 2026-11-09 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización de metadatos y del estado Git; incorporación de `DOC-EX-50` (`sga_frontend_jwt/vercel.json`, sección 3.5); decisiones sobre Vercel y Docker/Nginx en 2.1.c; propuestas y aspectos no verificados en 2.2 y 2.3; nota en la sección 5; observaciones 7.11 y 7.12. No se alteran identificadores, estados de tareas ni registros previos. | En revisión por el propietario; sin commit. |
+| 0.3 | 2026-11-10 | `9a0428822637197763ec3125ee5e3c64da78864e` | Registro de `AUD-2026-007` (DXA-06, DXA-12b, DXA-41, DXA-D1…DXA-D7); decisión 2.1.c-4 (Render, confirmada por propietario); actualización de propuesta en 2.2; observaciones 7.12 (ampliada) y 7.13 (nueva). No se alteran identificadores, estados de las 18 tareas ni registros históricos. | En revisión por el propietario; pendiente de commit. |

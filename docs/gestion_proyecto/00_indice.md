@@ -3,7 +3,7 @@
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
 > **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base documental de Fase 0: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-10: `9a0428822637197763ec3125ee5e3c64da78864e` (coincide con `origin/dev` según la referencia de seguimiento local; `deployment` en `3ee0d66`)
 > **Estructura creada:** 2026-10-28 · Fase 0.2 (organización documental preparatoria)
-> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` versionados en `dev` (commit `0f56f5d`) y presentes en `deployment` (merge `3ee0d66`); sin registro formal de aprobación de su contenido por el propietario. Cambios documentales del 2026-11-09/10 pendientes de commit: `README.md`, `sga_frontend_jwt/README.md`, `00_indice.md`, `MAT-2026-001`, `CHK-2026-001`, `AUD-2026-007` (nuevo)
+> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` versionados en `dev` (commit `0f56f5d`) y presentes en `deployment` (merge `3ee0d66`); sin registro formal de aprobación de su contenido por el propietario. Versionado en commit `2f1e14e` (2026-11-10): `README.md`, `sga_frontend_jwt/README.md`, `00_indice.md`, `MAT-2026-001`, `CHK-2026-001`, `AUD-2026-007`. Nueva actualización del 2026-11-10 (`RM-DOC-014` cierre + Alembic) pendiente de commit.
 
 ---
 
@@ -152,12 +152,12 @@ Estos documentos permanecen en sus ubicaciones originales dentro de `SGA_repo/SG
 
 | Documento | Ubicación | Estado | Nota |
 |---|---|---|---|
-| `README.md` raíz | [`README.md`](../../README.md) | ⚠️ Parcialmente actualizado: badges de stack tecnológico, sección «Estrategia de Despliegue» y correcciones IA-001/IA-002 aplicadas el 2026-11-09/10; pendiente de commit. Siguen pendientes: credenciales incorrectas (F-25, `I-037`), orden de scripts y usuarios de prueba (`RM-DOC-008`). | Cara del proyecto; no mover |
+| `README.md` raíz | [`README.md`](../../README.md) | ⚠️ Actualizado 2026-11-10: badges, estrategia de despliegue, correcciones IA-001/IA-002, nota sobre Alembic; propietario eliminó paso de scripts SQL manuales. Pendiente de commit. Siguen pendientes: credenciales incorrectas y usuarios de prueba (`RM-DOC-008`). | Cara del proyecto; no mover |
 | `AGENTS.md` raíz | [`AGENTS.md`](../../AGENTS.md) | ✅ Vigente (creado en Fase 0) | Instrucciones operativas exclusivas para OpenCode (solo lectura); permanece en la raíz |
 | `database/README_base_de_datos.md` | [`database/README_base_de_datos.md`](../../database/README_base_de_datos.md) | ⚠️ Desactualizada + **credencial en texto plano** (R-08) | Saneamiento R-08 pendiente (P0, fuera de este alcance) |
 | `database/03_documentacion/INDICE.md` | [`database/03_documentacion/INDICE.md`](../../database/03_documentacion/INDICE.md) | ⚠️ Esquema antiguo + **credencial** (R-08, F-43) | Ídem |
 | `sga_backend_jwt/README.md` | [`sga_backend_jwt/README.md`](../../sga_backend_jwt/README.md) | ⚠️ En conflicto con `entrypoint.sh` (R-02) | Documentación junto al código |
-| `sga_frontend_jwt/README.md` | [`sga_frontend_jwt/README.md`](../../sga_frontend_jwt/README.md) | ⚠️ Actualizado el 2026-11-09: árbol de `src/` real (5 carpetas modulares de componentes, 9 utilidades), sección «Despliegue» y confirmación de Vercel operativo. Criterios de aceptación de `RM-DOC-014` cumplidos (pendiente de commit). | Documentación junto al código |
+| `sga_frontend_jwt/README.md` | [`sga_frontend_jwt/README.md`](../../sga_frontend_jwt/README.md) | ✅ Actualizado 2026-11-09 y versionado en `2f1e14e`. `RM-DOC-014` **cerrada**. Árbol real de `src/`, sección de despliegue Vercel, CORS y comandos `npm` verificados. | Documentación junto al código |
 | `docs/` placeholders × 6 | `docs/architecture/`, `docs/requirements/`, `docs/scrum/`, `docs/ui_ux/` | ⛔ Vacíos (0 B, F-39) | Decisión sobre poblar o eliminar: fase posterior |
 
 > [!CAUTION]

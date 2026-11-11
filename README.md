@@ -77,17 +77,8 @@ cd SGA
    ```sql
    CREATE DATABASE sga_db;
    ```
-3. Conéctate a `sga_db` y ejecuta los scripts **en este orden exacto**:
 
-   | Orden | Archivo |
-   |---|---|
-   | 1 | `database/01_esquema/01_tablas.sql` |
-   | 2 | `database/01_esquema/02_funciones_y_triggers.sql` |
-   | 3 | `database/01_esquema/03_seed_data.sql` |
-   | 4 | `database/01_esquema/04_plantillas.sql` *(opcional — datos de prueba)* |
-   | 5 | `database/01_esquema/06_vistas_dashboard.sql` |
-
-   > ⚠️ No ejecutes `05_consultas.sql` — es solo de referencia, no modifica el esquema.
+> El esquema de la base de datos es gestionado por Alembic: al arrancar el backend, `entrypoint.sh` ejecuta `alembic upgrade head` y aplica las migraciones definidas en `sga_backend_jwt/alembic/versions/`. Los scripts de `database/01_esquema/` están disponibles como referencia en el repositorio.
 
 ### Paso 3 — Configurar y arrancar el Backend
 

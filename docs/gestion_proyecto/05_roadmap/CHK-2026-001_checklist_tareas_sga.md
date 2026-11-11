@@ -1,10 +1,10 @@
 # CHK-2026-001 — Checklist de Tareas Documentales del Proyecto SGA
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`
-> **Fecha de elaboración:** 2026-10-31
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-09: `9a0428822637197763ec3125ee5e3c64da78864e`
+> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-10 (v0.3)
 > **Naturaleza:** documento vivo de seguimiento operativo, versionado mediante Git
-> **Estado:** en revisión por el propietario (sin commit)
+> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; las actualizaciones v0.2 (2026-11-09) y v0.3 (2026-11-10) están pendientes de commit
 > **Matriz asociada:** [`MAT-2026-001_matriz_maestra_documental.md`](MAT-2026-001_matriz_maestra_documental.md)
 > **Evidencia de hallazgos:** [`EVD-2026-003`](../06_evidencias/EVD-2026-003_inventario_unico_hallazgos_fase0_paso04.md)
 > **Índice de gobierno:** [`00_indice.md`](../00_indice.md)
@@ -115,7 +115,7 @@
   - **Prioridad:** P1
   - **Dependencias:** la sección de arranque con Docker Compose depende de la definición de `I-016`.
   - **Responsable:** Pendiente de asignación
-  - **Estado:** Pendiente — lista para iniciar (la sección Docker, condicionada a `I-016`)
+  - **Estado:** Pendiente — criterios de aceptación cumplidos en la intervención del 2026-11-09 (pendiente de commit y cierre formal con evidencia) (la sección Docker, condicionada a `I-016`)
   - **Criterios de aceptación:**
     1. La versión de PostgreSQL indicada coincide con la de `docker-compose.yml` (`postgres:16-alpine`) y con `database/README_base_de_datos.md`.
     2. La carga inicial de la BD no incluye `04_plantillas.sql`.
@@ -190,7 +190,7 @@
     2. Menciona `Dockerfile` y `nginx.conf`, que existen en `sga_frontend_jwt/`.
     3. La nota sobre CORS refleja que el origen se configura mediante `CORS_ORIGINS` en `settings.py`, no con una lista fija en `main.py`.
     4. Los comandos `npm` documentados corresponden a los scripts de `package.json`.
-  - **Evidencia de cierre:** pendiente.
+  - **Evidencia de cierre:** intervención 2026-11-09: árbol real de `src/` con 5 carpetas modulares de componentes y 9 utilidades; `Dockerfile`, `nginx.conf`, CORS y comandos `npm` verificados. Confirmación de Vercel por propietario. Pendiente de commit y de registro formal de evidencia de cierre (`AUD-*` o `EVD-*`).
 
 ---
 
@@ -405,3 +405,5 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 | Versión | Fecha | Línea base | Cambios | Estado |
 |---|---|---|---|---|
 | 0.1 | 2026-10-31 | `c100a78f53a61828bec1c17aff4c9e2017336c1b` | Creación con las 18 tareas `RM-DOC-001`…`RM-DOC-018`; 2 completadas con evidencia verificada; 16 pendientes. | En revisión por el propietario; sin commit. |
+| 0.2 | 2026-11-09 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización de metadatos y de la línea base Git. Sin cambios en tareas, casillas, estados, prioridades, dependencias ni criterios de aceptación: se conservan las 18 tareas (2 completadas, 16 pendientes). | En revisión por el propietario; sin commit. |
+| 0.3 | 2026-11-10 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización del estado de `RM-DOC-014`: criterios de aceptación cumplidos en intervención 2026-11-09 (pendiente de commit y cierre formal). Sin cambios en las demás 17 tareas, casillas ni prioridades. | Pendiente de commit. |

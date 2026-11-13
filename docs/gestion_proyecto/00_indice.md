@@ -1,9 +1,9 @@
 # SGA — Índice de Gestión del Proyecto
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base documental de Fase 0: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-11: `32b232eceb814df2a8ea8d047b31057cf245455f` (coincide con `origin/dev` según la referencia de seguimiento local; `deployment` en `3ee0d66`)
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base documental de Fase 0: commit `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-11: `8c7de4dc4b6c4a94f454141e5895dccc947757fb` (coincide con `origin/dev` según la referencia de seguimiento local; `deployment` en `3ee0d66`)
 > **Estructura creada:** 2026-10-28 · Fase 0.2 (organización documental preparatoria)
-> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` versionados en `dev` (commit `0f56f5d`) y presentes en `deployment` (merge `3ee0d66`); sin registro formal de aprobación de su contenido por el propietario. Versionado en commit `32b232e` (2026-11-10): cierre formal de `RM-DOC-014`, decisión sobre Alembic y actualización de READMEs. Actualización documental del 2026-11-11 (v0.5): cierre formal de `RM-DOC-008`, actualización de `README.md` (separación local/producción, seed con datos ficticios de prueba, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue) y sincronización de matriz y checklist, pendiente de commit.
+> **Estado:** línea base de Fase 0 versionada en `dev` (commit `c100a78`); `MAT-2026-001` y `CHK-2026-001` versionados en `dev` (commit `0f56f5d`) y presentes en `deployment` (merge `3ee0d66`); sin registro formal de aprobación de su contenido por el propietario. Versionado en commit `32b232e` (2026-11-10): cierre formal de `RM-DOC-014`, decisión sobre Alembic y actualización de READMEs. Actualización documental del 2026-11-11 (v0.5): cierre formal de `RM-DOC-008`, actualización de `README.md` (separación local/producción, seed con datos ficticios de prueba, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue) y sincronización de matriz y checklist, versionado en commit `8c7de4d` (2026-11-11).
 
 ---
 
@@ -126,8 +126,8 @@ Documentos de planeación documental de `05_roadmap/`. Son **documentos vivos**:
 
 | ID | Archivo | Naturaleza | Estado |
 |---|---|---|---|
-| MAT-2026-001 | [MAT-2026-001_matriz_maestra_documental.md](05_roadmap/MAT-2026-001_matriz_maestra_documental.md) | Matriz maestra documental: inventario de documentos, catálogo de documentos oficiales y correspondencia con `RM-DOC-001`…`RM-DOC-018` y `EVD-2026-003` | Versionado en `dev` (`0f56f5d`); contenido en revisión del propietario |
-| CHK-2026-001 | [CHK-2026-001_checklist_tareas_sga.md](05_roadmap/CHK-2026-001_checklist_tareas_sga.md) | Checklist de las tareas documentales `RM-DOC-001`…`RM-DOC-018` | Versionado en `dev` (`0f56f5d`); contenido en revisión del propietario |
+| MAT-2026-001 | [MAT-2026-001_matriz_maestra_documental.md](05_roadmap/MAT-2026-001_matriz_maestra_documental.md) | Matriz maestra documental: inventario de documentos, catálogo de documentos oficiales y correspondencia con `RM-DOC-001`…`RM-DOC-018` y `EVD-2026-003` | Actualizados progresivamente en commits `2f1e14e`, `32b232e` y `8c7de4d` (v0.5); versionados en `dev`. Último estado: cierre de `RM-DOC-008` y regularización de trazabilidad. |
+| CHK-2026-001 | [CHK-2026-001_checklist_tareas_sga.md](05_roadmap/CHK-2026-001_checklist_tareas_sga.md) | Checklist de las tareas documentales `RM-DOC-001`…`RM-DOC-018` | Actualizados progresivamente en commits `2f1e14e`, `32b232e` y `8c7de4d` (v0.5); versionados en `dev`. Último estado: cierre de `RM-DOC-008` y regularización de trazabilidad. |
 
 > El roadmap oficial usará el formato `RDM-AAAA-NNN_slug.md` (ruta prevista: `05_roadmap/RDM-2026-001_roadmap_correccion_sga.md`).
 > **No existe todavía** y no se crea hasta que su contenido esté completo y aprobado.

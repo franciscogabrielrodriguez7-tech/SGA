@@ -1,10 +1,10 @@
 # CHK-2026-001 — Checklist de Tareas Documentales del Proyecto SGA
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-11: `32b232eceb814df2a8ea8d047b31057cf245455f`
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-11: `8c7de4dc4b6c4a94f454141e5895dccc947757fb`
 > **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-11 (v0.5)
 > **Naturaleza:** documento vivo de seguimiento operativo, versionado mediante Git
-> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; actualización v0.5 (2026-11-11): cierre formal de `RM-DOC-008` con verificación de criterios, actualización de `README.md` (precisión de seed ficticio y pgAdmin 4 exclusivo para producción) y ajuste de progreso a 4 completadas (14 pendientes), pendiente de commit.
+> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; actualización v0.5 (2026-11-11): cierre formal de `RM-DOC-008` con verificación de criterios, actualización de `README.md` (precisión de seed ficticio y pgAdmin 4 exclusivo para producción) y ajuste de progreso a 4 completadas (14 pendientes), versionado en commit `8c7de4d`.
 > **Matriz asociada:** [`MAT-2026-001_matriz_maestra_documental.md`](MAT-2026-001_matriz_maestra_documental.md)
 > **Evidencia de hallazgos:** [`EVD-2026-003`](../06_evidencias/EVD-2026-003_inventario_unico_hallazgos_fase0_paso04.md)
 > **Índice de gobierno:** [`00_indice.md`](../00_indice.md)
@@ -125,7 +125,7 @@
     6. El README no contiene la contraseña ficticia ni hashes; remite al encabezado de `03_seed_data.sql`.
     7. Cualquier instrucción sobre Docker Compose está respaldada por un procedimiento verificado o marcada expresamente como no verificada.
     8. Los enlaces Markdown resuelven a archivos existentes.
-  - **Evidencia de cierre:** verificado el 2026-11-11 en `dev` sobre la línea base `32b232eceb814df2a8ea8d047b31057cf245455f` (cierre formal documentado en esta intervención). Los 8 criterios de aceptación están cumplidos:
+  - **Evidencia de cierre:** verificado el 2026-11-11 en `dev`; cierre formal versionado en commit `8c7de4dc4b6c4a94f454141e5895dccc947757fb`. Los 8 criterios de aceptación están cumplidos:
     1. PostgreSQL 16+ con mención a `postgres:16-alpine` de `docker-compose.yml` y coherente con `database/README_base_de_datos.md` (README L60).
     2. El Paso 2 de instalación documenta la gestión por Alembic (`alembic upgrade head`) y no incluye `04_plantillas.sql` (README L81).
     3. La sección «Acceso Inicial» documenta el inicio de sesión con `email_usuario` o `telefono_usuario` (README L101) sin utilizar «Documento».
@@ -420,4 +420,4 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 | 0.2 | 2026-11-09 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización de metadatos y de la línea base Git. Sin cambios en tareas, casillas, estados, prioridades, dependencias ni criterios de aceptación: se conservan las 18 tareas (2 completadas, 16 pendientes). | En revisión por el propietario; sin commit. |
 | 0.3 | 2026-11-10 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización del estado de `RM-DOC-014`: criterios de aceptación cumplidos en intervención 2026-11-09 (pendiente de commit y cierre formal). Sin cambios en las demás 17 tareas, casillas ni prioridades. | Pendiente de commit. |
 | 0.4 | 2026-11-10 | `2f1e14eef9ebc7c313b87d8541cf9288d9533a87` | Cierre formal de `RM-DOC-014` (`[x]`, Completada, con evidencia de commit); actualización del resumen de progreso (3 completadas, 15 pendientes); resolución parcial de `D-3` (Alembic confirmado por propietario); `README.md` raíz actualizado con nota sobre Alembic (propietario eliminó scripts SQL manuales del Paso 2). | Versionado en commit `32b232e`. |
-| 0.5 | 2026-11-11 | `32b232eceb814df2a8ea8d047b31057cf245455f` | Cierre formal de `RM-DOC-008` (`[x]`, Completada, con verificación de los 8 criterios de aceptación); actualización del resumen de progreso (4 completadas, 14 pendientes); actualización de `README.md` (precisión de datos ficticios del seed en desarrollo local, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue). | En revisión por el propietario; pendiente de commit. |
+| 0.5 | 2026-11-11 | `32b232eceb814df2a8ea8d047b31057cf245455f` | Cierre formal de `RM-DOC-008` (`[x]`, Completada, con verificación de los 8 criterios de aceptación); actualización del resumen de progreso (4 completadas, 14 pendientes); actualización de `README.md` (precisión de datos ficticios del seed en desarrollo local, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue). | Versionado en commit `8c7de4d`. |

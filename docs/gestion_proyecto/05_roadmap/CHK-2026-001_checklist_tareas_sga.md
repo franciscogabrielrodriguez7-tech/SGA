@@ -1,10 +1,10 @@
 # CHK-2026-001 — Checklist de Tareas Documentales del Proyecto SGA
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
-> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-11: `8c7de4dc4b6c4a94f454141e5895dccc947757fb`
-> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-11 (v0.5)
+> **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-23: `cefb92df3e4f15f98568131d3a91711665bbf64b`
+> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-23 (v0.6)
 > **Naturaleza:** documento vivo de seguimiento operativo, versionado mediante Git
-> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; actualización v0.5 (2026-11-11): cierre formal de `RM-DOC-008` con verificación de criterios, actualización de `README.md` (precisión de seed ficticio y pgAdmin 4 exclusivo para producción) y ajuste de progreso a 4 completadas (14 pendientes), versionado en commit `8c7de4d`.
+> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; actualización v0.5 (2026-11-11): cierre formal de `RM-DOC-008` con verificación de criterios, actualización de `README.md` (precisión de seed ficticio y pgAdmin 4 exclusivo para producción) y ajuste de progreso a 4 completadas (14 pendientes), versionado en commit `8c7de4d` y regularizado en `cefb92d`; actualización v0.6 (2026-11-23): cierre formal de `RM-DOC-010` con verificación de sus 6 criterios sobre `docs/architecture/architecture_map.md`, habilitación de `RM-DOC-011` como lista para iniciar y ajuste de progreso a 5 completadas (13 pendientes).
 > **Matriz asociada:** [`MAT-2026-001_matriz_maestra_documental.md`](MAT-2026-001_matriz_maestra_documental.md)
 > **Evidencia de hallazgos:** [`EVD-2026-003`](../06_evidencias/EVD-2026-003_inventario_unico_hallazgos_fase0_paso04.md)
 > **Índice de gobierno:** [`00_indice.md`](../00_indice.md)
@@ -65,11 +65,11 @@
 | Concepto | Cantidad |
 |---|---:|
 | Tareas totales (`RM-DOC-001`…`RM-DOC-018`) | 18 |
-| Completadas | 4 (`RM-DOC-002`, `RM-DOC-003`, `RM-DOC-014`, `RM-DOC-008`) |
-| Pendientes | 14 |
-| — lista para iniciar | 3 (`RM-DOC-005`, `RM-DOC-010`, `RM-DOC-017`) |
+| Completadas | 5 (`RM-DOC-002`, `RM-DOC-003`, `RM-DOC-014`, `RM-DOC-008`, `RM-DOC-010`) |
+| Pendientes | 13 |
+| — lista para iniciar | 3 (`RM-DOC-005`, `RM-DOC-011`, `RM-DOC-017`) |
 | — condicionada por decisión | 4 (`RM-DOC-001`, `RM-DOC-009`, `RM-DOC-013`, `RM-DOC-016`) |
-| — dependiente de tareas | 7 (`RM-DOC-004`, `RM-DOC-006`, `RM-DOC-007`, `RM-DOC-011`, `RM-DOC-012`, `RM-DOC-015`, `RM-DOC-018`) |
+| — dependiente de tareas | 6 (`RM-DOC-004`, `RM-DOC-006`, `RM-DOC-007`, `RM-DOC-012`, `RM-DOC-015`, `RM-DOC-018`) |
 | Con responsable «Pendiente de asignación» | 18 |
 
 ---
@@ -242,14 +242,14 @@
 
 ## 6. Etapa 3 — Documentación técnica viva en `docs/`
 
-- [ ] **RM-DOC-010 — Poblado del mapa de arquitectura**
+- [x] **RM-DOC-010 — Poblado del mapa de arquitectura**
   - **Actividad:** redactar `docs/architecture/architecture_map.md`, hoy vacío (0 B).
   - **Documentos:** `DOC-OF-06` · `docs/architecture/architecture_map.md`
   - **Hallazgos:** `I-035`, `I-043`, `I-074`, `I-076`, `I-079`
   - **Prioridad:** P1
   - **Dependencias:** ninguna
   - **Responsable:** Pendiente de asignación
-  - **Estado:** Pendiente — lista para iniciar
+  - **Estado:** Completada
   - **Criterios de aceptación:**
     1. El archivo tiene contenido (más de 0 B).
     2. Describe las capas del sistema, los servicios de `docker-compose.yml` y el modo de desarrollo local.
@@ -257,7 +257,13 @@
     4. Describe el contexto de auditoría (`audit_context.py` y `fn_auditar_cambios()`).
     5. Indica que los diagramas PNG de `docs/architecture/` son históricos.
     6. No presenta como vigentes afirmaciones de `DXC-2026-001` sin verificarlas.
-  - **Evidencia de cierre:** pendiente.
+  - **Evidencia de cierre:** `docs/architecture/architecture_map.md` (803 líneas, 72.035 B), verificado el 2026-11-23 en `dev` con dictamen final de auditoría de OpenCode «APTO PARA CIERRE». Los 6 criterios de aceptación están cumplidos:
+    1. Archivo poblado con 72.035 B y 12 secciones estructuradas.
+    2. Describe las capas del sistema (§1.2, §2, §3.2), los servicios, red, volúmenes y variables de `docker-compose.yml` (§8) y el modo de desarrollo local sin Docker (§9).
+    3. Cifras verificadas directamente contra el código fuente: 7 routers y 38 operaciones REST bajo `/api/sga` (más la ruta pública de diagnóstico `GET /` fuera de `/api/sga`), 7 tablas físicas (incluida la tabla puente `logistica_alquiler_alquiler` con PK compuesta), 16 índices creados por Alembic actual (`0001_initial_schema.py`), 12 funciones PL/pgSQL, 19 triggers y 1 vista (`vw_dashboard_operativo`).
+    4. Describe el mecanismo de auditoría (`sga_backend_jwt/app/utils/audit_context.py` con las 18 llamadas a `set_audit_context()` y `fn_auditar_cambios()` en `database/01_esquema/02_funciones_y_triggers.sql`) junto con sus limitaciones estáticas verificadas (§7.1–§7.4).
+    5. Identifica expresamente los tres diagramas PNG y el archivo `.docx` de `docs/architecture/` como artefactos históricos con sus tamaños exactos en bytes (§11).
+    6. Cita `DXC-2026-001` como diagnóstico histórico preliminar y no presenta sus afirmaciones como estado actual sin verificación en código (§11).
 
 - [ ] **RM-DOC-012 — Creación del catálogo de reglas de negocio y matriz RBAC**
   - **Actividad:** crear la documentación independiente de reglas de negocio y RBAC (decisión n.º 4).
@@ -281,7 +287,7 @@
   - **Prioridad:** P1
   - **Dependencias:** `RM-DOC-010`
   - **Responsable:** Pendiente de asignación
-  - **Estado:** Pendiente — dependiente de tareas
+  - **Estado:** Pendiente — lista para iniciar
   - **Criterios de aceptación:**
     1. El conjunto de endpoints coincide exactamente con los decoradores de `app/routes/` (38 al 2026-10-31); se comprueba mediante un recuento al redactar.
     2. Cada endpoint indica método, ruta, roles permitidos y formato de respuesta.
@@ -420,4 +426,5 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 | 0.2 | 2026-11-09 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización de metadatos y de la línea base Git. Sin cambios en tareas, casillas, estados, prioridades, dependencias ni criterios de aceptación: se conservan las 18 tareas (2 completadas, 16 pendientes). | En revisión por el propietario; sin commit. |
 | 0.3 | 2026-11-10 | `9a0428822637197763ec3125ee5e3c64da78864e` | Actualización del estado de `RM-DOC-014`: criterios de aceptación cumplidos en intervención 2026-11-09 (pendiente de commit y cierre formal). Sin cambios en las demás 17 tareas, casillas ni prioridades. | Pendiente de commit. |
 | 0.4 | 2026-11-10 | `2f1e14eef9ebc7c313b87d8541cf9288d9533a87` | Cierre formal de `RM-DOC-014` (`[x]`, Completada, con evidencia de commit); actualización del resumen de progreso (3 completadas, 15 pendientes); resolución parcial de `D-3` (Alembic confirmado por propietario); `README.md` raíz actualizado con nota sobre Alembic (propietario eliminó scripts SQL manuales del Paso 2). | Versionado en commit `32b232e`. |
-| 0.5 | 2026-11-11 | `32b232eceb814df2a8ea8d047b31057cf245455f` | Cierre formal de `RM-DOC-008` (`[x]`, Completada, con verificación de los 8 criterios de aceptación); actualización del resumen de progreso (4 completadas, 14 pendientes); actualización de `README.md` (precisión de datos ficticios del seed en desarrollo local, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue). | Versionado en commit `8c7de4d`. |
+| 0.5 | 2026-11-11 | `32b232eceb814df2a8ea8d047b31057cf245455f` | Cierre formal de `RM-DOC-008` (`[x]`, Completada, con verificación de los 8 criterios de aceptación); actualización del resumen de progreso (4 completadas, 14 pendientes); actualización de `README.md` (precisión de datos ficticios del seed en desarrollo local, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue). | Versionado en commit `8c7de4d` y regularizado en `cefb92d`. |
+| 0.6 | 2026-11-23 | `cefb92df3e4f15f98568131d3a91711665bbf64b` | Cierre formal de `RM-DOC-010` (`[x]`, Completada, con evidencia en `docs/architecture/architecture_map.md` y verificación de los 6 criterios de aceptación tras auditoría de OpenCode); `RM-DOC-011` pasa a «Pendiente — lista para iniciar» al quedar satisfecha su dependencia de `RM-DOC-010`; actualización del resumen de progreso (5 completadas, 13 pendientes: 3 listas para iniciar, 4 condicionadas por decisión, 6 dependientes de tareas). | Versionado en el commit de cierre de `RM-DOC-010`. |

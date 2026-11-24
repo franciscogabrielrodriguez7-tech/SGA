@@ -158,6 +158,10 @@ def consultar_detalles_alquiler(id_alquiler: int, db: Session = Depends(get_db))
 
     try:
         detalles = listar_detalles_por_alquiler(db, id_alquiler)
+
+        if detalles is None:
+            return response_error(mensaje="El alquiler no existe", error="ALQUILER_NOT_FOUND", code=404)
+
         return response_success(mensaje="Detalles del alquiler encontrados", data=detalles, code=200)
 
     except Exception as error:
@@ -188,7 +192,7 @@ def modificar_alquiler(
         return response_error(mensaje="Error al actualizar el alquiler", error=str(error), code=500)
 
 
-@router.patch("/{id_alquiler}/estado", dependencies=[Depends(requiere_rol(*STAFF_INTERNO))])
+@router.patch("/{id_alquiler}/estado", dependencies=[Depends(requiere_rol(*ADMIN_O_FACTURACION))])
 def cambiar_estado(
     id_alquiler: int,
     datos: AlquilerEstadoUpdate,
@@ -323,6 +327,10 @@ def listar_entregas(id_alquiler: int, db: Session = Depends(get_db)):
 
     try:
         entregas = obtener_entregas(db, id_alquiler)
+
+        if entregas is None:
+            return response_error(mensaje="El alquiler no existe", error="ALQUILER_NOT_FOUND", code=404)
+
         return response_success(mensaje="Entregas del alquiler", data=entregas, code=200)
 
     except Exception as error:
@@ -366,6 +374,10 @@ def listar_recogidas(id_alquiler: int, db: Session = Depends(get_db)):
 
     try:
         recogidas = obtener_recogidas(db, id_alquiler)
+
+        if recogidas is None:
+            return response_error(mensaje="El alquiler no existe", error="ALQUILER_NOT_FOUND", code=404)
+
         return response_success(mensaje="Recogidas del alquiler", data=recogidas, code=200)
 
     except Exception as error:

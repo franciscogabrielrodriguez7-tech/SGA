@@ -83,6 +83,14 @@ def _recalcular_precio_alquiler(db: Session, id_alquiler: int):
 
 def listar_detalles_por_alquiler(db: Session, id_alquiler: int):
 
+    existe = db.execute(
+        text("SELECT 1 FROM alquiler WHERE id_alquiler = :id_alquiler"),
+        {"id_alquiler": id_alquiler}
+    ).first()
+
+    if not existe:
+        return None
+
     sql = text("""
         SELECT
             d.id_detalle_alquiler, d.id_alquiler, d.id_producto,

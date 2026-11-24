@@ -2,9 +2,9 @@
 
 > **Repositorio:** `https://github.com/franciscogabrielrodriguez7-tech/SGA.git`
 > **Fuente de verdad:** `SGA_repo/SGA` · rama `dev` · línea base verificada `c100a78f53a61828bec1c17aff4c9e2017336c1b`; `HEAD` verificado el 2026-11-23: `cefb92df3e4f15f98568131d3a91711665bbf64b`
-> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-23 (v0.6)
+> **Fecha de elaboración:** 2026-10-31 · **Última actualización:** 2026-11-23 (v0.7)
 > **Naturaleza:** documento vivo de seguimiento operativo, versionado mediante Git
-> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; actualización v0.5 (2026-11-11): cierre formal de `RM-DOC-008` con verificación de criterios, actualización de `README.md` (precisión de seed ficticio y pgAdmin 4 exclusivo para producción) y ajuste de progreso a 4 completadas (14 pendientes), versionado en commit `8c7de4d` y regularizado en `cefb92d`; actualización v0.6 (2026-11-23): cierre formal de `RM-DOC-010` con verificación de sus 6 criterios sobre `docs/architecture/architecture_map.md`, habilitación de `RM-DOC-011` como lista para iniciar y ajuste de progreso a 5 completadas (13 pendientes).
+> **Estado:** versionado en `dev` (commit `0f56f5d`) y presente en `deployment` (merge `3ee0d66`); contenido en revisión del propietario; actualización v0.5 (2026-11-11): cierre formal de `RM-DOC-008` con verificación de criterios, actualización de `README.md` (precisión de seed ficticio y pgAdmin 4 exclusivo para producción) y ajuste de progreso a 4 completadas (14 pendientes), versionado en commit `8c7de4d` y regularizado en `cefb92d`; actualización v0.6 (2026-11-23): cierre formal de `RM-DOC-010` con verificación de sus 6 criterios sobre `docs/architecture/architecture_map.md`, habilitación de `RM-DOC-011` como lista para iniciar y ajuste de progreso a 5 completadas (13 pendientes); actualización v0.7 (2026-11-23): cierre formal de `RM-DOC-011` con verificación de sus 4 criterios oficiales sobre `docs/architecture/api_reference.md` tras auditoría independiente de OpenCode y resolución de observaciones de calidad, ajustando el progreso a 6 completadas y 12 pendientes.
 > **Matriz asociada:** [`MAT-2026-001_matriz_maestra_documental.md`](MAT-2026-001_matriz_maestra_documental.md)
 > **Evidencia de hallazgos:** [`EVD-2026-003`](../06_evidencias/EVD-2026-003_inventario_unico_hallazgos_fase0_paso04.md)
 > **Índice de gobierno:** [`00_indice.md`](../00_indice.md)
@@ -65,9 +65,9 @@
 | Concepto | Cantidad |
 |---|---:|
 | Tareas totales (`RM-DOC-001`…`RM-DOC-018`) | 18 |
-| Completadas | 5 (`RM-DOC-002`, `RM-DOC-003`, `RM-DOC-014`, `RM-DOC-008`, `RM-DOC-010`) |
-| Pendientes | 13 |
-| — lista para iniciar | 3 (`RM-DOC-005`, `RM-DOC-011`, `RM-DOC-017`) |
+| Completadas | 6 (`RM-DOC-002`, `RM-DOC-003`, `RM-DOC-014`, `RM-DOC-008`, `RM-DOC-010`, `RM-DOC-011`) |
+| Pendientes | 12 |
+| — lista para iniciar | 2 (`RM-DOC-005`, `RM-DOC-017`) |
 | — condicionada por decisión | 4 (`RM-DOC-001`, `RM-DOC-009`, `RM-DOC-013`, `RM-DOC-016`) |
 | — dependiente de tareas | 6 (`RM-DOC-004`, `RM-DOC-006`, `RM-DOC-007`, `RM-DOC-012`, `RM-DOC-015`, `RM-DOC-018`) |
 | Con responsable «Pendiente de asignación» | 18 |
@@ -280,20 +280,31 @@
     4. No duplica `DXC-2026-005`: lo cita como histórico.
   - **Evidencia de cierre:** pendiente.
 
-- [ ] **RM-DOC-011 — Creación de la referencia viva de la API REST**
+- [x] **RM-DOC-011 — Creación de la referencia viva de la API REST**
   - **Actividad:** documentar el contrato de los endpoints vigentes en `docs/architecture/api_reference.md`.
-  - **Documentos:** `DOC-OF-07` · `docs/architecture/api_reference.md` (ruta propuesta; no existe)
-  - **Hallazgos:** `I-022`, `I-060`, `I-072`, `I-077`, `I-078`
+  - **Documentos:** `DOC-OF-07` · `docs/architecture/api_reference.md`
+  - **Hallazgos:** `I-022`, `I-060`, `I-072`, `I-077`, `I-078` (más corrección de seguridad `I-001` / `DXA-06` implementada y probada)
   - **Prioridad:** P1
   - **Dependencias:** `RM-DOC-010`
   - **Responsable:** Pendiente de asignación
-  - **Estado:** Pendiente — lista para iniciar
+  - **Estado:** Completada
   - **Criterios de aceptación:**
     1. El conjunto de endpoints coincide exactamente con los decoradores de `app/routes/` (38 al 2026-10-31); se comprueba mediante un recuento al redactar.
     2. Cada endpoint indica método, ruta, roles permitidos y formato de respuesta.
     3. Documenta el sobre de respuesta estándar y los códigos de error.
     4. No lista endpoints que no existan en el código (`DXC-2026-003` documenta 45).
-  - **Evidencia de cierre:** pendiente.
+  - **Evidencia de cierre:** `docs/architecture/api_reference.md` (creado y verificado en `dev`, verificado el 2026-11-23). Los 4 criterios oficiales están cumplidos:
+    1. Conjunto exacto de 38 operaciones REST bajo `/api/sga` en 7 routers (`auth`, `usuario`, `cliente`, `producto`, `alquiler`, `detalle_alquiler`, `gastos`) más la ruta de verificación `GET /`, comprobadas contra el código.
+    2. Cada operación documenta método HTTP, ruta, roles RBAC requeridos (`SOLO_ADMIN`, `ADMIN_O_FACTURACION`, `STAFF_INTERNO`, Público) y formato de respuesta.
+    3. Documenta el sobre uniforme (`success`, `data`, `message`, `error`, `pagination`), códigos `200`, `201`, `400`, `401`, `403`, `404`, `422`, `500` y ciclo de vida de tokens JWT.
+    4. 0 endpoints ficticios (elimina los 7 endpoints no existentes de `DXC-2026-003`).
+
+    **Secuencia cronológica de auditoría, correcciones y cierre:**
+    - **Fase 1 (Corrección de seguridad I-001 / DXA-06):** Lista blanca `__campos_publicos__` en `sga_backend_jwt/app/models/usuario.py` y exclusión estricta de `contrasena_usuario` en `sga_backend_jwt/app/utils/response.py`, validada con 8 pruebas automatizadas aprobadas (`8/8 OK`) en `sga_backend_jwt/tests/test_security_usuario_serialization.py`.
+    - **Fase 2 (Correcciones funcionales aprobadas):** Restricción de `PATCH /api/sga/alquileres/{id_alquiler}/estado` a `ADMIN_O_FACTURACION` (403 Forbidden a `encargado_logistico`) y ocultamiento de controles en `CambiarEstadoSection.tsx`; normalización de 3 subrecursos (`/detalles`, `/entregas`, `/recogidas`) a `404 ALQUILER_NOT_FOUND` si el alquiler padre no existe (`200 []` si existe vacío); conservación de `400 DETALLE_VALIDATION_ERROR` en `POST /detalle-alquiler` si el padre no existe.
+    - **Fase 3 (Auditoría preliminar de OpenCode y resolución de H-1 a H-5):** Dictamen «APTO CON OBSERVACIONES», resueltas mediante: precisión en §13.3 de agregación de gastos sin filtro por tipo ni estado de registro (H-1); actualización de referencias de líneas de código (H-2); pruebas automatizadas de renderizado frontend (H-3); suite exhaustiva de 9 pruebas unitarias en controladores distinguiendo chequeo de padre, consulta y retorno (H-4, total backend de 31 pruebas `31/31 OK`); alineación de estados documentales (H-5). H-6 permanece documentado como riesgo residual informativo.
+    - **Fase 4 (Auditoría final de OpenCode y resolución de observaciones de calidad):** Dictamen final «APTO PARA CIERRE» con 3 observaciones informativas menores resueltas: compilación de pruebas frontend en `os.tmpdir()` con borrado garantizado en `finally` sin residuos en `node_modules/.tmp/` (Obs 4.1); prueba de renderizado real SSR de `LogisticaSection.tsx` con y sin datos, confirmando operatividad de entregas y recogidas sin dependencia de facturación (Obs 4.2); y clarificación cronológica del proceso de cierre en esta checklist (Obs 4.3).
+    - **Fase 5 (Cierre formal):** Aprobación y versionado en el commit local de cierre en la rama `dev`.
 
 - [ ] **RM-DOC-015 — Poblado de alcance funcional y casos de uso**
   - **Actividad:** redactar `docs/requirements/user_cases.md`, hoy vacío (0 B).
@@ -428,3 +439,4 @@ Solo se registran decisiones realmente pendientes. Ninguna se considera aprobada
 | 0.4 | 2026-11-10 | `2f1e14eef9ebc7c313b87d8541cf9288d9533a87` | Cierre formal de `RM-DOC-014` (`[x]`, Completada, con evidencia de commit); actualización del resumen de progreso (3 completadas, 15 pendientes); resolución parcial de `D-3` (Alembic confirmado por propietario); `README.md` raíz actualizado con nota sobre Alembic (propietario eliminó scripts SQL manuales del Paso 2). | Versionado en commit `32b232e`. |
 | 0.5 | 2026-11-11 | `32b232eceb814df2a8ea8d047b31057cf245455f` | Cierre formal de `RM-DOC-008` (`[x]`, Completada, con verificación de los 8 criterios de aceptación); actualización del resumen de progreso (4 completadas, 14 pendientes); actualización de `README.md` (precisión de datos ficticios del seed en desarrollo local, pgAdmin 4 exclusivo para producción sin exposición de datos de despliegue). | Versionado en commit `8c7de4d` y regularizado en `cefb92d`. |
 | 0.6 | 2026-11-23 | `cefb92df3e4f15f98568131d3a91711665bbf64b` | Cierre formal de `RM-DOC-010` (`[x]`, Completada, con evidencia en `docs/architecture/architecture_map.md` y verificación de los 6 criterios de aceptación tras auditoría de OpenCode); `RM-DOC-011` pasa a «Pendiente — lista para iniciar» al quedar satisfecha su dependencia de `RM-DOC-010`; actualización del resumen de progreso (5 completadas, 13 pendientes: 3 listas para iniciar, 4 condicionadas por decisión, 6 dependientes de tareas). | Versionado en el commit de cierre de `RM-DOC-010`. |
+| 0.7 | 2026-11-23 | `eb382a1cfdc3f9ab22692611d1926648e93efb7d` | Cierre formal de `RM-DOC-011` (`[x]`, Completada, con entrega de `docs/architecture/api_reference.md`, resolución de observaciones de auditoría de OpenCode y suite de pruebas backend y frontend); actualización del progreso a 6 completadas y 12 pendientes. | Versionado en el commit de cierre de `RM-DOC-011`. |

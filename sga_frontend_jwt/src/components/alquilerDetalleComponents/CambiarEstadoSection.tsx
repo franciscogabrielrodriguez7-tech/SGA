@@ -23,38 +23,44 @@ export function CambiarEstadoSection({
       </h2>
 
       <div className="hstack gap-3 flex-wrap">
-        <select
-          className="input"
-          style={{ width: "auto" }}
-          value={nuevoEstado}
-          onChange={(e) => setNuevoEstado(e.target.value as EstadoAlquiler)}
-        >
-          <option value="">Selecciona un estado</option>
-          {ESTADOS_ALQUILER.map((estado) => (
-            <option key={estado} value={estado}>
-              {estado}
-            </option>
-          ))}
-        </select>
+        {puedeGestionarFacturacion ? (
+          <>
+            <select
+              className="input"
+              style={{ width: "auto" }}
+              value={nuevoEstado}
+              onChange={(e) => setNuevoEstado(e.target.value as EstadoAlquiler)}
+            >
+              <option value="">Selecciona un estado</option>
+              {ESTADOS_ALQUILER.map((estado) => (
+                <option key={estado} value={estado}>
+                  {estado}
+                </option>
+              ))}
+            </select>
 
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={manejarCambioEstado}
-          disabled={!nuevoEstado}
-        >
-          Aplicar
-        </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={manejarCambioEstado}
+              disabled={!nuevoEstado}
+            >
+              Aplicar
+            </button>
 
-        {puedeGestionarFacturacion && (
-          <button
-            type="button"
-            className="btn btn-danger-outline"
-            onClick={manejarCancelar}
-            style={{ marginLeft: "auto" }}
-          >
-            Cancelar alquiler
-          </button>
+            <button
+              type="button"
+              className="btn btn-danger-outline"
+              onClick={manejarCancelar}
+              style={{ marginLeft: "auto" }}
+            >
+              Cancelar alquiler
+            </button>
+          </>
+        ) : (
+          <p className="text-sm text-muted">
+            Solo el personal de administración o facturación tiene permisos para cambiar manualmente el estado del alquiler o cancelarlo.
+          </p>
         )}
       </div>
 

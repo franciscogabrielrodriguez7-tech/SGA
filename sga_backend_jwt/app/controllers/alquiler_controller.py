@@ -609,6 +609,14 @@ def registrar_entrega(db: Session, id_alquiler: int, datos, usuario_actual):
 
 def obtener_entregas(db: Session, id_alquiler: int):
 
+    existe = db.execute(
+        text("SELECT 1 FROM alquiler WHERE id_alquiler = :id_alquiler"),
+        {"id_alquiler": id_alquiler}
+    ).first()
+
+    if not existe:
+        return None
+
     sql = text("""
         SELECT
             l.id_logistica_alquiler,
@@ -715,6 +723,14 @@ def registrar_recogida(db: Session, id_alquiler: int, datos, usuario_actual):
 
 
 def obtener_recogidas(db: Session, id_alquiler: int):
+
+    existe = db.execute(
+        text("SELECT 1 FROM alquiler WHERE id_alquiler = :id_alquiler"),
+        {"id_alquiler": id_alquiler}
+    ).first()
+
+    if not existe:
+        return None
 
     sql = text("""
         SELECT

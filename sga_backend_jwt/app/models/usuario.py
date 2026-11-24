@@ -7,6 +7,23 @@ class Usuario(Base):
 
     __tablename__ = "usuario"
 
+    # Lista blanca de atributos públicos permitidos al serializar instancias
+    # ORM de Usuario hacia JSON (ver app/utils/response.py). Excluye
+    # contrasena_usuario y evita que futuras propiedades sensibles del modelo
+    # se expongan accidentalmente en respuestas HTTP.
+    __campos_publicos__ = (
+        "id_usuario",
+        "rol_usuario",
+        "nombres_usuario",
+        "apellidos_usuario",
+        "email_usuario",
+        "telefono_usuario",
+        "tipo_documento",
+        "estado_registro",
+        "fecha_creacion",
+        "fecha_actualizacion",
+    )
+
     id_usuario = Column(String(20), primary_key=True)
 
     rol_usuario = Column(String(30), nullable=False, server_default="cliente")

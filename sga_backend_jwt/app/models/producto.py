@@ -68,4 +68,3 @@ class Producto(Base):
             postgresql_where=text("estado_registro IS TRUE"),
         ),
     )
-

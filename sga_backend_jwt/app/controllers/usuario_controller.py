@@ -9,10 +9,10 @@ from app.utils.audit_context import set_audit_context
 from app.utils.db_errors import extraer_mensaje_negocio
 
 
-
 # =========================================================
 # CREAR USUARIO (personal interno)
 # =========================================================
+
 
 def crear_usuario(db: Session, datos, usuario_actual):
 

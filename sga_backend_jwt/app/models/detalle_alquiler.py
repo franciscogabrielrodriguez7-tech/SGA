@@ -6,7 +6,6 @@ from sqlalchemy import (
     TIMESTAMP,
     ForeignKey,
     Index,
-    UniqueConstraint,
     text
 )
 
@@ -21,13 +20,23 @@ class DetalleAlquiler(Base):
 
     id_alquiler = Column(
         Integer,
-        ForeignKey("alquiler.id_alquiler", name="fk_detalle_alquiler_alquiler", onupdate="CASCADE", ondelete="RESTRICT"),
+        ForeignKey(
+            "alquiler.id_alquiler",
+            name="fk_detalle_alquiler_alquiler",
+            onupdate="CASCADE",
+            ondelete="RESTRICT",
+        ),
         nullable=False
     )
 
     id_producto = Column(
         Integer,
-        ForeignKey("producto.id_producto", name="fk_detalle_alquiler_producto", onupdate="CASCADE", ondelete="RESTRICT"),
+        ForeignKey(
+            "producto.id_producto",
+            name="fk_detalle_alquiler_producto",
+            onupdate="CASCADE",
+            ondelete="RESTRICT",
+        ),
         nullable=False
     )
 

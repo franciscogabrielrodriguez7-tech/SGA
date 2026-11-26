@@ -6,7 +6,6 @@ from app.utils.audit_context import set_audit_context
 from app.utils.db_errors import extraer_mensaje_negocio
 
 
-
 def crear_producto(db: Session, datos, usuario_actual):
 
     try:

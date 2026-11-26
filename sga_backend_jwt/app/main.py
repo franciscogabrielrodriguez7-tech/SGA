@@ -1,11 +1,28 @@
 # =========================================================
-# PRUEBA DE CONEXIÓN A BASE DE DATOS
+# IMPORTACIONES PRINCIPALES Y ROUTERS
 # =========================================================
 
+from fastapi import FastAPI, Request
+from fastapi.exceptions import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.config.database import engine
+from app.config.settings import CORS_ORIGINS
+from app.routes.alquiler_routes import router as alquiler_router
+from app.routes.auth_routes import router as auth_router
+from app.routes.cliente_routes import router as cliente_router
+from app.routes.detalle_alquiler_routes import router as detalle_alquiler_router
+from app.routes.gastos_routes import router as gastos_router
+from app.routes.producto_routes import router as producto_router
+from app.routes.usuario_routes import router as usuario_router
+from app.utils.response import response_error
+from app.utils.scheduler import detener_scheduler, iniciar_scheduler
 
+
+# =========================================================
+# PRUEBA DE CONEXIÓN A BASE DE DATOS
+# =========================================================
 
 try:
     with engine.connect() as connection:
@@ -20,14 +37,6 @@ except Exception as error:
 # FASTAPI
 # =========================================================
 
-from fastapi import FastAPI, Request
-from app.config.settings import CORS_ORIGINS
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import HTTPException
-
-from app.utils.response import response_error
-
-
 app = FastAPI(
     title="API SGA",
     description="API para el Sistema de Gestión de Alquileres de Andamios",
@@ -39,8 +48,6 @@ app = FastAPI(
 # SCHEDULER — actualiza activo -> vencido diariamente a las
 # 00:05 America/Bogota. Ver app/utils/scheduler.py.
 # =========================================================
-
-from app.utils.scheduler import iniciar_scheduler, detener_scheduler
 
 
 @app.on_event("startup")
@@ -92,19 +99,6 @@ async def manejar_http_exception(request: Request, exc: HTTPException):
         error=codigo_error,
         code=exc.status_code
     )
-
-
-# =========================================================
-# IMPORTAR ROUTES
-# =========================================================
-
-from app.routes.auth_routes import router as auth_router
-from app.routes.usuario_routes import router as usuario_router
-from app.routes.cliente_routes import router as cliente_router
-from app.routes.producto_routes import router as producto_router
-from app.routes.alquiler_routes import router as alquiler_router
-from app.routes.detalle_alquiler_routes import router as detalle_alquiler_router
-from app.routes.gastos_routes import router as gastos_router
 
 
 # =========================================================

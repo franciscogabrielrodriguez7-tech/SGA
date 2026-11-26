@@ -6,7 +6,6 @@ from app.utils.audit_context import set_audit_context
 from app.utils.db_errors import extraer_mensaje_negocio
 
 
-
 # =========================================================
 # CREAR CLIENTE
 # -----------------------------------------------------------
@@ -16,6 +15,7 @@ from app.utils.db_errors import extraer_mensaje_negocio
 # recibe contraseña (RN-CLI-01): el campo queda NULL, tal como lo
 # permite explícitamente el esquema.
 # =========================================================
+
 
 def crear_cliente(db: Session, datos, usuario_actual):
 

@@ -45,4 +45,3 @@ class ProductoUpdate(BaseModel):
 class ProductoEstadoUpdate(BaseModel):
 
     estado_registro: bool
-

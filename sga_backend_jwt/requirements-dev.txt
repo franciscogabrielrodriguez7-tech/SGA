@@ -1,0 +1,12 @@
+# Dependencias de desarrollo y auditoría de calidad (Taller 6 — Actividad 3)
+# No modificar requirements.txt ni Dockerfile de producción para estas herramientas.
+# Instalación sobre el entorno virtual del backend (sga_backend_jwt/venv):
+#   .\venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+
+-r requirements.txt
+
+flake8==7.5.0
+radon==6.0.1
+pytest==9.2.0
+pytest-cov==7.1.0
+locust==2.47.0

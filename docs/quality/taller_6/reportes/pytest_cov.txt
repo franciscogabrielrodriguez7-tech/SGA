@@ -1,0 +1,108 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0
+rootdir: C:\Users\Acer\Documents\Default Project\SGA_repo\SGA\sga_backend_jwt
+configfile: pyproject.toml
+plugins: anyio-4.14.2, locust-2.47.0, cov-7.1.0
+collected 54 items
+
+tests\test_alquiler_lifecycle_and_routes.py ....                         [  7%]
+tests\test_alquiler_subresources_and_permissions.py .................... [ 44%]
+...                                                                      [ 50%]
+tests\test_controllers_crud_and_routes.py .........                      [ 66%]
+tests\test_security_usuario_serialization.py ........                    [ 81%]
+tests\test_utils_and_schemas.py ..........                               [100%]
+
+============================== warnings summary ===============================
+venv\Lib\site-packages\anyio\pytest_plugin.py:14
+  C:\Users\Acer\Documents\Default Project\SGA_repo\SGA\sga_backend_jwt\venv\Lib\site-packages\anyio\pytest_plugin.py:14: PytestRemovedIn10Warning: _pytest.python.CallSpec2 has been renamed to CallSpec.
+  The CallSpec2 alias will be removed in pytest 10.
+  Update imports to use CallSpec instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#callspec2-renamed
+    from _pytest.python import CallSpec2
+
+app\main.py:53
+  C:\Users\Acer\Documents\Default Project\SGA_repo\SGA\sga_backend_jwt\app\main.py:53: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+venv\Lib\site-packages\fastapi\applications.py:4681
+venv\Lib\site-packages\fastapi\applications.py:4681
+  C:\Users\Acer\Documents\Default Project\SGA_repo\SGA\sga_backend_jwt\venv\Lib\site-packages\fastapi\applications.py:4681: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)  # ty: ignore[deprecated]
+
+app\main.py:58
+  C:\Users\Acer\Documents\Default Project\SGA_repo\SGA\sga_backend_jwt\app\main.py:58: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.12.10-final-0 _______________
+
+Name                                               Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------------
+app\__init__.py                                        0      0   100%
+app\config\__init__.py                                 0      0   100%
+app\config\database.py                                12      0   100%
+app\config\settings.py                                13      2    85%   12, 22
+app\controllers\__init__.py                            0      0   100%
+app\controllers\alquiler_controller.py               230     23    90%   180-182, 199, 258, 303, 318, 327-329, 366-368, 510, 536-538, 567, 663, 687, 717-719
+app\controllers\auditoria_controller.py               10      0   100%
+app\controllers\cliente_controller.py                 65      3    95%   125-127
+app\controllers\detalle_alquiler_controller.py        60      8    87%   23, 142-144, 169, 204-206
+app\controllers\logistica_alquiler_controller.py      35      0   100%
+app\controllers\producto_controller.py                54      0   100%
+app\controllers\usuario_controller.py                 93      8    91%   23, 27, 47-49, 136-138
+app\main.py                                           50      6    88%   32-33, 55, 60, 94-95
+app\models\__init__.py                                 8      0   100%
+app\models\alquiler.py                                23      0   100%
+app\models\auditoria_sistema.py                       14      0   100%
+app\models\detalle_alquiler.py                        14      0   100%
+app\models\logistica_alquiler.py                      15      0   100%
+app\models\logistica_alquiler_alquiler.py              7      0   100%
+app\models\producto.py                                19      0   100%
+app\models\usuario.py                                 17      0   100%
+app\routes\__init__.py                                 0      0   100%
+app\routes\alquiler_routes.py                        168     61    64%   70-71, 81-82, 92-93, 111-116, 130-131, 143-146, 167-168, 183, 187-192, 207, 211-216, 231, 235-240, 254, 258-259, 277, 281-286, 305, 317-322, 336-337, 352, 364-369, 383-384
+app\routes\auth_routes.py                             18      0   100%
+app\routes\cliente_routes.py                          63     24    62%   54-60, 70-71, 85-86, 101, 111-117, 132, 140-146
+app\routes\detalle_alquiler_routes.py                 42     13    69%   48-50, 62-65, 80, 84-90
+app\routes\gastos_routes.py                           35     10    71%   44-50, 60-61, 71-72
+app\routes\producto_routes.py                         62     24    61%   52-58, 68-69, 81-84, 99, 103-109, 127-130, 136-138
+app\routes\usuario_routes.py                          65     24    63%   59-65, 98-99, 117-118, 137, 148-154, 177, 185-191
+app\schemas\__init__.py                                0      0   100%
+app\schemas\alquiler_schema.py                        41      0   100%
+app\schemas\cliente_schema.py                         23      0   100%
+app\schemas\detalle_alquiler_schema.py                12      0   100%
+app\schemas\logistica_alquiler_schema.py              16      0   100%
+app\schemas\producto_schema.py                        20      0   100%
+app\schemas\usuario_schema.py                         45      1    98%   96
+app\utils\__init__.py                                  0      0   100%
+app\utils\audit_context.py                             4      0   100%
+app\utils\auth_dependency.py                          19      0   100%
+app\utils\db_errors.py                                13      0   100%
+app\utils\jwt_utils.py                                18      0   100%
+app\utils\response.py                                 43      4    91%   61, 64-65, 73
+app\utils\roles.py                                    12      0   100%
+app\utils\scheduler.py                                22      0   100%
+app\utils\security.py                                 11      0   100%
+app\utils\tiempo.py                                   38      0   100%
+app\utils\unidades.py                                 13      0   100%
+--------------------------------------------------------------------------------
+TOTAL                                               1542    211    86%
+Coverage HTML written to dir ..\docs\quality\taller_6\reportes\htmlcov
+Coverage XML written to file ..\docs\quality\taller_6\reportes\coverage.xml
+======================= 54 passed, 5 warnings in 12.31s =======================

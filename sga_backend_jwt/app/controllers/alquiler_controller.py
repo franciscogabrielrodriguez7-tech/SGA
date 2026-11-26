@@ -231,7 +231,10 @@ def obtener_alquileres(db: Session, estado_alquiler: str = None, id_usuario_clie
 # =========================================================
 
 CAMPOS_EDITABLES_POR_ESTADO = {
-    "pendiente": {"direccion", "barrio", "precio_alquiler", "deposito", "fecha_inicio", "tiempo_alquiler_dias", "se_lleva", "se_recoge"},
+    "pendiente": {
+        "direccion", "barrio", "precio_alquiler", "deposito",
+        "fecha_inicio", "tiempo_alquiler_dias", "se_lleva", "se_recoge",
+    },
     "activo": {"precio_alquiler", "tiempo_alquiler_dias", "se_lleva", "se_recoge"},
     "vencido": {"precio_alquiler", "tiempo_alquiler_dias"},
     "recogido": set(),
@@ -418,14 +421,14 @@ def buscar_alquileres(db: Session, cliente: str = None, barrio: str = None, nume
 def alquileres_proximos_a_vencer(db: Session, dias: int = 2):
     # Removido verificar_y_actualizar_vencidos(db) por eficiencia
     fecha_vencimiento_expr = func.date(Alquiler.fecha_inicio + Alquiler.tiempo_alquiler_dias - 1)
-    
+
     query = db.query(Alquiler).options(
         joinedload(Alquiler.cliente),
         joinedload(Alquiler.creador)
     ).filter(
         Alquiler.estado_alquiler == 'activo',
         fecha_vencimiento_expr.between(
-            func.current_date(), 
+            func.current_date(),
             func.current_date() + text(f"INTERVAL '{dias} days'")
         )
     )
@@ -449,7 +452,7 @@ def alquileres_pendientes_entrega(db: Session, solo_transporte: bool = False):
         joinedload(Alquiler.creador)
     ).filter(
         Alquiler.estado_alquiler == 'pendiente',
-        Alquiler.se_lleva == True
+        Alquiler.se_lleva == True  # noqa: E712
     ).order_by(Alquiler.fecha_creacion.desc())
 
     alquileres = query.all()
@@ -670,7 +673,7 @@ def registrar_recogida(db: Session, id_alquiler: int, datos, usuario_actual):
         .filter(
             LogisticaAlquilerAlquiler.id_alquiler == id_alquiler,
             LogisticaAlquiler.tipo_movimiento == "ENTREGA",
-            LogisticaAlquiler.estado_registro == True,
+            LogisticaAlquiler.estado_registro == True,  # noqa: E712
         )
         .first()
     )

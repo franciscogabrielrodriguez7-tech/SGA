@@ -1,27 +1,59 @@
-# 08 — Plan y Registro de Validaciones
+# 08 — Resultados de Validaciones en Producción (`sga_db_mydd`)
 
+**Estado de la actividad:** **Ejecutada y aprobada al 100%**  
 **Fecha:** 2026-11-27
 
 ---
 
-## 1. Validaciones ya ejecutadas (Fases 1 a 5 — Solo lectura / Aisladas)
+## 1. Conteos finales verificados vs esperados
 
-| Validación | Alcance | Resultado observado | Estado |
-|---|---|---|---|
-| Rama Git `backup/sga-antes-carga-produccion-2026-11-27` | Repositorio SGA | Creada en `d5496b1091df4ea039324d7ed7f2c1abeb026a61`; `dev` intacta; `BAD_TRACKED=0`; `WORKTREE_DUMPS=0` | **Ejecutada (OK)** |
-| Identidad de producción | `sga_db_mydd` (solo lectura) | Confirmado `current_database() = 'sga_db_mydd'`, PostgreSQL `18.6`, `alembic_version = '0001_initial_schema'` | **Ejecutada (OK)** |
-| Comparación estructural `sga_db_mydd` vs `sga_db` | Esquema `public` | `8` tablas, `73` cols equivalentes, `1` vista, `12` funciones, `19` triggers, `26` índices, `92` restricciones; detectado `H-DB-03` y `H-DB-08` en producción | **Ejecutada (OK)** |
-| Respaldo físico `pg_dump` | `sga_db_mydd` -> `C:\RespaldosSGA\sga_db_mydd_previo_carga_20261127_091347.dump` | Exit `0`, `58726` bytes, `102` entradas TOC, SHA-256 `0d5b35e6e5a5d40e8811323cfb73f287ccbc3d9540b0bbc4aa8af571c1d4f3c2` | **Ejecutada (OK)** |
-| Restauración aislada | `sga_prod_verify_tmp` (local, luego eliminada) | Exit `0`, `8` tablas con conteos exactos (`1,6,12,6,9,9,7,22`), `12` funciones, `19` triggers, `1` vista, `0` huérfanos en 7 FKs | **Ejecutada (OK)** |
+| Tabla | Cantidad esperada | Cantidad observada | Estado |
+|---|---:|---:|---|
+| `usuario` | 14 | 14 | Cumplido |
+| `producto` | 10 | 10 | Cumplido |
+| `alquiler` | 8 | 8 | Cumplido |
+| `detalle_alquiler` | 20 | 20 | Cumplido |
+| `logistica_alquiler` | 14 | 14 | Cumplido |
+| `logistica_alquiler_alquiler` | 14 | 14 | Cumplido |
+| `auditoria_sistema` | 109 | 109 (`12` históricos + `97` nuevos) | Cumplido |
+| `alembic_version` | 1 | 1 (`0001_initial_schema`) | Cumplido |
 
 ---
 
-## 2. Validaciones preparadas para Fase 7.4 (Pendientes de autorización expresa)
+## 2. Verificación de las 14 condiciones obligatorias (Fase 7)
 
-Se ejecutará [03_validacion_produccion.sql](file:///C:/Users/Acer/Documents/Default%20Project/SGA_repo/SGA/docs/respaldo_produccion/scripts/03_validacion_produccion.sql) + comprobaciones funcionales tras completar Fase 7.2 y Fase 7.3:
+| # | Condición verificada | Resultado observado | Estado |
+|---:|---|---|---|
+| 1 | Ausencia de claves foráneas huérfanas (`7` FKs) | `0` huérfanos en las `7` relaciones FK | Cumplida |
+| 2 | Ausencia de alquileres sin detalles | `0` alquileres sin `detalle_alquiler` | Cumplida |
+| 3 | `stock_alquilado` coincide con contratos abiertos (`pendiente`, `activo`, `vencido`) | `0` diferencias en los `10` productos (`stock_en_obra = 68`) | Cumplida |
+| 4 | Ausencia de inconsistencias logísticas | `0` movimientos sin contrato; `0` entregas en `pendiente`/`cancelado`; `0` recogidas fuera de `recogido`/`terminado` | Cumplida |
+| 5 | Ausencia de usuarios duplicados (`id_usuario`, `email_usuario`) | `0` duplicados | Cumplida |
+| 6 | Los 5 empleados tienen hashes bcrypt válidos (`verificar_contrasena`) | `5/5` verificados (`True`) | Cumplida |
+| 7 | Los 9 clientes no tienen contraseña asignada (`contrasena_usuario IS NULL`) | `0` clientes con contraseña | Cumplida |
+| 8 | Ausencia de hashes/`contrasena_usuario` en nuevos eventos de auditoría (`id_auditoria > 20`) | `new_pwd_rows = 0` sobre `97` eventos nuevos (además de prueba `INSERT/UPDATE/DELETE` en `sga_prod_verify_tmp2` = `False`) | Cumplida |
+| 9 | Permanencia de los 12 eventos históricos (`id_auditoria <= 20`) | `hist = 12` intactos | Cumplida |
+| 10 | Los 19 triggers continúan activos | `19` triggers activos verificados | Cumplida |
+| 11 | Las 12 funciones siguen disponibles | `12` funciones verificadas en `public` | Cumplida |
+| 12 | La vista operativa `vw_dashboard_operativo` funciona | `(2, 2, 1, 532, 68, 464)` | Cumplida |
+| 13 | Las 5 secuencias están alineadas con `MAX(id)` (`is_called = True`) | `producto=10/10`, `alquiler=8/8`, `detalle_alquiler=20/20`, `logistica_alquiler=14/14`, `auditoria_sistema=117/117` | Cumplida |
+| 14 | El backend FastAPI se conecta, autentica y consulta `sga_db_mydd` | Ver sección 3 | Cumplida |
 
-1. **Precondiciones (Fase 7.1):** reconfirmar `current_database() = 'sga_db_mydd'`, existencia y SHA-256 de `sga_db_mydd_previo_carga_20261127_091347.dump`, ausencia de cambios inesperados en conteos desde la inspección previa (`22, 7, 6, 6, 9, 9, 12, 1`).
-2. **Conteos y secuencias:** verificar `usuario=14`, `producto=10`, `alquiler=8`, `detalle_alquiler=20`, `logistica_alquiler=14`, `logistica_alquiler_alquiler=14`, `alembic_version=1` (`0001_initial_schema`), `auditoria_sistema` (`12` históricos + eventos generados por la carga) y `last_value >= MAX(id)`.
-3. **Integridad referencial y stock:** `0` huérfanos en las `7` llaves foráneas; `stock_alquilado = stock_calculado` en los `10` productos; salida esperada de `vw_dashboard_operativo` (`2, 2, 1, 532, 68, 464`).
-4. **Usuarios, roles y auditoría:** `1 admin`, `2 facturación`, `2 logístico`, `9 clientes`; `0` clientes con contraseña; prueba de autenticación contra empleados demo (sin modificar `sga_db_mydd`) y verificación de ausencia de contraseñas en `auditoria_sistema` según la opción aprobada para `H-DB-08`.
-5. **Triggers y estructura:** confirmar `12` funciones, `19` triggers activos, `1` vista y `sga_db` local intacta.
+---
+
+## 3. Pruebas reales del backend FastAPI contra `sga_db_mydd`
+
+Ejecutadas vía ASGI con `get_db` conectado a `sga_db_mydd` (sin modificar `.env` ni escribir datos):
+
+- `POST /api/sga/auth/login` (`admin`, `facturacion`, `logistico`): HTTP `200`, `logueado=True`, sin campo `contrasena_usuario`.
+- `POST /api/sga/auth/login` (`cliente`): HTTP `401` (`LOGIN_INVALID`).
+- `GET /api/sga/usuarios` (`admin`): HTTP `200`, `items=5`.
+- `GET /api/sga/productos` (`logistico`): HTTP `200`, `items=9`.
+- `GET /api/sga/alquileres` (`facturacion`): HTTP `200`, `items=8`.
+- `GET /api/sga/alquileres/proximos-vencer` (`logistico`): HTTP `200`, `items=1`.
+- `GET /api/sga/alquileres/pendientes-entrega` (`logistico`): HTTP `200`, `items=2`.
+- `GET /api/sga/gastos` (`logistico`): HTTP `200`, `items=5`.
+- `GET /api/sga/gastos/resumen-semanal` (`facturacion`): HTTP `200`, `items=3`.
+- `GET /api/sga/alquileres/6/historial` (`facturacion`): HTTP `200`, `items=5` (incluye los `2` eventos del contrato `6` demo más `3` eventos históricos preservados en `auditoria_sistema` con `id_registro_afectado = '6'`).
+
+*(Nota sobre pruebas no ejecutadas en producción: no se ejecutaron endpoints HTTP de escritura `POST/PATCH/DELETE` posteriores a la carga sobre `sga_db_mydd` para no alterar los conteos finales `14, 10, 8, 20, 14, 14, 109, 1` ni las secuencias alineadas.)*

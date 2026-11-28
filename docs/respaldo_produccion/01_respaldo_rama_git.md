@@ -2,7 +2,7 @@
 
 **Estado de la actividad:** **Ejecutada** (Fase 1 completada; sin modificaciones a `dev` ni a `feat/taller-6-calidad-sqa`; sin `push` remoto).  
 **Fecha:** 2026-11-27  
-**Repositorio:** `C:\Users\Acer\Documents\Default Project\SGA_repo\SGA`
+**Repositorio:** `<RAIZ_REPOSITORIO>\SGA_repo\SGA`
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Elemento | Resultado observado |
 |---|---|
-| Raíz del repositorio | `C:/Users/Acer/Documents/Default Project/SGA_repo/SGA` |
+| Raíz del repositorio | `<RAIZ_REPOSITORIO>/SGA_repo/SGA` |
 | Rama de respaldo utilizada | `backup/sga-antes-carga-produccion-2026-11-27` |
 | Commit base de respaldo del estado previo | `d5496b1091df4ea039324d7ed7f2c1abeb026a61` |
 | Commit documental de inspección y planes previos | `7371be151a02044423f85c2fee52f68a2f653687` (`docs(backup): registrar inspección y planes previos a carga en producción`) |

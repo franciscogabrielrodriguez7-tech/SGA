@@ -2,7 +2,7 @@
 
 ## 1. Script y mecanismo de carga
 
-La población se ejecutó con los triggers habilitados mediante [02_poblamiento_demo_sga_db.sql](file:///C:/Users/Acer/Documents/Default%20Project/SGA_repo/SGA/docs/implementacion_datos_demo/scripts/02_poblamiento_demo_sga_db.sql), estableciendo `SET LOCAL app.usuario_actual = '<ACTOR_DEMO>'` en cada bloque para garantizar trazabilidad completa en `auditoria_sistema`.
+La población se ejecutó con los triggers habilitados mediante [02_poblamiento_demo_sga_db.sql](./scripts/02_poblamiento_demo_sga_db.sql), estableciendo `SET LOCAL app.usuario_actual = '<ACTOR_DEMO>'` en cada bloque para garantizar trazabilidad completa en `auditoria_sistema`.
 
 El marcador `<HASH_BCRYPT_EMPLEADOS>` del script versionado fue sustituido en memoria al ejecutar el poblamiento utilizando `app.utils.security.hashear_contrasena()` del propio backend. Ningún hash bcrypt ni contraseña real o secreta fue escrita en el archivo SQL ni en los documentos del repositorio.
 
@@ -12,7 +12,7 @@ El marcador `<HASH_BCRYPT_EMPLEADOS>` del script versionado fue sustituido en me
 
 1. **Separación de credenciales por rol (`cliente` vs personal interno):**
    - Según `cliente_controller.py`, `roles.py` y `usuario_controller.py`, los clientes se registran con `contrasena_usuario = NULL` y el login rechaza cuentas con rol `'cliente'`. Por ello, los `9` clientes demo (`DEMO-CLI-01`..`DEMO-CLI-09`) se insertaron con `contrasena_usuario = NULL`.
-   - Solo los `5` usuarios internos (`DEMO-ADM-01`, `DEMO-FAC-01`, `DEMO-FAC-02`, `DEMO-LOG-01`, `DEMO-LOG-02`) recibieron hash bcrypt válido (contraseña de prueba local `Sga2026*`) y correos sintéticos `.invalid`.
+   - Solo los `5` usuarios internos (`DEMO-ADM-01`, `DEMO-FAC-01`, `DEMO-FAC-02`, `DEMO-LOG-01`, `DEMO-LOG-02`) recibieron hash bcrypt válido (contraseña de prueba local `<CONTRASENA_DEMO_LOCAL>`) y correos sintéticos `.invalid`.
 2. **Coherencia de `unidad_minima_alquiler`:** Todos los contratos en `alquiler` usan duraciones compatibles con las unidades de sus productos en `detalle_alquiler` (`DIA`, `SEMANA` múltiplo de `7`, `MES` múltiplo de `30`).
 3. **Coherencia de movimientos logísticos:** Solo contratos ya despachados/cerrados (`3, 4, 5, 6, 7`) tienen registros `ENTREGA`, y solo contratos recogidos/terminados (`6, 7`) tienen registros `RECOGIDA`. Los contratos `pendiente` (`1, 2`) y `cancelado` (`8`) no tienen entregas ni recogidas asignadas.
 

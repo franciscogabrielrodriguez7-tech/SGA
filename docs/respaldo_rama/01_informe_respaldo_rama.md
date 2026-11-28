@@ -8,7 +8,7 @@
 
 ## 2. Ruta del repositorio
 
-- **Raíz del repositorio SGA:** `C:\Users\Acer\Documents\Default Project\SGA_repo\SGA`
+- **Raíz del repositorio SGA:** `<RAIZ_REPOSITORIO>\SGA_repo\SGA`
 
 ---
 
@@ -117,4 +117,4 @@ Permanecieron excluidos mediante `.gitignore` (sin agregarse al índice ni al co
 1. **Alcance exclusivamente local:** la rama `backup/sga-antes-estabilizacion-2026-11-27` existe solo en el repositorio local hasta que se autorice su publicación remota (`push`).
 2. **Exclusión intencional de artefactos ignorados:** archivos `.env`, `venv/`, `node_modules/`, `dist/`, cachés, reportes de cobertura y archivos `.dump` de PostgreSQL no forman parte de la rama Git y dependen de su custodia fuera de Git.
 3. **Estado preexistente documentado:** como también registró `docs/auditoria_post_poblamiento/07_verificacion_repositorio.md`, en `docs/implementacion_datos_demo/` solo estaban presentes los archivos `01`, `02`, `04` y `scripts/01..03` al momento de crear este respaldo; la rama conserva fielmente ese estado exacto sin alterarlo.
-4. **Informe posterior al commit:** este archivo ([01_informe_respaldo_rama.md](file:///C:/Users/Acer/Documents/Default%20Project/SGA_repo/SGA/docs/respaldo_rama/01_informe_respaldo_rama.md)) se generó después de registrar `d5496b1091df4ea039324d7ed7f2c1abeb026a61` para documentar su hash final sin modificar el commit de respaldo ni `dev`.
+4. **Informe posterior al commit:** este archivo ([01_informe_respaldo_rama.md](./01_informe_respaldo_rama.md)) se generó después de registrar `d5496b1091df4ea039324d7ed7f2c1abeb026a61` para documentar su hash final sin modificar el commit de respaldo ni `dev`.

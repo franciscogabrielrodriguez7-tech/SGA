@@ -34,7 +34,7 @@ El código de aplicación (`sga_backend_jwt/app/`), las migraciones (`alembic/`)
 
 | Tabla | Filas previas | Filas post-limpieza | Filas finales demo | Cobertura funcional |
 |---|---:|---:|---:|---|
-| `usuario` | 21 | 0 | 14 | `1` admin, `2` facturación, `2` logísticos (`Sga2026*` en hash bcrypt); `9` clientes sin contraseña |
+| `usuario` | 21 | 0 | 14 | `1` admin, `2` facturación, `2` logísticos (`<CONTRASENA_DEMO_LOCAL>` en hash bcrypt); `9` clientes sin contraseña |
 | `producto` | 7 | 0 | 10 | Unidades `DIA`, `SEMANA`, `MES`, ítem de stock bajo (`id=9`) e ítem inactivo (`id=10`) |
 | `alquiler` | 3 | 0 | 8 | Cobertura completa de 6 estados: `pendiente` (2), `activo` (2), `vencido` (1), `recogido` (1), `terminado` (1), `cancelado` (1) |
 | `detalle_alquiler` | 8 | 0 | 20 | Stock sincronizado por triggers según unidad mínima de alquiler |

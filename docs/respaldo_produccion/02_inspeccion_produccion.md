@@ -9,7 +9,7 @@
 
 | Parámetro | Valor observado |
 |---|---|
-| Host | `dpg-dbnu9q5g1s2s73dn3kh0-a.oregon-postgres.render.com` |
+| Host | `<HOST_RENDER_PRODUCCION>` (Render Managed PostgreSQL) |
 | Puerto | `5432` |
 | Base de datos (`current_database()`) | `sga_db_mydd` |
 | Esquema (`current_schema()`) | `public` |

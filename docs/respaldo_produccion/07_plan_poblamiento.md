@@ -2,7 +2,7 @@
 
 **Estado de la actividad:** **Ejecutada** dentro de la misma transacción atómica junto con la Fase 4 y Fase 5.  
 **Fecha:** 2026-11-27  
-**Script ejecutado:** [02_poblamiento_demo_produccion_preparado.sql](file:///C:/Users/Acer/Documents/Default%20Project/SGA_repo/SGA/docs/respaldo_produccion/scripts/02_poblamiento_demo_produccion_preparado.sql)
+**Script ejecutado:** [02_poblamiento_demo_produccion_preparado.sql](./scripts/02_poblamiento_demo_produccion_preparado.sql)
 
 ---
 

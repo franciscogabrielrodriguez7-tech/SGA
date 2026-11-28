@@ -2,7 +2,7 @@
 
 **Estado de la actividad:** **Ejecutada** dentro de transacción atómica (`BEGIN ... COMMIT`).  
 **Fecha:** 2026-11-27  
-**Script de referencia:** [01_limpieza_produccion_preparado.sql](file:///C:/Users/Acer/Documents/Default%20Project/SGA_repo/SGA/docs/respaldo_produccion/scripts/01_limpieza_produccion_preparado.sql)
+**Script de referencia:** [01_limpieza_produccion_preparado.sql](./scripts/01_limpieza_produccion_preparado.sql)
 
 ---
 
